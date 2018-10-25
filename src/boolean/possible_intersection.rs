@@ -6,8 +6,8 @@ use std::collections::BinaryHeap;
 use std::rc::Rc;
 
 pub fn possible_intersection<F>(
-    se1: Rc<SweepEvent<F>>,
-    se2: Rc<SweepEvent<F>>,
+    se1: &Rc<SweepEvent<F>>,
+    se2: &Rc<SweepEvent<F>>,
     queue: &mut BinaryHeap<Rc<SweepEvent<F>>>,
 ) -> u8
 where
@@ -127,7 +127,7 @@ mod test {
         let (se1, _other1) = make_simple(s.exterior.0[3], s.exterior.0[2], true);
         let (se2, _other2) = make_simple(c.exterior.0[0], c.exterior.0[1], false);
 
-        assert_eq!(possible_intersection(se1.clone(), se2.clone(), &mut q), 1);
+        assert_eq!(possible_intersection(&se1, &se2, &mut q), 1);
         assert_eq!(q.len(), 4);
 
         let mut e = q.pop().unwrap();

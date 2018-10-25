@@ -114,7 +114,7 @@ where
 
     let sorted_events = subdivide(&mut event_queue, &sbbox, &cbbox, operation);
 
-    MultiPolygon(connect_edges(sorted_events, operation))
+    MultiPolygon(connect_edges(&sorted_events, operation))
 }
 
 fn trivial_result<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operation: Operation) -> MultiPolygon<F>

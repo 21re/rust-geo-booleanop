@@ -5,13 +5,13 @@ use num_traits::Float;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-fn order_events<F>(sorted_events: Vec<Rc<SweepEvent<F>>>) -> Vec<Rc<SweepEvent<F>>>
+fn order_events<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Rc<SweepEvent<F>>>
 where
     F: Float,
 {
     let mut result_events: Vec<Rc<SweepEvent<F>>> = Vec::new();
 
-    for event in &sorted_events {
+    for event in sorted_events {
         if (event.is_left() && event.is_in_result())
             || (!event.is_left() && event.get_other_event().map(|o| o.is_in_result()).unwrap_or(false))
         {
@@ -34,8 +34,7 @@ where
         event.set_pos(pos as i32)
     }
 
-    for i in 0..result_events.len() {
-        let event = result_events[i].clone();
+    for event in &result_events {
         if !event.is_left() {
             if let Some(other) = event.get_other_event() {
                 let tmp = event.get_pos();
@@ -48,7 +47,7 @@ where
     result_events
 }
 
-fn next_pos<F>(pos: i32, result_events: &Vec<Rc<SweepEvent<F>>>, processed: &mut HashSet<i32>, orig_index: i32) -> i32
+fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &mut HashSet<i32>, orig_index: i32) -> i32
 where
     F: Float,
 {
@@ -80,18 +79,7 @@ where
     new_pos
 }
 
-fn append_countour<F>(polygon: &mut Polygon<F>, contour: LineString<F>)
-where
-    F: Float,
-{
-    if polygon.exterior.0.len() > 0 {
-        polygon.interiors.push(contour)
-    } else {
-        polygon.exterior = contour
-    }
-}
-
-pub fn connect_edges<F>(sorted_events: Vec<Rc<SweepEvent<F>>>, operation: Operation) -> Vec<Polygon<F>>
+pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>], operation: Operation) -> Vec<Polygon<F>>
 where
     F: Float,
 {
@@ -120,21 +108,13 @@ where
         }
 
         if !result_events[i as usize].is_exterior_ring {
-            if operation == Operation::Difference && !result_events[i as usize].is_subject && result.len() == 0 {
-                result.push(Polygon::new(contour, Vec::new()));
-            } else if result.len() == 0 {
+            if result.is_empty() {
                 result.push(Polygon::new(contour, Vec::new()));
             } else {
-                append_countour(
-                    result.last_mut().expect("Result must not be empty at this point"),
-                    contour,
-                );
+                    result.last_mut().expect("Result must not be empty at this point").interiors.push(contour);
             }
         } else if operation == Operation::Difference && !result_events[i as usize].is_subject && result.len() > 1 {
-            append_countour(
-                result.last_mut().expect("Result must not be empty at this point"),
-                contour,
-            );
+                result.last_mut().expect("Result must not be empty at this point").interiors.push(contour);
         } else {
             result.push(Polygon::new(contour, Vec::new()));
         }

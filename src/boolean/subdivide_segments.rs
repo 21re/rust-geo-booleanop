@@ -40,14 +40,14 @@ where
             compute_fields(&event, maybe_prev, operation);
 
             if let Some(next) = maybe_next {
-                if possible_intersection(event.clone(), next.clone(), event_queue) == 2 {
+                if possible_intersection(&event, &next, event_queue) == 2 {
                     compute_fields(&event, maybe_prev, operation);
                     compute_fields(&event, Some(next), operation);
                 }
             }
 
             if let Some(prev) = maybe_prev {
-                if possible_intersection(prev.clone(), event.clone(), event_queue) == 2 {
+                if possible_intersection(&prev, &event, event_queue) == 2 {
                     let maybe_prev_prev = sweep_line.prev(&prev);
 
                     compute_fields(&prev, maybe_prev_prev, operation);
@@ -60,7 +60,7 @@ where
                 let maybe_next = sweep_line.next(&other_event).cloned();
 
                 if let (Some(prev), Some(next)) = (maybe_prev, maybe_next) {
-                    possible_intersection(prev.clone(), next.clone(), event_queue);
+                    possible_intersection(&prev, &next, event_queue);
                 }
 
                 sweep_line.remove(&other_event);
