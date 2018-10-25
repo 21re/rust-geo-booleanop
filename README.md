@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/21re/rust-geo-booleanop.svg?branch=master)](https://travis-ci.org/21re/rust-geo-booleanop)
+
+
 # Boolean operations on geo shapes
 
 This is an implementation of the [Martinez-Rueda Polygon Clipping Algorithm](http://www.cs.ucr.edu/~vbz/cs230papers/martinez_boolean.pdf) in rust to integrate smoothly into the already exsting geospatial library  [georust/geo](https://github.com/georust/geo).
