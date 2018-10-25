@@ -135,9 +135,10 @@ dependencies = [
 
 [[package]]
 name = "geo-booleanop"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "geo 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "geo-types 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "geojson 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "num-traits 0.2.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",

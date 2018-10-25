@@ -1,4 +1,4 @@
-use geo::Coordinate;
+use geo_types::Coordinate;
 use num_traits::Float;
 
 #[derive(Debug, Clone, Copy, PartialEq)]

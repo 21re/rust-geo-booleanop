@@ -1,5 +1,5 @@
 use super::sweep_event::SweepEvent;
-use geo::Coordinate;
+use geo_types::Coordinate;
 use num_traits::Float;
 use std::collections::BinaryHeap;
 use std::rc::Rc;

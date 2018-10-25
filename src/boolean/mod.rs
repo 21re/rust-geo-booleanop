@@ -1,6 +1,6 @@
 use num_traits::Float;
 
-use geo::{Coordinate, MultiPolygon, Polygon, Rect};
+use geo_types::{Coordinate, MultiPolygon, Polygon, Rect};
 
 mod compare_segments;
 mod compute_fields;

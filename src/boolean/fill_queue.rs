@@ -1,4 +1,4 @@
-use geo::{LineString, Polygon, Rect};
+use geo_types::{LineString, Polygon, Rect};
 use num_traits::Float;
 use std::collections::BinaryHeap;
 use std::rc::{Rc, Weak};

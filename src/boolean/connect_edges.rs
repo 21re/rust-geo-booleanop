@@ -1,6 +1,6 @@
 use super::sweep_event::SweepEvent;
 use super::Operation;
-use geo::{LineString, Polygon};
+use geo_types::{LineString, Polygon};
 use num_traits::Float;
 use std::collections::HashSet;
 use std::rc::Rc;
