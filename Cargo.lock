@@ -134,7 +134,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "geo-boolean"
+name = "geo-booleanop"
 version = "0.1.0"
 dependencies = [
  "geo 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
