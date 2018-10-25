@@ -73,7 +73,7 @@ mod test {
         queue.push(se1.clone());
         queue.push(se2.clone());
 
-        let inter = match intersection(se1.point, other1.point, se2.point, other2.point, false) {
+        let inter = match intersection(se1.point, other1.point, se2.point, other2.point) {
             LineIntersection::Point(p) => p,
             _ => panic!("Not a point intersection"),
         };

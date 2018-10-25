@@ -16,7 +16,6 @@ pub fn intersection<F>(
     a2: Coordinate<F>,
     b1: Coordinate<F>,
     b2: Coordinate<F>,
-    no_endpoint_touch: bool,
 ) -> LineIntersection<F>
 where
     F: Float,
@@ -48,18 +47,10 @@ where
         }
 
         if s == F::zero() || s == F::one() {
-            if no_endpoint_touch {
-                return LineIntersection::None;
-            } else {
-                return LineIntersection::Point(mid_point(a1, s, va));
-            }
+            return LineIntersection::Point(mid_point(a1, s, va));
         }
         if t == F::zero() || t == F::one() {
-            if no_endpoint_touch {
-                return LineIntersection::None;
-            } else {
-                return LineIntersection::Point(mid_point(b1, t, vb));
-            }
+            return LineIntersection::Point(mid_point(b1, t, vb));
         }
 
         return LineIntersection::Point(mid_point(a1, s, va));
@@ -79,22 +70,10 @@ where
 
     if smin <= F::one() && smax >= F::zero() {
         if smin == F::one() {
-            if no_endpoint_touch {
-                return LineIntersection::None;
-            } else {
-                return LineIntersection::Point(mid_point(a1, smin, va));
-            }
+            return LineIntersection::Point(mid_point(a1, smin, va));
         }
         if smax == F::zero() {
-            if no_endpoint_touch {
-                return LineIntersection::None;
-            } else {
-                return LineIntersection::Point(mid_point(a1, smax, va));
-            }
-        }
-
-        if no_endpoint_touch && smin == F::zero() && smax == F::one() {
-            return LineIntersection::None;
+            return LineIntersection::Point(mid_point(a1, smax, va));
         }
 
         return LineIntersection::Overlap(
@@ -140,117 +119,85 @@ mod test {
     #[test]
     fn test_intersection() {
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(2, 2), false),
+            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(2, 2)),
             LineIntersection::None
         );
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(10, 2), false),
+            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(10, 2)),
             LineIntersection::None
         );
         assert_eq!(
-            intersection(xy(2, 2), xy(3, 3), xy(0, 6), xy(2, 4), false),
+            intersection(xy(2, 2), xy(3, 3), xy(0, 6), xy(2, 4)),
             LineIntersection::None
         );
 
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(0, 1), false),
+            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(0, 1)),
             LineIntersection::Point(xy(0.5, 0.5))
         );
 
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, 1), xy(0, 0), false),
+            intersection(xy(0, 0), xy(1, 1), xy(0, 1), xy(0, 0)),
             LineIntersection::Point(xy(0, 0))
         );
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, 1), xy(1, 1), false),
+            intersection(xy(0, 0), xy(1, 1), xy(0, 1), xy(1, 1)),
             LineIntersection::Point(xy(1, 1))
         );
 
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0.5, 0.5), xy(1, 0), false),
+            intersection(xy(0, 0), xy(1, 1), xy(0.5, 0.5), xy(1, 0)),
             LineIntersection::Point(xy(0.5, 0.5))
         );
 
         assert_eq!(
-            intersection(xy(0, 0), xy(10, 10), xy(1, 1), xy(5, 5), false),
+            intersection(xy(0, 0), xy(10, 10), xy(1, 1), xy(5, 5)),
             LineIntersection::Overlap(xy(1, 1), xy(5, 5))
         );
         assert_eq!(
-            intersection(xy(1, 1), xy(10, 10), xy(1, 1), xy(5, 5), false),
+            intersection(xy(1, 1), xy(10, 10), xy(1, 1), xy(5, 5)),
             LineIntersection::Overlap(xy(1, 1), xy(5, 5))
         );
         assert_eq!(
-            intersection(xy(3, 3), xy(10, 10), xy(0, 0), xy(5, 5), false),
+            intersection(xy(3, 3), xy(10, 10), xy(0, 0), xy(5, 5)),
             LineIntersection::Overlap(xy(3, 3), xy(5, 5))
         );
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, 0), xy(1, 1), false),
+            intersection(xy(0, 0), xy(1, 1), xy(0, 0), xy(1, 1)),
             LineIntersection::Overlap(xy(0, 0), xy(1, 1))
         );
         assert_eq!(
-            intersection(xy(1, 1), xy(0, 0), xy(0, 0), xy(1, 1), false),
+            intersection(xy(1, 1), xy(0, 0), xy(0, 0), xy(1, 1)),
             LineIntersection::Overlap(xy(1, 1), xy(0, 0))
         );
 
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(1, 1), xy(2, 2), false),
+            intersection(xy(0, 0), xy(1, 1), xy(1, 1), xy(2, 2)),
             LineIntersection::Point(xy(1, 1))
         );
         assert_eq!(
-            intersection(xy(1, 1), xy(0, 0), xy(1, 1), xy(2, 2), false),
+            intersection(xy(1, 1), xy(0, 0), xy(1, 1), xy(2, 2)),
             LineIntersection::Point(xy(1, 1))
         );
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(2, 2), xy(4, 4), false),
+            intersection(xy(0, 0), xy(1, 1), xy(2, 2), xy(4, 4)),
             LineIntersection::None
         );
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, -1), xy(1, 0), false),
+            intersection(xy(0, 0), xy(1, 1), xy(0, -1), xy(1, 0)),
             LineIntersection::None
         );
         assert_eq!(
-            intersection(xy(1, 1), xy(0, 0), xy(0, -1), xy(1, 0), false),
+            intersection(xy(1, 1), xy(0, 0), xy(0, -1), xy(1, 0)),
             LineIntersection::None
         );
         assert_eq!(
-            intersection(xy(0, -1), xy(1, 0), xy(0, 0), xy(1, 1), false),
-            LineIntersection::None
-        );
-
-        assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, 1), xy(0, 0), true),
-            LineIntersection::None
-        );
-        assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, 1), xy(1, 1), true),
+            intersection(xy(0, -1), xy(1, 0), xy(0, 0), xy(1, 1)),
             LineIntersection::None
         );
 
         assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(1, 1), xy(2, 2), true),
-            LineIntersection::None
-        );
-        assert_eq!(
-            intersection(xy(1, 1), xy(0, 0), xy(1, 1), xy(2, 2), true),
-            LineIntersection::None
-        );
-
-        assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(0, 0), xy(1, 1), true),
-            LineIntersection::None
-        );
-        assert_eq!(
-            intersection(xy(1, 1), xy(0, 0), xy(0, 0), xy(1, 1), true),
-            LineIntersection::None
-        );
-
-        assert_eq!(
-            intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(0, 1), true),
-            LineIntersection::Point(xy(0.5, 0.5))
-        );
-
-        assert_eq!(
-            intersection(xy(0, 0.5), xy(1, 1.5), xy(0, 1), xy(1, 0), false),
+            intersection(xy(0, 0.5), xy(1, 1.5), xy(0, 1), xy(1, 0)),
             LineIntersection::Point(xy(0.25, 0.75))
         );
     }

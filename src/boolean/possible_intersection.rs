@@ -18,7 +18,7 @@ where
         _ => return 0,
     };
 
-    match intersection(se1.point, other1.point, se2.point, other2.point, false) {
+    match intersection(se1.point, other1.point, se2.point, other2.point) {
         LineIntersection::None => 0, // No intersection
         LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => 0, // the line segments intersect at an endpoint of both line segments
         LineIntersection::Point(inter) => {
