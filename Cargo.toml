@@ -1,5 +1,5 @@
 [package]
-name = "geo-boolean"
+name = "geo-booleanop"
 version = "0.1.0"
 authors = ["Bodo Junglas <junglas@objectcode.de>"]
 
