@@ -40,7 +40,7 @@ mod test {
     use super::super::segment_intersection::{intersection, LineIntersection};
     use super::super::sweep_event::SweepEvent;
     use super::*;
-    use geo::Coordinate;
+    use geo_types::Coordinate;
     use std::collections::BinaryHeap;
     use std::rc::{Rc, Weak};
 

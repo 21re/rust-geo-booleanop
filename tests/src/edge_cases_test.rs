@@ -1,5 +1,5 @@
-use super::helper::test::{fixture_shapes, xy};
-use super::BooleanOp;
+use super::helper::{fixture_shapes, xy};
+use geo_booleanop::boolean::BooleanOp;
 
 #[test]
 fn touching_hourglass_intersection() {

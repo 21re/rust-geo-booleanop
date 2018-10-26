@@ -1,0 +1,11 @@
+[package]
+name = "geo-booleanop"
+version = "0.1.3"
+authors = ["Bodo Junglas <junglas@objectcode.de>"]
+
+[dependencies]
+geo-types = { version = "0.2.0", default-features = false }
+num-traits = "0.2"
+
+[dev-dependencies]
+rand = "0.3"

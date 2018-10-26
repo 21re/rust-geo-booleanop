@@ -1,0 +1,13 @@
+[package]
+name = "geo-booleanop-tests"
+version = "0.1.3"
+authors = ["Bodo Junglas <junglas@objectcode.de>"]
+
+[dependencies]
+geo-booleanop = { path = "../lib" }
+num-traits = "0.2"
+
+[dev-dependencies]
+geo = "0.10.2"
+geojson = "0.12.0"
+

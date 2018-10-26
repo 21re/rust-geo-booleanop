@@ -2,21 +2,17 @@ use num_traits::Float;
 
 use geo_types::{Coordinate, MultiPolygon, Polygon, Rect};
 
-mod compare_segments;
-mod compute_fields;
+pub mod compare_segments;
+pub mod compute_fields;
 mod connect_edges;
 mod divide_segment;
-#[cfg(test)]
-mod edge_cases_test;
-#[cfg(test)]
-mod feature_type_test;
-mod fill_queue;
+pub mod fill_queue;
 mod helper;
-mod possible_intersection;
+pub mod possible_intersection;
 mod segment_intersection;
 mod signed_area;
-mod subdivide_segments;
-mod sweep_event;
+pub mod subdivide_segments;
+pub mod sweep_event;
 
 use self::connect_edges::connect_edges;
 use self::fill_queue::fill_queue;

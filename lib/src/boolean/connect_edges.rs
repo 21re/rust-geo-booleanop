@@ -111,10 +111,18 @@ where
             if result.is_empty() {
                 result.push(Polygon::new(contour, Vec::new()));
             } else {
-                    result.last_mut().expect("Result must not be empty at this point").interiors.push(contour);
+                result
+                    .last_mut()
+                    .expect("Result must not be empty at this point")
+                    .interiors
+                    .push(contour);
             }
         } else if operation == Operation::Difference && !result_events[i as usize].is_subject && result.len() > 1 {
-                result.last_mut().expect("Result must not be empty at this point").interiors.push(contour);
+            result
+                .last_mut()
+                .expect("Result must not be empty at this point")
+                .interiors
+                .push(contour);
         } else {
             result.push(Polygon::new(contour, Vec::new()));
         }

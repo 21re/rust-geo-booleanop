@@ -53,7 +53,7 @@ where
 mod test {
     use super::super::sweep_event::SweepEvent;
     use super::compare_segments;
-    use geo::Coordinate;
+    use geo_types::Coordinate;
     use splay::SplaySet;
     use std::cmp::Ordering;
     use std::rc::{Rc, Weak};

@@ -1,6 +1,6 @@
-use super::helper::test::{fixture_multi_polygon, fixture_polygon};
-use super::BooleanOp;
+use super::helper::{fixture_multi_polygon, fixture_polygon};
 use geo::Polygon;
+use geo_booleanop::boolean::BooleanOp;
 
 fn assert_clipping<F>(subject: &F, clipping: &Polygon<f64>, expected_name: &str)
 where
