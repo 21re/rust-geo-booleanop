@@ -2,6 +2,7 @@
 name = "geo-booleanop-tests"
 version = "0.1.3"
 authors = ["Bodo Junglas <junglas@objectcode.de>"]
+edition = "2018"
 
 [dependencies]
 geo-booleanop = { path = "../lib" }

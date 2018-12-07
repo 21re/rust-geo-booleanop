@@ -66,7 +66,7 @@ mod test {
         other_y: f64,
         is_subject: bool,
     ) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
-        let other = SweepEvent::new(
+        let other = SweepEvent::new_rc(
             contour_id,
             Coordinate { x: other_x, y: other_y },
             false,
@@ -74,7 +74,7 @@ mod test {
             is_subject,
             true,
         );
-        let event = SweepEvent::new(
+        let event = SweepEvent::new_rc(
             contour_id,
             Coordinate { x, y },
             true,

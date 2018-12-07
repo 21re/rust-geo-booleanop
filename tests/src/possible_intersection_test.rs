@@ -13,8 +13,8 @@ use std::collections::BinaryHeap;
 use std::rc::{Rc, Weak};
 
 fn make_simple(a: Coordinate<f64>, b: Coordinate<f64>, is_subject: bool) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
-    let other = SweepEvent::new(0, b, false, Weak::new(), is_subject, true);
-    let event = SweepEvent::new(0, a, true, Rc::downgrade(&other), is_subject, true);
+    let other = SweepEvent::new_rc(0, b, false, Weak::new(), is_subject, true);
+    let event = SweepEvent::new_rc(0, a, true, Rc::downgrade(&other), is_subject, true);
 
     (event, other)
 }
@@ -91,12 +91,12 @@ fn test_on_two_polygons() {
     let p1 = Coordinate { x: 298.0, y: 359.0 };
     let p2 = Coordinate { x: 156.0, y: 203.5 };
 
-    let te = SweepEvent::new(0, p0, true, Weak::new(), true, true);
-    let te2 = SweepEvent::new(0, p1, false, Rc::downgrade(&te), false, true);
+    let te = SweepEvent::new_rc(0, p0, true, Weak::new(), true, true);
+    let te2 = SweepEvent::new_rc(0, p1, false, Rc::downgrade(&te), false, true);
     te.set_other_event(&te2);
 
-    let te3 = SweepEvent::new(0, p0, true, Weak::new(), true, true);
-    let te4 = SweepEvent::new(0, p2, true, Rc::downgrade(&te3), false, true);
+    let te3 = SweepEvent::new_rc(0, p0, true, Weak::new(), true, true);
+    let te4 = SweepEvent::new_rc(0, p2, true, Rc::downgrade(&te3), false, true);
     te3.set_other_event(&te4);
 
     let mut tr = SplaySet::new(compare_segments);

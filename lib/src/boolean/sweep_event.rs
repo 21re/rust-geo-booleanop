@@ -215,9 +215,9 @@ mod test {
 
     #[test]
     pub fn test_is_below() {
-        let other_s1 = SweepEvent::new(0, xy(1, 1), false, Weak::new(), false, true);
-        let s1 = SweepEvent::new(0, xy(0, 0), true, Rc::downgrade(&other_s1), false, true);
-        let s2 = SweepEvent::new(0, xy(0, 0), false, Rc::downgrade(&s1), false, true);
+        let other_s1 = SweepEvent::new_rc(0, xy(1, 1), false, Weak::new(), false, true);
+        let s1 = SweepEvent::new_rc(0, xy(0, 0), true, Rc::downgrade(&other_s1), false, true);
+        let s2 = SweepEvent::new_rc(0, xy(0, 0), false, Rc::downgrade(&s1), false, true);
 
         assert!(s1.is_below(xy(0, 1)));
         assert!(s1.is_below(xy(1, 2)));
@@ -232,9 +232,9 @@ mod test {
 
     #[test]
     pub fn test_is_above() {
-        let other_s1 = SweepEvent::new(0, xy(1, 1), false, Weak::new(), false, true);
-        let s1 = SweepEvent::new(0, xy(0, 0), true, Rc::downgrade(&other_s1), false, true);
-        let s2 = SweepEvent::new(0, xy(0, 1), false, Rc::downgrade(&s1), false, true);
+        let other_s1 = SweepEvent::new_rc(0, xy(1, 1), false, Weak::new(), false, true);
+        let s1 = SweepEvent::new_rc(0, xy(0, 0), true, Rc::downgrade(&other_s1), false, true);
+        let s2 = SweepEvent::new_rc(0, xy(0, 1), false, Rc::downgrade(&s1), false, true);
 
         assert!(!s1.is_above(xy(0, 1)));
         assert!(!s1.is_above(xy(1, 2)));
@@ -249,10 +249,10 @@ mod test {
 
     #[test]
     pub fn test_is_vertical() {
-        let other_s1 = SweepEvent::new(0, xy(0, 1), false, Weak::new(), false, true);
-        let s1 = SweepEvent::new(0, xy(0, 0), true, Rc::downgrade(&other_s1), false, true);
-        let other_s2 = SweepEvent::new(0, xy(0.0001, 1), false, Weak::new(), false, true);
-        let s2 = SweepEvent::new(0, xy(0, 0), true, Rc::downgrade(&other_s2), false, true);
+        let other_s1 = SweepEvent::new_rc(0, xy(0, 1), false, Weak::new(), false, true);
+        let s1 = SweepEvent::new_rc(0, xy(0, 0), true, Rc::downgrade(&other_s1), false, true);
+        let other_s2 = SweepEvent::new_rc(0, xy(0.0001, 1), false, Weak::new(), false, true);
+        let s2 = SweepEvent::new_rc(0, xy(0, 0), true, Rc::downgrade(&other_s2), false, true);
 
         assert!(s1.is_vertical());
         assert!(!s2.is_vertical());

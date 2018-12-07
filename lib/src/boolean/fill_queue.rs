@@ -56,8 +56,8 @@ fn process_polygon<F>(
             continue; // skip collapsed edges
         }
 
-        let mut e1 = SweepEvent::new_rc(contour_id, line.start, false, Weak::new(), is_subject, is_exterior_ring);
-        let mut e2 = SweepEvent::new_rc(
+        let e1 = SweepEvent::new_rc(contour_id, line.start, false, Weak::new(), is_subject, is_exterior_ring);
+        let e2 = SweepEvent::new_rc(
             contour_id,
             line.end,
             false,
@@ -92,7 +92,7 @@ mod test {
     use std::rc::{Rc, Weak};
 
     fn make_simple(x: f64, y: f64, is_subject: bool) -> Rc<SweepEvent<f64>> {
-        SweepEvent::new(0, Coordinate { x, y }, false, Weak::new(), is_subject, true)
+        SweepEvent::new_rc(0, Coordinate { x, y }, false, Weak::new(), is_subject, true)
     }
 
     fn check_order_in_queue(first: Rc<SweepEvent<f64>>, second: Rc<SweepEvent<f64>>) {
