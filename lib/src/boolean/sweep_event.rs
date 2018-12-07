@@ -45,7 +45,7 @@ impl<F> SweepEvent<F>
 where
     F: Float,
 {
-    pub fn new(
+    pub fn new_rc(
         contour_id: u32,
         point: Coordinate<F>,
         left: bool,

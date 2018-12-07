@@ -7,7 +7,7 @@ pub struct Node<K, V> {
 }
 
 impl<K, V> Node<K, V> {
-    pub fn new(k: K, v: V, l: Option<Box<Node<K, V>>>, r: Option<Box<Node<K, V>>>) -> Box<Node<K, V>> {
+    pub fn new_boxed(k: K, v: V, l: Option<Box<Node<K, V>>>, r: Option<Box<Node<K, V>>>) -> Box<Node<K, V>> {
         Box::new(Node {
             key: k,
             value: v,

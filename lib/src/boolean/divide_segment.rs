@@ -13,8 +13,8 @@ where
         None => return,
     };
 
-    let r = SweepEvent::new(se.contour_id, inter, false, Rc::downgrade(&se), se.is_subject, true);
-    let l = SweepEvent::new(
+    let r = SweepEvent::new_rc(se.contour_id, inter, false, Rc::downgrade(&se), se.is_subject, true);
+    let l = SweepEvent::new_rc(
         se.contour_id,
         inter,
         true,
@@ -51,7 +51,7 @@ mod test {
         other_y: f64,
         is_subject: bool,
     ) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
-        let other = SweepEvent::new(
+        let other = SweepEvent::new_rc(
             0,
             Coordinate { x: other_x, y: other_y },
             false,
@@ -59,7 +59,7 @@ mod test {
             is_subject,
             true,
         );
-        let event = SweepEvent::new(0, Coordinate { x, y }, true, Rc::downgrade(&other), is_subject, true);
+        let event = SweepEvent::new_rc(0, Coordinate { x, y }, true, Rc::downgrade(&other), is_subject, true);
 
         (event, other)
     }

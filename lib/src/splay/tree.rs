@@ -162,20 +162,20 @@ where
                     }
                     Ordering::Less => {
                         let left = root.pop_left();
-                        let new = Node::new(key, value, left, None);
+                        let new = Node::new_boxed(key, value, left, None);
                         let prev = mem::replace(root, new);
                         root.right = Some(prev);
                     }
                     Ordering::Greater => {
                         let right = root.pop_right();
-                        let new = Node::new(key, value, None, right);
+                        let new = Node::new_boxed(key, value, None, right);
                         let prev = mem::replace(root, new);
                         root.left = Some(prev);
                     }
                 }
             }
             slot => {
-                *slot = Some(Node::new(key, value, None, None));
+                *slot = Some(Node::new_boxed(key, value, None, None));
             }
         }
         self.size += 1;
@@ -249,7 +249,7 @@ where
     }
 
     // Messy code ahead
-    #[cfg_attr(feature = "cargo-clippy", allow(mut_from_ref))]
+    #[allow(clippy::mut_from_ref)]
     fn root_mut(&self) -> &mut Option<Box<Node<K, V>>> {
         unsafe { &mut *self.root.get() }
     }
@@ -396,7 +396,7 @@ impl<K, V> ExactSizeIterator for IntoIter<K, V> {}
 /// modify the pointer to contain the new root of the tree once the splay
 /// operation is done. When finished, if `key` is in the tree, it will be at the
 /// root. Otherwise the closest key to the specified key will be at the root.
-#[cfg_attr(feature = "cargo-clippy", allow(borrowed_box))]
+#[allow(clippy::borrowed_box)]
 fn splay<K, V, C>(key: &K, node: &mut Box<Node<K, V>>, comparator: &C)
 where
     C: Fn(&K, &K) -> Ordering,

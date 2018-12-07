@@ -56,8 +56,8 @@ fn process_polygon<F>(
             continue; // skip collapsed edges
         }
 
-        let mut e1 = SweepEvent::new(contour_id, line.start, false, Weak::new(), is_subject, is_exterior_ring);
-        let mut e2 = SweepEvent::new(
+        let mut e1 = SweepEvent::new_rc(contour_id, line.start, false, Weak::new(), is_subject, is_exterior_ring);
+        let mut e2 = SweepEvent::new_rc(
             contour_id,
             line.end,
             false,
