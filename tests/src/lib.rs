@@ -1,11 +1,4 @@
 #[cfg(test)]
-extern crate geo;
-extern crate geo_booleanop;
-#[cfg(test)]
-extern crate geojson;
-extern crate num_traits;
-
-#[cfg(test)]
 mod edge_cases_test;
 #[cfg(test)]
 mod feature_type_test;
