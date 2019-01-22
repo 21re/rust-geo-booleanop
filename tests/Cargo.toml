@@ -9,6 +9,6 @@ geo-booleanop = { path = "../lib" }
 num-traits = "0.2"
 
 [dev-dependencies]
-geo = "0.10.2"
-geojson = "0.12.0"
+geo = "0.11"
+geojson = "0.14"
 
