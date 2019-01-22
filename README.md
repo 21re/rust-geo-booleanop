@@ -14,9 +14,8 @@ At the moment the implementation contains is own splay tree implementation (adap
 Pretty straight forward:
 
 ```
-geo-booleanop = { git = "https://github.com/21re/rust-geo-booleanop.git" }
+geo-booleanop = "0.1.4"
 ```
-(not on crates.io ... yet?)
 
 ```
 extern create geo;
