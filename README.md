@@ -9,6 +9,10 @@ In fact the implementation closely follows the "reference" implementation in Jav
 
 At the moment the implementation contains is own splay tree implementation (adapted from [https://github.com/alexcrichton/splay-rs](https://github.com/alexcrichton/splay-rs)) as the JavaScript implementation also uses a splay-tree. This might be refactored out in the future in favor of the standard collection types (like BTreeSet).
 
+# IMPORTANT: How to report bugs
+
+Please be aware (so far) this implementation is based on the JavaScript version. If you find a bug (i.e. two polygons not producing the expected result), chances are that the original algorithm has the same problem. So please first check with [https://github.com/w8r/martinez](https://github.com/w8r/martinez) and file a report there. Once there is a fix I will happily backport it to the rust version.
+
 # Usage
 
 Pretty straight forward:
