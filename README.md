@@ -13,6 +13,10 @@ At the moment the implementation contains is own splay tree implementation (adap
 
 Please be aware (so far) this implementation is based on the JavaScript version. If you find a bug (i.e. two polygons not producing the expected result), chances are that the original algorithm has the same problem. So please first check with [https://github.com/w8r/martinez](https://github.com/w8r/martinez) and file a report there. Once there is a fix I will happily backport it to the rust version.
 
+If you do not know how to do that (You understand rust but not javascript? ... I mean ... seriously?), you may take a look at this example: https://gist.github.com/untoldwind/e95b7eff8ad61527a5dc4bdd889169b0
+
+I.e. just create `package.json`, ìnsert your example coordinates in `main.js` and then do `npm install` followed by `node main.js`
+
 # Usage
 
 Pretty straight forward:
