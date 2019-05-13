@@ -24,8 +24,8 @@ fn test_possible_intersection() {
     let (s, c) = fixture_shapes("two_shapes.geojson");
     let mut q: BinaryHeap<Rc<SweepEvent<f64>>> = BinaryHeap::new();
 
-    let (se1, _other1) = make_simple(s.exterior.0[3], s.exterior.0[2], true);
-    let (se2, _other2) = make_simple(c.exterior.0[0], c.exterior.0[1], false);
+    let (se1, _other1) = make_simple(s.exterior().0[3], s.exterior().0[2], true);
+    let (se2, _other2) = make_simple(c.exterior().0[0], c.exterior().0[1], false);
 
     assert_eq!(possible_intersection(&se1, &se2, &mut q), 1);
     assert_eq!(q.len(), 4);
