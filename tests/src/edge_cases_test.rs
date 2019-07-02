@@ -9,15 +9,15 @@ fn touching_hourglass_intersection() {
 
     assert_eq!(result.0.len(), 2);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![xy(0, 0.5), xy(0.25, 0.75), xy(0, 1), xy(0, 0.5)]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![xy(0.75, 0.75), xy(1, 0.5), xy(1, 1), xy(0.75, 0.75)]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn touching_hourglass_union() {
 
     assert_eq!(result.0.len(), 2);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(0, 0),
             xy(0.5, 0.5),
@@ -40,9 +40,9 @@ fn touching_hourglass_union() {
             xy(0, 0)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![
             xy(0.5, 0.5),
             xy(1, 0),
@@ -54,7 +54,7 @@ fn touching_hourglass_union() {
             xy(0.5, 0.5)
         ]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
 }
 
 #[test]
@@ -65,15 +65,15 @@ fn touching_hourglass_difference() {
 
     assert_eq!(result.0.len(), 2);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![xy(0, 0), xy(0.5, 0.5), xy(0.25, 0.75), xy(0, 0.5), xy(0, 0)]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![xy(0.5, 0.5), xy(1, 0), xy(1, 0.5), xy(0.75, 0.75), xy(0.5, 0.5)]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
 }
 
 #[test]
@@ -84,15 +84,15 @@ fn touching_hourglass_differenc2() {
 
     assert_eq!(result.0.len(), 2);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![xy(0, 1), xy(0.25, 0.75), xy(0.5, 1), xy(0, 1.5), xy(0, 1)]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![xy(0.5, 1), xy(0.75, 0.75), xy(1, 1), xy(1, 1.5), xy(0.5, 1)]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
 }
 
 #[test]
@@ -103,10 +103,10 @@ fn polygon_trapezoid_overlap_intersection() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![xy(3.5, 3.5), xy(7, 0), xy(14, 0), xy(17.5, 3.5), xy(3.5, 3.5)]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -117,7 +117,7 @@ fn polygon_trapezoid_overlap_union() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(0, 0),
             xy(7, 0),
@@ -132,7 +132,7 @@ fn polygon_trapezoid_overlap_union() {
             xy(0, 0)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -143,15 +143,15 @@ fn polygon_trapezoid_overlap_difference() {
 
     assert_eq!(result.0.len(), 2);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![xy(0, 0), xy(7, 0), xy(3.5, 3.5), xy(0, 3.5), xy(0, 0)]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![xy(14, 0), xy(21, 0), xy(21, 3.5), xy(17.5, 3.5), xy(14, 0)]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
 }
 
 #[test]
@@ -162,7 +162,7 @@ fn overlap_loop_intersection() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(57.8, -49.1),
             xy(177.8, -49.1),
@@ -171,7 +171,7 @@ fn overlap_loop_intersection() {
             xy(57.8, -49.1)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -182,7 +182,7 @@ fn overlap_loop_union() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(57.8, -97.1),
             xy(196.4, -97.1),
@@ -193,7 +193,7 @@ fn overlap_loop_union() {
             xy(57.8, -97.1)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -213,7 +213,7 @@ fn overlap_y_shift_intersection() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-1883, -8.5),
             xy(-1783, -8.5),
@@ -222,7 +222,7 @@ fn overlap_y_shift_intersection() {
             xy(-1883, -8.5)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -233,7 +233,7 @@ fn overlap_y_shift_union() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-1883, -25),
             xy(-1783, -25),
@@ -246,7 +246,7 @@ fn overlap_y_shift_union() {
             xy(-1883, -25)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -275,7 +275,7 @@ fn touching_boxes_union() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(0, 0),
             xy(3, 0),
@@ -288,7 +288,7 @@ fn touching_boxes_union() {
             xy(0, 0)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -299,10 +299,10 @@ fn touching_boxes_difference() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![xy(0, 0), xy(3, 0), xy(3, 1), xy(3, 2), xy(3, 3), xy(0, 3), xy(0, 0)]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -313,7 +313,7 @@ fn fatal1_intersection() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(117.6317159208374, 3.2710533372738473),
             xy(117.63180470386553, 3.2708954059271287),
@@ -322,7 +322,7 @@ fn fatal1_intersection() {
             xy(117.6317159208374, 3.2710533372738473)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -333,7 +333,7 @@ fn fatal1_union() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(117.62484785200004, 3.283270575000117),
             xy(117.6317159208374, 3.2710533372738473),
@@ -347,7 +347,7 @@ fn fatal1_union() {
             xy(117.62484785200004, 3.283270575000117)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -358,7 +358,7 @@ fn fatal1_difference() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(117.62484785200004, 3.283270575000117),
             xy(117.6317159208374, 3.2710533372738473),
@@ -370,7 +370,7 @@ fn fatal1_difference() {
             xy(117.62484785200004, 3.283270575000117)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -381,7 +381,7 @@ fn fatal2_intersection() {
 
     assert_eq!(result.0.len(), 4);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-79.887688, 40.444658),
             xy(-79.88768799972165, 40.44465799897759),
@@ -389,9 +389,9 @@ fn fatal2_intersection() {
             xy(-79.887688, 40.444658)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![
             xy(-79.88768796122203, 40.444657857562895),
             xy(-79.8872430162168, 40.4430235100967),
@@ -399,9 +399,9 @@ fn fatal2_intersection() {
             xy(-79.88768796122203, 40.444657857562895)
         ]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
     assert_eq!(
-        result.0[2].exterior.0,
+        result.0[2].exterior().0,
         vec![
             xy(-79.88761078560455, 40.444631250727284),
             xy(-79.88757599999991, 40.44461799906841),
@@ -413,9 +413,9 @@ fn fatal2_intersection() {
             xy(-79.88761078560455, 40.444631250727284)
         ]
     );
-    assert_eq!(result.0[2].interiors.len(), 0);
+    assert_eq!(result.0[2].interiors().len(), 0);
     assert_eq!(
-        result.0[3].exterior.0,
+        result.0[3].exterior().0,
         vec![
             xy(-79.88711873229528, 40.44256717591859),
             xy(-79.88685922414403, 40.4416281542633),
@@ -424,7 +424,7 @@ fn fatal2_intersection() {
             xy(-79.88711873229528, 40.44256717591859)
         ]
     );
-    assert_eq!(result.0[3].interiors.len(), 0);
+    assert_eq!(result.0[3].interiors().len(), 0);
 }
 
 #[test]
@@ -435,7 +435,7 @@ fn fatal2_union() {
 
     assert_eq!(result.0.len(), 4);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-79.894363, 40.44117499906849),
             xy(-79.894272, 40.44123699906842),
@@ -575,9 +575,9 @@ fn fatal2_union() {
             xy(-79.894363, 40.44117499906849)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
     assert_eq!(
-        result.0[1].exterior.0,
+        result.0[1].exterior().0,
         vec![
             xy(-79.887688, 40.444657999068475),
             xy(-79.88768796122203, 40.444657857562895),
@@ -585,9 +585,9 @@ fn fatal2_union() {
             xy(-79.887688, 40.444657999068475)
         ]
     );
-    assert_eq!(result.0[1].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
     assert_eq!(
-        result.0[2].exterior.0,
+        result.0[2].exterior().0,
         vec![
             xy(-79.88768795318525, 40.44465798378203),
             xy(-79.88761078560455, 40.444631250727284),
@@ -595,9 +595,9 @@ fn fatal2_union() {
             xy(-79.88768795318525, 40.44465798378203)
         ]
     );
-    assert_eq!(result.0[2].interiors.len(), 0);
+    assert_eq!(result.0[2].interiors().len(), 0);
     assert_eq!(
-        result.0[3].exterior.0,
+        result.0[3].exterior().0,
         vec![
             xy(-79.8872430162168, 40.4430235100967),
             xy(-79.887235, 40.44299399906848),
@@ -607,7 +607,7 @@ fn fatal2_union() {
             xy(-79.8872430162168, 40.4430235100967)
         ]
     );
-    assert_eq!(result.0[3].interiors.len(), 0);
+    assert_eq!(result.0[3].interiors().len(), 0);
 }
 
 #[test]
@@ -618,7 +618,7 @@ fn fatal2_difference() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-79.88768799972165, 40.44465799897759),
             xy(-79.88768796122203, 40.444657857562895),
@@ -649,7 +649,7 @@ fn fatal2_difference() {
             xy(-79.88768799972165, 40.44465799897759)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -660,7 +660,7 @@ fn rectangles_intersection() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-19.3046867422006, -126.63400219275148),
             xy(-19.3046867422006, -107.63400219275148),
@@ -669,7 +669,7 @@ fn rectangles_intersection() {
             xy(-19.3046867422006, -126.63400219275148)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -680,7 +680,7 @@ fn rectangles_union() {
 
     assert_eq!(result.0.len(), 1);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-96.6603326972832, -126.63400219275148),
             xy(-19.3046867422006, -126.63400219275148),
@@ -693,9 +693,11 @@ fn rectangles_union() {
             xy(10.695313257799384, 126.92383121744363),
             xy(-19.304686742200616, 126.92383121744363),
             xy(-19.3046867422006, -107.63400219275148),
+            xy(-96.6603326972832, -107.63400219275148),
+            xy(-96.6603326972832, -126.63400219275148)
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[0].interiors().len(), 0);
 }
 
 #[test]
@@ -704,19 +706,27 @@ fn rectangles_difference() {
 
     let result = s.difference(&c);
 
-    assert_eq!(result.0.len(), 1);
+    assert_eq!(result.0.len(), 2);
     assert_eq!(
-        result.0[0].exterior.0,
+        result.0[0].exterior().0,
         vec![
             xy(-19.304686742200616, 126.92383121744363),
             xy(-19.3046867422006, -107.63400219275148),
             xy(10.695313257799395, -107.63400219275148),
             xy(10.695313257799384, 126.92383121744363),
+            xy(-19.304686742200616, 126.92383121744363),
+        ]
+    );
+    assert_eq!(result.0[0].interiors().len(), 0);
+    assert_eq!(
+        result.0[1].exterior().0,
+        vec![
+            xy( -19.3046867422006, -126.63400219275148),
+            xy(-19.304686742200587, -357.48241878255635),
             xy(10.695313257799413, -357.48241878255635),
             xy(10.695313257799395, -126.63400219275148),
             xy(-19.3046867422006, -126.63400219275148),
-            xy(-19.304686742200587, -357.48241878255633),
         ]
     );
-    assert_eq!(result.0[0].interiors.len(), 0);
+    assert_eq!(result.0[1].interiors().len(), 0);
 }

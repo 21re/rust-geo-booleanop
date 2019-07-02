@@ -1,7 +1,7 @@
 use geo::{Coordinate, MultiPolygon, Polygon};
-use geojson::conversion::TryInto;
 use geojson::GeoJson;
 use std::fs::File;
+use std::convert::TryInto;
 use std::io::prelude::*;
 
 pub fn load_fixture(name: &str) -> GeoJson {
