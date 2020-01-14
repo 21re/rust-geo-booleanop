@@ -11,5 +11,6 @@ num-traits = "0.2"
 [dev-dependencies]
 geo = "0.12"
 geojson = { version = "0.16", features = ["geo-types"] }
+serde_json = "1.0"
 glob = "0.3"
 pretty_assertions = "0.6"

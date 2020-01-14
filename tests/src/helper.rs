@@ -1,11 +1,14 @@
-use geo::{Coordinate, MultiPolygon, Polygon};
-use geojson::{GeoJson, Feature, Value};
 use geo_booleanop::boolean::BooleanOp;
+
+use geo::{Coordinate, MultiPolygon, Polygon};
+use geojson::{GeoJson, Feature, FeatureCollection, Value};
+use serde_json::to_writer_pretty;
 use pretty_assertions::assert_eq;
 
 use std::fs::File;
 use std::convert::TryInto;
 use std::io::prelude::*;
+
 
 pub fn load_fixture_from_path(path: &str) -> GeoJson {
     let mut file = File::open(path).expect("Cannot open/find fixture");
@@ -122,13 +125,18 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
 pub fn load_generic_test_case(name: &str) {
     println!("Running test case: {}", name);
 
-    let features = match load_fixture_from_path(name) {
+    let original_geojson = load_fixture_from_path(name);
+    let features = match original_geojson {
         GeoJson::FeatureCollection(collection) => collection.features,
         _ => panic!("Fixture is not a feature collection"),
     };
     assert!(features.len() >= 2);
     let p1 = extract_multi_polygon(&features[0]);
     let p2 = extract_multi_polygon(&features[1]);
+
+
+    //let output_geojson = FeatureCollection{};
+    let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
 
     for i in 2 .. features.len() {
         let expected_result = extract_expected_result(&features[i]);
@@ -142,7 +150,19 @@ pub fn load_generic_test_case(name: &str) {
         };
 
         assert_eq!(result, expected_result.result);
+
+        output_features.push(features[i].clone());
     }
+
+    let output_geojson = GeoJson::FeatureCollection(FeatureCollection {
+        bbox: None,
+        features: output_features,
+        foreign_members: None,
+    });
+    let mut f = File::create("/tmp/test.json").expect("Unable to create json file.");
+    serde_json::to_writer_pretty(f, &output_geojson);
+    //std::fs::write("/tmp/test.json", output_geojson.to_string()).expect("Unable to write file");
+
 }
 
 pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
