@@ -1,8 +1,7 @@
 use geo_booleanop::boolean::BooleanOp;
 
 use geo::{Coordinate, MultiPolygon, Polygon};
-use geojson::{GeoJson, Feature, FeatureCollection, Value};
-use serde_json::to_writer_pretty;
+use geojson::{GeoJson, Feature, FeatureCollection, Value, Geometry};
 use pretty_assertions::assert_eq;
 
 use std::fs::File;
@@ -134,9 +133,9 @@ pub fn load_generic_test_case(filename: &str) {
     let p1 = extract_multi_polygon(&features[0]);
     let p2 = extract_multi_polygon(&features[1]);
 
-
-    //let output_geojson = FeatureCollection{};
     let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
+
+    let regenerate = std::env::var("REGEN").is_ok();
 
     for i in 2 .. features.len() {
         let expected_result = extract_expected_result(&features[i]);
@@ -149,12 +148,16 @@ pub fn load_generic_test_case(filename: &str) {
             TestOperation::DifferenceBA => p2.difference(&p1),
         };
 
-        assert_eq!(result, expected_result.result);
+        if !regenerate {
+            assert_eq!(result, expected_result.result);
+        }
 
-        output_features.push(features[i].clone());
+        let mut output_feature = features[i].clone();
+        output_feature.geometry = Some(Geometry::new(Value::from(&result)));
+        output_features.push(output_feature);
     }
 
-    if let Ok(_) = std::env::var("REGEN") {
+    if regenerate {
         let output_geojson = GeoJson::FeatureCollection(FeatureCollection {
             bbox: None,
             features: output_features,
@@ -162,7 +165,6 @@ pub fn load_generic_test_case(filename: &str) {
         });
         let f = File::create(filename).expect("Unable to create json file.");
         serde_json::to_writer_pretty(f, &output_geojson).expect("Unable to write json file.");
-        //std::fs::write("/tmp/test.json", output_geojson.to_string()).expect("Unable to write file");
     }
 
 }
