@@ -122,10 +122,10 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     }
 }
 
-pub fn load_generic_test_case(name: &str) {
-    println!("Running test case: {}", name);
+pub fn load_generic_test_case(filename: &str) {
+    println!("Running test case: {}", filename);
 
-    let original_geojson = load_fixture_from_path(name);
+    let original_geojson = load_fixture_from_path(filename);
     let features = match original_geojson {
         GeoJson::FeatureCollection(collection) => collection.features,
         _ => panic!("Fixture is not a feature collection"),
@@ -154,14 +154,16 @@ pub fn load_generic_test_case(name: &str) {
         output_features.push(features[i].clone());
     }
 
-    let output_geojson = GeoJson::FeatureCollection(FeatureCollection {
-        bbox: None,
-        features: output_features,
-        foreign_members: None,
-    });
-    let mut f = File::create("/tmp/test.json").expect("Unable to create json file.");
-    serde_json::to_writer_pretty(f, &output_geojson);
-    //std::fs::write("/tmp/test.json", output_geojson.to_string()).expect("Unable to write file");
+    if let Ok(_) = std::env::var("REGEN") {
+        let output_geojson = GeoJson::FeatureCollection(FeatureCollection {
+            bbox: None,
+            features: output_features,
+            foreign_members: None,
+        });
+        let f = File::create(filename).expect("Unable to create json file.");
+        serde_json::to_writer_pretty(f, &output_geojson).expect("Unable to write json file.");
+        //std::fs::write("/tmp/test.json", output_geojson.to_string()).expect("Unable to write file");
+    }
 
 }
 
