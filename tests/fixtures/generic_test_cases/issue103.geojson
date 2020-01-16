@@ -509,7 +509,8 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "operation": "union"
+        "operation": "union",
+        "comment": "Result isn't robust. Point [96.77561461573222, 132.3979499034881] is a spurious intersection."
       },
       "type": "Feature"
     }
