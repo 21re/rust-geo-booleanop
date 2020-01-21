@@ -6,5 +6,5 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let filename = &args[1];
 
-    load_generic_test_case(filename);
+    load_generic_test_case(filename, false);
 }

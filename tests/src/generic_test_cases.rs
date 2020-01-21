@@ -1,13 +1,18 @@
 use super::helper::{load_generic_test_case};
-use geo::Polygon;
-use geo_booleanop::boolean::BooleanOp;
 use glob::glob;
 
 
 #[test]
 fn test_generic_test_cases() {
+    let regenerate = std::env::var("REGEN").is_ok();
+
     for entry in glob("./fixtures/generic_test_cases/*.geojson").expect("Failed to read glob pattern") {
-        load_generic_test_case(entry.expect("Valid glob entry").to_str().unwrap());
+        let filename = entry.expect("Valid glob entry").to_str().unwrap().to_string();
+        load_generic_test_case(&filename, regenerate);
     }
-    //assert_eq!(1, 2);
+
+    if regenerate {
+        assert!(false,
+            "Regenerate is set to true. Won't let tests pass in this mode, because assertions are disabled.");
+    }
 }

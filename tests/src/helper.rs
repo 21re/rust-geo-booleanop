@@ -70,6 +70,13 @@ pub fn fixture_shapes(name: &str) -> (Polygon<f64>, Polygon<f64>) {
     (s, c)
 }
 
+pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
+    Coordinate {
+        x: x.into(),
+        y: y.into(),
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum TestOperation {
     Intersection,
@@ -89,7 +96,7 @@ fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
     let geometry_value = feature.geometry.as_ref().expect("Feature must have 'geometry' property").value.clone();
     let multi_polygon: MultiPolygon<f64> = match geometry_value {
         Value::Polygon(_) => MultiPolygon(vec![geometry_value.try_into().unwrap()]),
-        Value::MultiPolygon(_) => geometry_value.try_into().unwrap(), //.try_from().unwrap(),
+        Value::MultiPolygon(_) => geometry_value.try_into().unwrap(),
         _ => panic!("Feature must either be MultiPolygon or Polygon"),
     };
     multi_polygon
@@ -121,7 +128,7 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     }
 }
 
-pub fn load_generic_test_case(filename: &str) {
+pub fn load_generic_test_case(filename: &str, regenerate: bool) {
     println!("Running test case: {}", filename);
 
     let original_geojson = load_fixture_from_path(filename);
@@ -134,8 +141,6 @@ pub fn load_generic_test_case(filename: &str) {
     let p2 = extract_multi_polygon(&features[1]);
 
     let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
-
-    let regenerate = std::env::var("REGEN").is_ok();
 
     for i in 2 .. features.len() {
         let expected_result = extract_expected_result(&features[i]);
@@ -167,11 +172,4 @@ pub fn load_generic_test_case(filename: &str) {
         serde_json::to_writer_pretty(f, &output_geojson).expect("Unable to write json file.");
     }
 
-}
-
-pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
-    Coordinate {
-        x: x.into(),
-        y: y.into(),
-    }
 }
