@@ -1,7 +1,9 @@
 use geo_booleanop::boolean::BooleanOp;
 
+use super::compact_geojson::write_compact_geojson;
+
 use geo::{Coordinate, MultiPolygon, Polygon};
-use geojson::{GeoJson, Feature, FeatureCollection, Value, Geometry};
+use geojson::{GeoJson, Feature, Value, Geometry};
 use pretty_assertions::assert_eq;
 
 use std::fs::File;
@@ -163,13 +165,6 @@ pub fn load_generic_test_case(filename: &str, regenerate: bool) {
     }
 
     if regenerate {
-        let output_geojson = GeoJson::FeatureCollection(FeatureCollection {
-            bbox: None,
-            features: output_features,
-            foreign_members: None,
-        });
-        let f = File::create(filename).expect("Unable to create json file.");
-        serde_json::to_writer_pretty(f, &output_geojson).expect("Unable to write json file.");
+        write_compact_geojson(&output_features, filename);
     }
-
 }
