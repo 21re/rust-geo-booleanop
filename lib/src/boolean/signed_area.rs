@@ -1,12 +1,24 @@
 use geo_types::Coordinate;
 use num_traits::Float;
+use robust::{Coord, orient2d};
 
 #[inline]
 pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> F
 where
     F: Float,
 {
-    (p0.x - p2.x) * (p1.y - p2.y) - (p1.x - p2.x) * (p0.y - p2.y)
+    let res = orient2d(
+        Coord{x: p0.x.to_f64().unwrap(), y: p0.y.to_f64().unwrap()},
+        Coord{x: p1.x.to_f64().unwrap(), y: p1.y.to_f64().unwrap()},
+        Coord{x: p2.x.to_f64().unwrap(), y: p2.y.to_f64().unwrap()},
+    );
+    if res > 0. {
+        F::from(1.).unwrap()
+    } else if res < 0. {
+        F::from(-1.).unwrap()
+    } else {
+        F::from(0.).unwrap()
+    }
 }
 
 #[cfg(test)]
