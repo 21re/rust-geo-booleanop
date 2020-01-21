@@ -1,11 +1,7 @@
 {
-  "type": "FeatureCollection",
   "features": [
     {
-      "type": "Feature",
-      "properties": {},
       "geometry": {
-        "type": "Polygon",
         "coordinates": [
           [
             [117.659922722, 3.255275783000087],
@@ -13,14 +9,14 @@
             [117.62484785200004, 3.283270575000117],
             [117.659922722, 3.255275783000087]
           ]
-        ]
-      }
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {},
       "geometry": {
-        "type": "Polygon",
         "coordinates": [
           [
             [117.6315403, 3.2711246],
@@ -31,14 +27,14 @@
             [117.6314897, 3.2709469],
             [117.6315403, 3.2711246]
           ]
-        ]
-      }
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {"operation": "intersection"},
       "geometry": {
-        "type": "MultiPolygon",
         "coordinates": [
           [
             [
@@ -49,14 +45,16 @@
               [117.63171592083741, 3.271053337273843]
             ]
           ]
-        ]
-      }
+        ],
+        "type": "MultiPolygon"
+      },
+      "properties": {
+        "operation": "intersection"
+      },
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {"operation": "union"},
       "geometry": {
-        "type": "MultiPolygon",
         "coordinates": [
           [
             [
@@ -72,14 +70,16 @@
               [117.62484785200004, 3.283270575000117]
             ]
           ]
-        ]
-      }
+        ],
+        "type": "MultiPolygon"
+      },
+      "properties": {
+        "operation": "union"
+      },
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {"operation": "diff"},
       "geometry": {
-        "type": "MultiPolygon",
         "coordinates": [
           [
             [
@@ -93,8 +93,14 @@
               [117.62484785200004, 3.283270575000117]
             ]
           ]
-        ]
-      }
+        ],
+        "type": "MultiPolygon"
+      },
+      "properties": {
+        "operation": "diff"
+      },
+      "type": "Feature"
     }
-  ]
+  ],
+  "type": "FeatureCollection"
 }

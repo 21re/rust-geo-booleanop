@@ -1,11 +1,7 @@
 {
-  "type": "FeatureCollection",
   "features": [
     {
-      "type": "Feature",
-      "properties": {},
       "geometry": {
-        "type": "Polygon",
         "coordinates": [
           [
             [180.60987101280907, 22.943242898435663],
@@ -14,14 +10,14 @@
             [180.60987101280907, 62.94324289843566],
             [180.60987101280907, 22.943242898435663]
           ]
-        ]
-      }
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {},
       "geometry": {
-        "type": "Polygon",
         "coordinates": [
           [
             [-5.65625, 110.828125],
@@ -40,17 +36,14 @@
             [65.59375, 53.171875],
             [-5.65625, 110.828125]
           ]
-        ]
-      }
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {
-        "operation": "intersection",
-        "comment": "This test case currently has a wrong result"
-      },
       "geometry": {
-        "type": "MultiPolygon",
         "coordinates": [
           [
             [
@@ -58,20 +51,21 @@
               [253.09375, 40.984375],
               [260.125, 59.265625],
               [280.6098710128091, 60.657800699899646],
-              [280.6098710128091, 62.94324289843566]
+              [280.6098710128091, 62.94324289843566],
+              [198.56943964860557, 22.943242898435663]
             ]
           ]
-        ]
-      }
+        ],
+        "type": "MultiPolygon"
+      },
+      "properties": {
+        "comment": "This test case currently has a wrong result",
+        "operation": "intersection"
+      },
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {
-        "operation": "union",
-        "comment": "This test case currently has a wrong result"
-      },
       "geometry": {
-        "type": "MultiPolygon",
         "coordinates": [
           [
             [
@@ -99,11 +93,19 @@
             [
               [198.56943964860557, 22.943242898435663],
               [280.6098710128091, 22.943242898435663],
-              [280.6098710128091, 60.657800699899646]
+              [280.6098710128091, 60.657800699899646],
+              [198.56943964860557, 22.943242898435663]
             ]
           ]
-        ]
-      }
+        ],
+        "type": "MultiPolygon"
+      },
+      "properties": {
+        "comment": "This test case currently has a wrong result",
+        "operation": "union"
+      },
+      "type": "Feature"
     }
-  ]
+  ],
+  "type": "FeatureCollection"
 }

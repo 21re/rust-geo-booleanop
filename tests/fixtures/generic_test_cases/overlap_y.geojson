@@ -1,25 +1,36 @@
 {
-  "type": "FeatureCollection",
   "features": [
     {
-      "type": "Feature",
-      "properties": {},
       "geometry": {
-        "type": "Polygon",
         "coordinates": [
-          [[-1883, -3], [-1883, -8.5], [-1783, -8.5], [-1783, -3], [-1883, -3]]
-        ]
-      }
+          [
+            [-1883, -3],
+            [-1883, -8.5],
+            [-1783, -8.5],
+            [-1783, -3],
+            [-1883, -3]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
     },
     {
-      "type": "Feature",
-      "properties": {},
       "geometry": {
-        "type": "Polygon",
         "coordinates": [
-          [[-1883, -25], [-1783, -25], [-1783, 75], [-1883, 75], [-1883, -25]]
-        ]
-      }
+          [
+            [-1883, -25],
+            [-1783, -25],
+            [-1783, 75],
+            [-1883, 75],
+            [-1883, -25]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
     },
     {
       "geometry": {
@@ -36,7 +47,9 @@
         ],
         "type": "MultiPolygon"
       },
-      "properties": {"operation": "intersection"},
+      "properties": {
+        "operation": "intersection"
+      },
       "type": "Feature"
     },
     {
@@ -58,16 +71,23 @@
         ],
         "type": "MultiPolygon"
       },
-      "properties": {"operation": "union"},
+      "properties": {
+        "operation": "union"
+      },
       "type": "Feature"
     },
     {
-      "geometry": {"coordinates": [], "type": "MultiPolygon"},
+      "geometry": {
+        "coordinates": [
+        ],
+        "type": "MultiPolygon"
+      },
       "properties": {
-        "operation": "diff",
-        "comment": "This test case currently has a wrong result (tests for empty result)."
+        "comment": "This test case currently has a wrong result (tests for empty result).",
+        "operation": "diff"
       },
       "type": "Feature"
     }
-  ]
+  ],
+  "type": "FeatureCollection"
 }
