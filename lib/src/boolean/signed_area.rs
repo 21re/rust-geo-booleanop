@@ -3,21 +3,29 @@ use num_traits::Float;
 use robust::{Coord, orient2d};
 
 #[inline]
+pub fn coordinate_to_robust<F>(p : Coordinate<F>) -> Coord
+where
+    F: Float,
+{
+    Coord{x: p.x.to_f64().unwrap(), y: p.y.to_f64().unwrap()}
+}
+
+#[inline]
 pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> F
 where
     F: Float,
 {
     let res = orient2d(
-        Coord{x: p0.x.to_f64().unwrap(), y: p0.y.to_f64().unwrap()},
-        Coord{x: p1.x.to_f64().unwrap(), y: p1.y.to_f64().unwrap()},
-        Coord{x: p2.x.to_f64().unwrap(), y: p2.y.to_f64().unwrap()},
+        coordinate_to_robust(p0),
+        coordinate_to_robust(p1),
+        coordinate_to_robust(p2),
     );
-    if res > 0. {
-        F::from(1.).unwrap()
-    } else if res < 0. {
-        F::from(-1.).unwrap()
+    if res > 0f64 {
+        F::one()
+    } else if res < 0f64 {
+        -F::one()
     } else {
-        F::from(0.).unwrap()
+        F::zero()
     }
 }
 

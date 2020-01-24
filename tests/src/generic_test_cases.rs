@@ -1,4 +1,4 @@
-use super::helper::{load_generic_test_case};
+use super::helper::{run_generic_test_case};
 use glob::glob;
 
 
@@ -8,7 +8,7 @@ fn test_generic_test_cases() {
 
     for entry in glob("./fixtures/generic_test_cases/*.geojson").expect("Failed to read glob pattern") {
         let filename = entry.expect("Valid glob entry").to_str().unwrap().to_string();
-        load_generic_test_case(&filename, regenerate);
+        run_generic_test_case(&filename, regenerate);
     }
 
     if regenerate {

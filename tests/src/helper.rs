@@ -130,7 +130,7 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     }
 }
 
-pub fn load_generic_test_case(filename: &str, regenerate: bool) {
+pub fn run_generic_test_case(filename: &str, regenerate: bool) {
     println!("Running test case: {}", filename);
 
     let original_geojson = load_fixture_from_path(filename);

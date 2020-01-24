@@ -26,7 +26,6 @@ fn indent_block(indent: i32, s: &str) -> String {
 
 trait WriteIndented {
     fn write_indented<S: AsRef<str>>(self, indent: i32, s: S);
-    fn write_indented_with_substring(self, indent: i32, s: &str);
 }
 
 impl WriteIndented for &mut File {
@@ -35,18 +34,6 @@ impl WriteIndented for &mut File {
         self.write(indent.as_bytes()).expect("Failed to write to file.");
         self.write(s.as_ref().as_bytes()).expect("Failed to write to file.");
     }
-
-    fn write_indented_with_substring(self, indent: i32, s: &str) {
-        let indent = " ".repeat(indent as usize);
-        for line in s.split("\n") {
-            if line.len() > 0 {
-                self.write(indent.as_bytes()).expect("Failed to write to file.");
-            }
-            self.write(line.as_bytes()).expect("Failed to write to file.");
-            self.write(b"\n").expect("Failed to write to file.");
-        }
-    }
-
 }
 
 fn write_polygon(polygon: &Vec<Vec<Vec<f64>>>, f: &mut File, indent: i32) {
