@@ -1,4 +1,4 @@
-use super::sweep_event::{EdgeType, SweepEvent};
+use super::sweep_event::{EdgeType, SweepEvent, ResultTransition};
 use super::Operation;
 use num_traits::Float;
 use std::rc::Rc;
@@ -25,7 +25,24 @@ where
         event.set_in_out(false, true);
     }
 
-    event.set_in_result(in_result(event, operation));
+    let in_result = in_result(event, operation);
+    let result_transition = if !in_result {
+        ResultTransition::None
+    } else {
+        let mut this_in = !event.is_in_out();
+        let mut that_in = !event.is_other_in_out();
+        if !event.is_subject {
+            std::mem::swap(&mut this_in, &mut that_in);
+        }
+        let is_in = match operation {
+            Operation::Intersection => this_in && that_in,
+            Operation::Union        => this_in || that_in,
+            Operation::Difference   => this_in && !that_in,
+            Operation::Xor          => this_in ^ that_in,
+        };
+        if is_in { ResultTransition::OutIn } else { ResultTransition::InOut }
+    };
+    event.set_result_transition(result_transition);
 }
 
 fn in_result<F>(event: &SweepEvent<F>, operation: Operation) -> bool

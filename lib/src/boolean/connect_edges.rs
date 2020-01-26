@@ -1,4 +1,4 @@
-use super::sweep_event::SweepEvent;
+use super::sweep_event::{SweepEvent, ResultTransition};
 use super::Operation;
 use geo_types::{LineString, Polygon, Coordinate};
 use num_traits::Float;
@@ -115,20 +115,22 @@ where
 {
     let mut writer = File::create("debug.csv").unwrap();
     writeln!(&mut writer,
-        "index;point;other_point;left;in_result;in_out;other_in_out;is_subject;is_exterior_ring;prev_in_result"
+        "index;x;y;other_x;other_y;lr;result_transition;in_out;other_in_out;is_subject;is_exterior_ring;prev_in_result"
     ).expect("Failed to write to file");
     for (i, evt) in events.iter().enumerate() {
-        writeln!(&mut writer, "{};{:?};{:?};{};{};{};{};{};{};{:?}",
-            i,
-            evt.point,
-            evt.get_other_event().unwrap().point,
-            if evt.is_left() { "L" } else { "R" },
-            evt.is_in_result(),
-            evt.is_in_out(),
-            evt.is_other_in_out(),
-            evt.is_subject,
-            evt.is_exterior_ring,
-            evt.get_prev_in_result().map(|o| format!("{:?}", o.point)),
+        writeln!(&mut writer, "{i};{x:?};{y:?};{other_x:?};{other_y:?};{lr};{transition:?};{in_out};{other_in_out};{subject};{exterior_ring};{prev_in_result:?}",
+            i=i,
+            x=evt.point.x,
+            y=evt.point.y,
+            other_x=evt.get_other_event().unwrap().point.x,
+            other_y=evt.get_other_event().unwrap().point.y,
+            lr=if evt.is_left() { "L" } else { "R" },
+            transition=evt.get_result_transition(),
+            in_out=evt.is_in_out(),
+            other_in_out=evt.is_other_in_out(),
+            subject=evt.is_subject,
+            exterior_ring=evt.is_exterior_ring,
+            prev_in_result=evt.get_prev_in_result().map(|o| format!("{:?}", o.point)),
         ).expect("Failed to write to file");
     }
 }
@@ -166,10 +168,10 @@ where
 
         if let Some(prev_in_result) = result_events[i as usize].get_prev_in_result() {
             let lower_contour_id = prev_in_result.get_output_contour_id();
-            println!("Inferring information from lower_contour_id = {} with is_in_out = {}", lower_contour_id, prev_in_result.is_in_out());
+            println!("Inferring information from lower_contour_id = {} with result transition = {:?}", lower_contour_id, prev_in_result.get_result_transition());
             println!("{:?}", prev_in_result.point);
             println!("{:?}", prev_in_result.get_other_event().unwrap().point);
-            if !prev_in_result.is_in_out() {
+            if prev_in_result.get_result_transition() == ResultTransition::OutIn {
                 result[lower_contour_id as usize].hole_ids.push(contour_id);
                 hole_of.insert(contour_id, lower_contour_id);
                 depth.insert(contour_id, depth[&lower_contour_id] + 1);

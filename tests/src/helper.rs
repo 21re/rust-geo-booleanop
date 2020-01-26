@@ -131,7 +131,7 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
 }
 
 pub fn run_generic_test_case(filename: &str, regenerate: bool) {
-    println!("Running test case: {}", filename);
+    println!("\n *** Running test case: {}", filename);
 
     let original_geojson = load_fixture_from_path(filename);
     let features = match original_geojson {
@@ -146,6 +146,7 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) {
 
     for i in 2 .. features.len() {
         let expected_result = extract_expected_result(&features[i]);
+        println!("Testing operation: {:?}", expected_result.op);
 
         let result = match expected_result.op {
             TestOperation::Union => p1.union(&p2),
@@ -156,7 +157,11 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) {
         };
 
         if !regenerate {
-            assert_eq!(result, expected_result.result, "Deviation found in test case: {}", filename);
+            assert_eq!(
+                result,
+                expected_result.result,
+                "Deviation found in test case {} with operation {:?}", filename, expected_result.op,
+            );
         }
 
         let mut output_feature = features[i].clone();

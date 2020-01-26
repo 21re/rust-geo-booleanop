@@ -15,6 +15,13 @@ pub enum EdgeType {
     DifferentTransition,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ResultTransition {
+    None,
+    InOut,
+    OutIn,
+}
+
 #[derive(Clone, Debug)]
 struct MutablePart<F>
 where
@@ -26,7 +33,7 @@ where
     edge_type: EdgeType,
     in_out: bool,
     other_in_out: bool,
-    in_result: bool,
+    result_transition: ResultTransition,
     pos: i32,
     output_contour_id: i32,
 }
@@ -63,7 +70,7 @@ where
                 edge_type: EdgeType::Normal,
                 in_out: false,
                 other_in_out: false,
-                in_result: false,
+                result_transition: ResultTransition::None,
                 pos: 0,
                 output_contour_id: -1,
             }),
@@ -115,11 +122,15 @@ where
     }
 
     pub fn is_in_result(&self) -> bool {
-        self.mutable.borrow().in_result
+        self.mutable.borrow().result_transition != ResultTransition::None
     }
 
-    pub fn set_in_result(&self, in_result: bool) {
-        self.mutable.borrow_mut().in_result = in_result
+    pub fn set_result_transition(&self, result_transition: ResultTransition) {
+        self.mutable.borrow_mut().result_transition = result_transition
+    }
+
+    pub fn get_result_transition(&self) -> ResultTransition {
+        self.mutable.borrow().result_transition
     }
 
     pub fn set_in_out(&self, in_out: bool, other_in_out: bool) {
