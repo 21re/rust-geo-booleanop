@@ -7,7 +7,7 @@ use std::rc::{Rc, Weak};
 use super::helper::less_if;
 use super::signed_area::signed_area;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum EdgeType {
     Normal,
     NonContributing,
@@ -15,21 +15,23 @@ pub enum EdgeType {
     DifferentTransition,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct MutablePart<F>
 where
     F: Float,
 {
     left: bool,
     other_event: Weak<SweepEvent<F>>,
+    prev_in_result: Weak<SweepEvent<F>>,
     edge_type: EdgeType,
     in_out: bool,
     other_in_out: bool,
     in_result: bool,
     pos: i32,
+    output_contour_id: i32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct SweepEvent<F>
 where
     F: Float,
@@ -57,11 +59,13 @@ where
             mutable: RefCell::new(MutablePart {
                 left,
                 other_event,
+                prev_in_result: Weak::new(),
                 edge_type: EdgeType::Normal,
                 in_out: false,
                 other_in_out: false,
                 in_result: false,
                 pos: 0,
+                output_contour_id: -1,
             }),
             contour_id,
             point,
@@ -84,6 +88,14 @@ where
 
     pub fn set_other_event(&self, other_event: &Rc<SweepEvent<F>>) {
         self.mutable.borrow_mut().other_event = Rc::downgrade(other_event);
+    }
+
+    pub fn get_prev_in_result(&self) -> Option<Rc<SweepEvent<F>>> {
+        self.mutable.borrow().prev_in_result.upgrade()
+    }
+
+    pub fn set_prev_in_result(&self, prev_in_result: &Rc<SweepEvent<F>>) {
+        self.mutable.borrow_mut().prev_in_result = Rc::downgrade(prev_in_result);
     }
 
     pub fn get_edge_type(&self) -> EdgeType {
@@ -123,6 +135,14 @@ where
 
     pub fn set_pos(&self, pos: i32) {
         self.mutable.borrow_mut().pos = pos
+    }
+
+    pub fn get_output_contour_id(&self) -> i32 {
+        self.mutable.borrow().output_contour_id
+    }
+
+    pub fn set_output_contour_id(&self, output_contour_id: i32) {
+        self.mutable.borrow_mut().output_contour_id = output_contour_id
     }
 
     pub fn is_below(&self, p: Coordinate<F>) -> bool {

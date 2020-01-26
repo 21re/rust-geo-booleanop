@@ -156,7 +156,7 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) {
         };
 
         if !regenerate {
-            assert_eq!(result, expected_result.result);
+            assert_eq!(result, expected_result.result, "Deviation found in test case: {}", filename);
         }
 
         let mut output_feature = features[i].clone();

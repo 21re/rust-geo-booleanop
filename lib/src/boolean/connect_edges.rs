@@ -1,13 +1,14 @@
 use super::sweep_event::SweepEvent;
 use super::Operation;
-use geo_types::{LineString, Polygon};
+use geo_types::{LineString, Polygon, Coordinate};
 use num_traits::Float;
 use std::collections::HashSet;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 fn order_events<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Rc<SweepEvent<F>>>
 where
-    F: Float,
+    F: Float + std::fmt::Debug,
 {
     let mut result_events: Vec<Rc<SweepEvent<F>>> = Vec::new();
 
@@ -44,10 +45,26 @@ where
         }
     }
 
+    for r in &result_events {
+        println!("{:?}", r);
+        debug_assert!(r.get_other_event().is_some());
+    }
+
+    for (i, r) in result_events.iter().enumerate() {
+        println!("pos {:3} linked to {:3}    {}    {:?} => {:?}",
+            i,
+            r.get_pos(),
+            if r.is_left() { "L" } else { "R" },
+            r.point,
+            r.get_other_event().map(|o| o.point).unwrap(),
+        );
+    }
+
     result_events
 }
 
-fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &mut HashSet<i32>, orig_index: i32) -> i32
+
+fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_index: i32) -> i32
 where
     F: Float,
 {
@@ -73,40 +90,166 @@ where
 
     new_pos = pos - 1;
 
-    while processed.contains(&new_pos) && new_pos >= orig_index as i32 {
+    while processed.contains(&new_pos) {
         new_pos -= 1;
     }
     new_pos
 }
 
-pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>], operation: Operation) -> Vec<Polygon<F>>
-where
-    F: Float,
-{
-    let result_events = order_events(sorted_events);
 
-    let mut result: Vec<Polygon<F>> = Vec::new();
+pub struct Contour<F>
+where
+    F: Float
+{
+    pub points: Vec<Coordinate<F>>,
+    pub hole_ids: Vec<i32>,
+    pub is_external: bool,
+}
+
+
+use std::fs::File;
+use std::io::Write;
+fn debug_print_results<F>(events: &[Rc<SweepEvent<F>>])
+where
+    F: Float + std::fmt::Debug,
+{
+    let mut writer = File::create("debug.csv").unwrap();
+    writeln!(&mut writer,
+        "index;point;other_point;left;in_result;in_out;other_in_out;is_subject;is_exterior_ring;prev_in_result"
+    ).expect("Failed to write to file");
+    for (i, evt) in events.iter().enumerate() {
+        writeln!(&mut writer, "{};{:?};{:?};{};{};{};{};{};{};{:?}",
+            i,
+            evt.point,
+            evt.get_other_event().unwrap().point,
+            if evt.is_left() { "L" } else { "R" },
+            evt.is_in_result(),
+            evt.is_in_out(),
+            evt.is_other_in_out(),
+            evt.is_subject,
+            evt.is_exterior_ring,
+            evt.get_prev_in_result().map(|o| format!("{:?}", o.point)),
+        ).expect("Failed to write to file");
+    }
+}
+
+
+pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>], operation: Operation) -> Vec<Contour<F>>
+where
+    F: Float + std::fmt::Debug,
+{
+    let mut result_events = order_events(sorted_events);
+    debug_print_results(&result_events);
+
+    //let mut result: Vec<Polygon<F>> = Vec::new();
+    let mut result: Vec<Contour<F>> = Vec::new();
     let mut processed: HashSet<i32> = HashSet::new();
+
+    let mut depth: HashMap<i32, i32> = HashMap::new();
+    let mut hole_of: HashMap<i32, i32> = HashMap::new();
 
     for i in 0..(result_events.len() as i32) {
         if processed.contains(&i) {
             continue;
         }
-        let mut contour = LineString::<F>(Vec::new());
+        //let mut contour = LineString::<F>(Vec::new());
+        let mut contour = Contour{
+            points: Vec::new(),
+            hole_ids: Vec::new(),
+            is_external: true,
+        };
+
+        let contour_id = result.len() as i32;
+        println!("\n *** Adding contour id {}", contour_id);
+        depth.insert(contour_id, 0);
+        hole_of.insert(contour_id, -1);
+
+        if let Some(prev_in_result) = result_events[i as usize].get_prev_in_result() {
+            let lower_contour_id = prev_in_result.get_output_contour_id();
+            println!("Inferring information from lower_contour_id = {} with is_in_out = {}", lower_contour_id, prev_in_result.is_in_out());
+            println!("{:?}", prev_in_result.point);
+            println!("{:?}", prev_in_result.get_other_event().unwrap().point);
+            if !prev_in_result.is_in_out() {
+                result[lower_contour_id as usize].hole_ids.push(contour_id);
+                hole_of.insert(contour_id, lower_contour_id);
+                depth.insert(contour_id, depth[&lower_contour_id] + 1);
+                contour.is_external = false;
+                println!("Marking contour as hole of {} with depth {}", lower_contour_id, depth[&contour_id]);
+            } else if !result[lower_contour_id as usize].is_external {
+                let parent_contour_id = hole_of[&lower_contour_id];
+                result[parent_contour_id as usize].hole_ids.push(contour_id);
+                hole_of.insert(contour_id, parent_contour_id);
+                depth.insert(contour_id, depth[&lower_contour_id]);
+                contour.is_external = false;
+                println!("Transitively marking contour as hole of {} via {} with depth {}", parent_contour_id, lower_contour_id, depth[&contour_id]);
+            }
+        }
+        /*
+        if (result_events[i as usize].prev_in_result) {
+
+            if (!result_events[i].prevInResult.resultInOut) {
+                result[lower_contour_id].holes.push(contourId);
+                holeOf[contourId] = lower_contour_id;
+                depth[contourId] = depth[lower_contour_id] + 1;
+                contour.external = false;
+                console.log(`Marking contour as hole of ${lower_contour_id} with depth ${depth[lower_contour_id] + 1}`)
+            } else if (!result[lower_contour_id].external) {
+                result[holeOf[lower_contour_id]].holes.push(contourId);
+                holeOf[contourId] = holeOf[lower_contour_id];
+                depth[contourId] = depth[lower_contour_id];
+                contour.external = false;
+                console.log(`Transitively marking contour as hole of ${holeOf[lower_contour_id]} via ${lower_contour_id} with depth ${depth[lower_contour_id]}`)
+            }
+        }
+        console.log(` => depth = ${depth[contourId]} holeOf = ${holeOf[contourId]}`)
+        */
+
         let mut pos = i;
         let initial = result_events[i as usize].point;
 
-        contour.0.push(initial);
+        contour.points.push(initial);
 
-        while pos >= i {
+        while pos >= 0 && result_events[pos as usize].get_other_event().unwrap().point != initial {
+            println!("pos = {}   {}   {:?} => {:?}",
+                pos,
+                if result_events[pos as usize].is_left() { "L" } else { "R" },
+                result_events[pos as usize].point,
+                result_events[pos as usize].get_other_event().unwrap().point,
+            );
             processed.insert(pos);
+            result_events[pos as usize].set_output_contour_id(contour_id);
+
+            /*
+            let event = &mut result_events[pos as usize];
+            if event.is_left() {
+                event.set_output_contour_id(contour_id);
+            } else {
+
+            }
+            */
 
             pos = result_events[pos as usize].get_pos();
+            println!("Jumped to: {}", pos);
+
             processed.insert(pos);
-            contour.0.push(result_events[pos as usize].point);
-            pos = next_pos(pos, &result_events, &mut processed, i);
+            result_events[pos as usize].set_output_contour_id(contour_id);
+
+            contour.points.push(result_events[pos as usize].point);
+            pos = next_pos(pos, &result_events, &processed, i);
+            println!("Next pos: {}", pos);
         }
 
+        if pos != -1 {
+            processed.insert(pos);
+            result_events[pos as usize].set_output_contour_id(contour_id);
+            pos = result_events[pos as usize].get_pos();
+            processed.insert(pos);
+            result_events[pos as usize].set_output_contour_id(contour_id);
+        }
+
+        result.push(contour);
+
+        /*
         if !result_events[i as usize].is_exterior_ring {
             if result.is_empty() {
                 result.push(Polygon::new(contour, Vec::new()));
@@ -124,6 +267,7 @@ where
         } else {
             result.push(Polygon::new(contour, Vec::new()));
         }
+        */
     }
 
     result

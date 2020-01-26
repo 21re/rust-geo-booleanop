@@ -15,6 +15,12 @@ where
         } else {
             event.set_in_out(!prev.is_other_in_out(), prev.is_in_out());
         }
+
+        if prev.is_in_result() && !prev.is_vertical() {
+            event.set_prev_in_result(prev);
+        } else if let Some(prev_of_prev) = prev.get_prev_in_result() {
+            event.set_prev_in_result(&prev_of_prev);
+        }
     } else {
         event.set_in_out(false, true);
     }

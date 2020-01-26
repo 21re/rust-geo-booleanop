@@ -1,6 +1,6 @@
 use num_traits::Float;
 
-use geo_types::{Coordinate, MultiPolygon, Polygon, Rect};
+use geo_types::{Coordinate, MultiPolygon, Polygon, LineString, Rect};
 
 pub mod compare_segments;
 pub mod compute_fields;
@@ -51,7 +51,7 @@ where
 
 impl<F> BooleanOp<F> for Polygon<F>
 where
-    F: Float,
+    F: Float + std::fmt::Debug,
 {
     fn boolean(&self, rhs: &Polygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(&[self.clone()], &[rhs.clone()], operation)
@@ -60,7 +60,7 @@ where
 
 impl<F> BooleanOp<F, MultiPolygon<F>> for Polygon<F>
 where
-    F: Float,
+    F: Float + std::fmt::Debug,
 {
     fn boolean(&self, rhs: &MultiPolygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(&[self.clone()], rhs.0.as_slice(), operation)
@@ -69,7 +69,7 @@ where
 
 impl<F> BooleanOp<F> for MultiPolygon<F>
 where
-    F: Float,
+    F: Float + std::fmt::Debug,
 {
     fn boolean(&self, rhs: &MultiPolygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(self.0.as_slice(), rhs.0.as_slice(), operation)
@@ -78,7 +78,7 @@ where
 
 impl<F> BooleanOp<F, Polygon<F>> for MultiPolygon<F>
 where
-    F: Float,
+    F: Float + std::fmt::Debug,
 {
     fn boolean(&self, rhs: &Polygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(self.0.as_slice(), &[rhs.clone()], operation)
@@ -87,7 +87,7 @@ where
 
 fn boolean_operation<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operation: Operation) -> MultiPolygon<F>
 where
-    F: Float,
+    F: Float + std::fmt::Debug,
 {
     let mut sbbox = Rect {
         min: Coordinate {
@@ -110,7 +110,24 @@ where
 
     let sorted_events = subdivide(&mut event_queue, &sbbox, &cbbox, operation);
 
-    MultiPolygon(connect_edges(&sorted_events, operation))
+    let contours = connect_edges(&sorted_events, operation);
+
+    let mut polygons: Vec<Polygon<F>> = Vec::new();
+
+    for contour in &contours {
+        if contour.is_external {
+            let exterior = LineString(contour.points.clone());
+            let mut interios: Vec<LineString<F>> = Vec::new();
+            for hole_id in &contour.hole_ids {
+                interios.push(LineString(contours[*hole_id as usize].points.clone()));
+            }
+
+            let polygon = Polygon::new(exterior, interios);
+            polygons.push(polygon);
+        }
+    }
+
+    MultiPolygon(polygons)
 }
 
 fn trivial_result<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operation: Operation) -> MultiPolygon<F>
