@@ -110,7 +110,7 @@ where
 
     let sorted_events = subdivide(&mut event_queue, &sbbox, &cbbox, operation);
 
-    let contours = connect_edges(&sorted_events, operation);
+    let contours = connect_edges(&sorted_events);
 
     let mut polygons: Vec<Polygon<F>> = Vec::new();
 

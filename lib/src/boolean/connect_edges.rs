@@ -136,11 +136,11 @@ where
 }
 
 
-pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>], operation: Operation) -> Vec<Contour<F>>
+pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Contour<F>>
 where
     F: Float + std::fmt::Debug,
 {
-    let mut result_events = order_events(sorted_events);
+    let result_events = order_events(sorted_events);
     debug_print_results(&result_events);
 
     //let mut result: Vec<Polygon<F>> = Vec::new();
@@ -154,7 +154,6 @@ where
         if processed.contains(&i) {
             continue;
         }
-        //let mut contour = LineString::<F>(Vec::new());
         let mut contour = Contour{
             points: Vec::new(),
             hole_ids: Vec::new(),
@@ -172,39 +171,27 @@ where
             println!("{:?}", prev_in_result.point);
             println!("{:?}", prev_in_result.get_other_event().unwrap().point);
             if prev_in_result.get_result_transition() == ResultTransition::OutIn {
-                result[lower_contour_id as usize].hole_ids.push(contour_id);
-                hole_of.insert(contour_id, lower_contour_id);
-                depth.insert(contour_id, depth[&lower_contour_id] + 1);
-                contour.is_external = false;
-                println!("Marking contour as hole of {} with depth {}", lower_contour_id, depth[&contour_id]);
-            } else if !result[lower_contour_id as usize].is_external {
-                let parent_contour_id = hole_of[&lower_contour_id];
-                result[parent_contour_id as usize].hole_ids.push(contour_id);
-                hole_of.insert(contour_id, parent_contour_id);
-                depth.insert(contour_id, depth[&lower_contour_id]);
-                contour.is_external = false;
-                println!("Transitively marking contour as hole of {} via {} with depth {}", parent_contour_id, lower_contour_id, depth[&contour_id]);
+                // We are inside, let's check if the thing below us is an exterior contour or just
+                // another hole.
+                if result[lower_contour_id as usize].is_external {
+                    result[lower_contour_id as usize].hole_ids.push(contour_id);
+                    hole_of.insert(contour_id, lower_contour_id);
+                    depth.insert(contour_id, depth[&lower_contour_id] + 1);
+                    contour.is_external = false;
+                    println!("Marking contour as hole of {} with depth {}", lower_contour_id, depth[&contour_id]);
+                } else {
+                    let parent_contour_id = hole_of[&lower_contour_id];
+                    result[parent_contour_id as usize].hole_ids.push(contour_id);
+                    hole_of.insert(contour_id, parent_contour_id);
+                    depth.insert(contour_id, depth[&lower_contour_id]);
+                    contour.is_external = false;
+                    println!("Transitively marking contour as hole of {} via {} with depth {}", parent_contour_id, lower_contour_id, depth[&contour_id]);
+                }
+            } else {
+                contour.is_external = true;
+                println!("Keeping contour as external");
             }
         }
-        /*
-        if (result_events[i as usize].prev_in_result) {
-
-            if (!result_events[i].prevInResult.resultInOut) {
-                result[lower_contour_id].holes.push(contourId);
-                holeOf[contourId] = lower_contour_id;
-                depth[contourId] = depth[lower_contour_id] + 1;
-                contour.external = false;
-                console.log(`Marking contour as hole of ${lower_contour_id} with depth ${depth[lower_contour_id] + 1}`)
-            } else if (!result[lower_contour_id].external) {
-                result[holeOf[lower_contour_id]].holes.push(contourId);
-                holeOf[contourId] = holeOf[lower_contour_id];
-                depth[contourId] = depth[lower_contour_id];
-                contour.external = false;
-                console.log(`Transitively marking contour as hole of ${holeOf[lower_contour_id]} via ${lower_contour_id} with depth ${depth[lower_contour_id]}`)
-            }
-        }
-        console.log(` => depth = ${depth[contourId]} holeOf = ${holeOf[contourId]}`)
-        */
 
         let mut pos = i;
         let initial = result_events[i as usize].point;
@@ -220,15 +207,6 @@ where
             );
             processed.insert(pos);
             result_events[pos as usize].set_output_contour_id(contour_id);
-
-            /*
-            let event = &mut result_events[pos as usize];
-            if event.is_left() {
-                event.set_output_contour_id(contour_id);
-            } else {
-
-            }
-            */
 
             pos = result_events[pos as usize].get_pos();
             println!("Jumped to: {}", pos);
@@ -250,26 +228,6 @@ where
         }
 
         result.push(contour);
-
-        /*
-        if !result_events[i as usize].is_exterior_ring {
-            if result.is_empty() {
-                result.push(Polygon::new(contour, Vec::new()));
-            } else {
-                result
-                    .last_mut()
-                    .expect("Result must not be empty at this point")
-                    .interiors_push(contour);
-            }
-        } else if operation == Operation::Difference && !result_events[i as usize].is_subject && result.len() > 1 {
-            result
-                .last_mut()
-                .expect("Result must not be empty at this point")
-                .interiors_push(contour);
-        } else {
-            result.push(Polygon::new(contour, Vec::new()));
-        }
-        */
     }
 
     result
