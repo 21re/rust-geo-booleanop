@@ -115,7 +115,7 @@ where
     let mut polygons: Vec<Polygon<F>> = Vec::new();
 
     for contour in &contours {
-        if contour.is_external {
+        if contour.is_exterior {
             let exterior = LineString(contour.points.clone());
             let mut interios: Vec<LineString<F>> = Vec::new();
             for hole_id in &contour.hole_ids {

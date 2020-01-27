@@ -34,18 +34,7 @@ where
     let result_transition = if !in_result {
         ResultTransition::None
     } else {
-        let mut this_in = !event.is_in_out();
-        let mut that_in = !event.is_other_in_out();
-        if !event.is_subject {
-            std::mem::swap(&mut this_in, &mut that_in);
-        }
-        let is_in = match operation {
-            Operation::Intersection => this_in && that_in,
-            Operation::Union        => this_in || that_in,
-            Operation::Difference   => this_in && !that_in,
-            Operation::Xor          => this_in ^ that_in,
-        };
-        if is_in { ResultTransition::OutIn } else { ResultTransition::InOut }
+        determine_result_transition(&event, operation)
     };
     event.set_result_transition(result_transition);
 }
@@ -67,4 +56,25 @@ where
         EdgeType::DifferentTransition => operation == Operation::Difference,
         EdgeType::NonContributing => false,
     }
+}
+
+fn determine_result_transition<F>(event: &SweepEvent<F>, operation: Operation) -> ResultTransition
+where
+    F: Float,
+{
+    let this_in = !event.is_in_out();
+    let that_in = !event.is_other_in_out();
+    let is_in = match operation {
+        Operation::Intersection => this_in && that_in,
+        Operation::Union        => this_in || that_in,
+        Operation::Xor          => this_in ^  that_in,
+        Operation::Difference   =>
+            // Difference is assymmetric, so subject vs clipping matters.
+            if event.is_subject {
+                this_in && !that_in
+            } else {
+                that_in && !this_in
+            }
+    };
+    if is_in { ResultTransition::OutIn } else { ResultTransition::InOut }
 }

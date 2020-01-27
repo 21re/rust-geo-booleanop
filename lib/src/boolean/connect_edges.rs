@@ -103,7 +103,12 @@ where
 {
     pub points: Vec<Coordinate<F>>,
     pub hole_ids: Vec<i32>,
-    pub is_external: bool,
+    /// The semantics of `is_exterior` are in the sense of an exterior ring of a polygon
+    /// in GeoJSON. This is not to be confused with "external contour" as used in the
+    /// Martinez paper (which refers to contours that are not included in any of the
+    /// other polygon contours). `is_exterior` is true for all outer contours, not just
+    /// the outermost.
+    pub is_exterior: bool,
 }
 
 
@@ -157,7 +162,7 @@ where
         let mut contour = Contour{
             points: Vec::new(),
             hole_ids: Vec::new(),
-            is_external: true,
+            is_exterior: true,
         };
 
         let contour_id = result.len() as i32;
@@ -173,22 +178,22 @@ where
             if prev_in_result.get_result_transition() == ResultTransition::OutIn {
                 // We are inside, let's check if the thing below us is an exterior contour or just
                 // another hole.
-                if result[lower_contour_id as usize].is_external {
+                if result[lower_contour_id as usize].is_exterior {
                     result[lower_contour_id as usize].hole_ids.push(contour_id);
                     hole_of.insert(contour_id, lower_contour_id);
                     depth.insert(contour_id, depth[&lower_contour_id] + 1);
-                    contour.is_external = false;
+                    contour.is_exterior = false;
                     println!("Marking contour as hole of {} with depth {}", lower_contour_id, depth[&contour_id]);
                 } else {
                     let parent_contour_id = hole_of[&lower_contour_id];
                     result[parent_contour_id as usize].hole_ids.push(contour_id);
                     hole_of.insert(contour_id, parent_contour_id);
                     depth.insert(contour_id, depth[&lower_contour_id]);
-                    contour.is_external = false;
+                    contour.is_exterior = false;
                     println!("Transitively marking contour as hole of {} via {} with depth {}", parent_contour_id, lower_contour_id, depth[&contour_id]);
                 }
             } else {
-                contour.is_external = true;
+                contour.is_exterior = true;
                 println!("Keeping contour as external");
             }
         }
