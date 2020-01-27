@@ -1,4 +1,8 @@
 /target
 **/*.rs.b
-.idea/
 *.iml
+
+.idea/
+.vscode/
+
+test_cases.pdf
