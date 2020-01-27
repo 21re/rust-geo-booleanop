@@ -1,6 +1,4 @@
 #[cfg(test)]
-mod feature_type_test;
-#[cfg(test)]
 mod fill_queue_test;
 #[cfg(test)]
 mod generic_test_cases;
