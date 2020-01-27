@@ -16,6 +16,9 @@ where
             event.set_in_out(!prev.is_other_in_out(), prev.is_in_out());
         }
 
+        // Connect to previous in result: Only use the given `prev` if it is
+        // part of the result and not a vertical segment. Otherwise connect
+        // to its previous in result if any.
         if prev.is_in_result() && !prev.is_vertical() {
             event.set_prev_in_result(prev);
         } else if let Some(prev_of_prev) = prev.get_prev_in_result() {
@@ -25,6 +28,8 @@ where
         event.set_in_out(false, true);
     }
 
+    // Determine whether segment is in result, and if so, whether it is an
+    // in-out or out-in transition.
     let in_result = in_result(event, operation);
     let result_transition = if !in_result {
         ResultTransition::None
