@@ -199,8 +199,8 @@ where
             // result".
             let lower_contour_id = prev_in_result.get_output_contour_id();
             if prev_in_result.get_result_transition() == ResultTransition::OutIn {
-                // We are inside. Now we have to check if the thing below us is an another hole
-                // or an exterior contour.
+                // We are inside. Now we have to check if the thing below us is another hole or
+                // an exterior contour.
                 let lower_contour = &result[lower_contour_id as usize];
                 if let Some(parent_contour_id) = lower_contour.hole_of {
                     // The lower contour is a hole => Connect the new contour as a hole to its parent,
@@ -234,7 +234,7 @@ where
         contour.points.push(initial);
 
         loop {
-            // Loop carifications:
+            // Loop clarifications:
             // - An iteration has two kinds of `pos` advancements:
             //   (A) following a segment via `other_pos`, and
             //   (B) searching for the next outgoing edge on same point.
