@@ -1,6 +1,6 @@
 use super::sweep_event::SweepEvent;
 use geo_types::Coordinate;
-use num_traits::Float;
+use super::helper::Float;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 

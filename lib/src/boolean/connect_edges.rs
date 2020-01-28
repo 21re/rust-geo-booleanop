@@ -1,6 +1,6 @@
 use super::sweep_event::{SweepEvent, ResultTransition};
 use geo_types::{Coordinate};
-use num_traits::Float;
+use super::helper::Float;
 use std::collections::HashSet;
 use std::collections::HashMap;
 use std::rc::Rc;

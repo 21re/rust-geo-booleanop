@@ -1,5 +1,5 @@
 use geo_types::Coordinate;
-use num_traits::Float;
+use super::helper::Float;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::rc::{Rc, Weak};

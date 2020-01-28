@@ -1,5 +1,5 @@
 use geo_types::Coordinate;
-use num_traits::Float;
+use super::helper::Float;
 use robust::{Coord, orient2d};
 
 #[inline]

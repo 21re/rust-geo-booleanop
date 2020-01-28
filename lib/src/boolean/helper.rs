@@ -1,4 +1,9 @@
 use std::cmp::Ordering;
+use std::fmt::{Debug, Display};
+use num_traits::Float as NumTraitsFloat;
+
+pub trait Float: NumTraitsFloat + Debug + Display {}
+impl<T: NumTraitsFloat + Debug + Display> Float for T {}
 
 #[inline]
 pub fn less_if(condition: bool) -> Ordering {

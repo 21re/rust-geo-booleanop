@@ -1,6 +1,6 @@
 use super::sweep_event::{EdgeType, SweepEvent, ResultTransition};
 use super::Operation;
-use num_traits::Float;
+use super::helper::Float;
 use std::rc::Rc;
 
 pub fn compute_fields<F>(event: &Rc<SweepEvent<F>>, maybe_prev: Option<&Rc<SweepEvent<F>>>, operation: Operation)

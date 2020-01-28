@@ -1,5 +1,3 @@
-use num_traits::Float;
-
 use geo_types::{Coordinate, MultiPolygon, Polygon, LineString, Rect};
 
 pub mod compare_segments;
@@ -13,6 +11,8 @@ mod segment_intersection;
 mod signed_area;
 pub mod subdivide_segments;
 pub mod sweep_event;
+
+pub use helper::Float;
 
 use self::connect_edges::connect_edges;
 use self::fill_queue::fill_queue;
