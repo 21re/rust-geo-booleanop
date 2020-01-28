@@ -1,6 +1,5 @@
 use super::sweep_event::{SweepEvent, ResultTransition};
-use super::Operation;
-use geo_types::{LineString, Polygon, Coordinate};
+use geo_types::{Coordinate};
 use num_traits::Float;
 use std::collections::HashSet;
 use std::collections::HashMap;
@@ -31,16 +30,16 @@ where
         }
     }
 
+    // Populate `other_pos` by initializing with index and swapping with other event.
     for (pos, event) in result_events.iter().enumerate() {
-        event.set_pos(pos as i32)
+        event.set_other_pos(pos as i32)
     }
-
     for event in &result_events {
-        if !event.is_left() {
+        if event.is_left() {
             if let Some(other) = event.get_other_event() {
-                let tmp = event.get_pos();
-                event.set_pos(other.get_pos());
-                other.set_pos(tmp);
+                let (a, b) = (event.get_other_pos(), other.get_other_pos());
+                event.set_other_pos(b);
+                other.set_other_pos(a);
             }
         }
     }
@@ -53,7 +52,7 @@ where
     for (i, r) in result_events.iter().enumerate() {
         println!("pos {:3} linked to {:3}    {}    {:?} => {:?}",
             i,
-            r.get_pos(),
+            r.get_other_pos(),
             if r.is_left() { "L" } else { "R" },
             r.point,
             r.get_other_event().map(|o| o.point).unwrap(),
@@ -64,7 +63,7 @@ where
 }
 
 
-fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_index: i32) -> i32
+fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_pos: i32) -> i32
 where
     F: Float,
 {
@@ -90,7 +89,7 @@ where
 
     new_pos = pos - 1;
 
-    while processed.contains(&new_pos) {
+    while processed.contains(&new_pos) && new_pos > orig_pos {
         new_pos -= 1;
     }
     new_pos
@@ -141,6 +140,15 @@ where
 }
 
 
+fn mark_as_processed<F>(processed: &mut HashSet<i32>, result_events: &[Rc<SweepEvent<F>>], pos: i32, contour_id: i32)
+where
+    F: Float + std::fmt::Debug,
+{
+    processed.insert(pos);
+    result_events[pos as usize].set_output_contour_id(contour_id);
+}
+
+
 pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Contour<F>>
 where
     F: Float + std::fmt::Debug,
@@ -148,7 +156,6 @@ where
     let result_events = order_events(sorted_events);
     debug_print_results(&result_events);
 
-    //let mut result: Vec<Polygon<F>> = Vec::new();
     let mut result: Vec<Contour<F>> = Vec::new();
     let mut processed: HashSet<i32> = HashSet::new();
 
@@ -198,39 +205,38 @@ where
             }
         }
 
+        let orig_pos = i; // Alias just for clarity
         let mut pos = i;
-        let initial = result_events[i as usize].point;
 
+        let initial = result_events[pos as usize].point;
         contour.points.push(initial);
 
-        while pos >= 0 && result_events[pos as usize].get_other_event().unwrap().point != initial {
-            println!("pos = {}   {}   {:?} => {:?}",
-                pos,
-                if result_events[pos as usize].is_left() { "L" } else { "R" },
-                result_events[pos as usize].point,
-                result_events[pos as usize].get_other_event().unwrap().point,
-            );
-            processed.insert(pos);
-            result_events[pos as usize].set_output_contour_id(contour_id);
+        loop {
+            // Loop carifications:
+            // - An iteration has two kinds of `pos` advancements:
+            //   (A) following a segment via `other_pos`, and
+            //   (B) searching for the next outgoing edge on same point.
+            // - Therefore, the loop contains two "mark pos as processed" steps, using the
+            //   convention that at beginning of the loop, `pos` isn't marked yet.
+            // - The contour is extended after following a segment.
+            // - Hitting pos == orig_pos after search (B) indicates no continuation and
+            //   terminates the loop.
+            mark_as_processed(&mut processed, &result_events, pos, contour_id);
 
-            pos = result_events[pos as usize].get_pos();
-            println!("Jumped to: {}", pos);
+            pos = result_events[pos as usize].get_other_pos();              // pos advancment (A)
 
-            processed.insert(pos);
-            result_events[pos as usize].set_output_contour_id(contour_id);
-
+            mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
-            pos = next_pos(pos, &result_events, &processed, i);
-            println!("Next pos: {}", pos);
+
+            pos = next_pos(pos, &result_events, &processed, orig_pos);      // pos advancment (B)
+
+            if pos == orig_pos {
+                break;
+            }
         }
 
-        if pos != -1 {
-            processed.insert(pos);
-            result_events[pos as usize].set_output_contour_id(contour_id);
-            pos = result_events[pos as usize].get_pos();
-            processed.insert(pos);
-            result_events[pos as usize].set_output_contour_id(contour_id);
-        }
+        // This assert should be possible once the first stage of the algorithm is robust.
+        // debug_assert_eq!(contour.points.first(), contour.points.last());
 
         result.push(contour);
     }

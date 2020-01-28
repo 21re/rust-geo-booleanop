@@ -34,7 +34,7 @@ where
     in_out: bool,
     other_in_out: bool,
     result_transition: ResultTransition,
-    pos: i32,
+    other_pos: i32,
     output_contour_id: i32,
 }
 
@@ -71,7 +71,7 @@ where
                 in_out: false,
                 other_in_out: false,
                 result_transition: ResultTransition::None,
-                pos: 0,
+                other_pos: 0,
                 output_contour_id: -1,
             }),
             contour_id,
@@ -140,12 +140,12 @@ where
         mutable.other_in_out = other_in_out;
     }
 
-    pub fn get_pos(&self) -> i32 {
-        self.mutable.borrow().pos
+    pub fn get_other_pos(&self) -> i32 {
+        self.mutable.borrow().other_pos
     }
 
-    pub fn set_pos(&self, pos: i32) {
-        self.mutable.borrow_mut().pos = pos
+    pub fn set_other_pos(&self, other_pos: i32) {
+        self.mutable.borrow_mut().other_pos = other_pos
     }
 
     pub fn get_output_contour_id(&self) -> i32 {
