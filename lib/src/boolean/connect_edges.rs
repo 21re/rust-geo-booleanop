@@ -2,12 +2,11 @@ use super::sweep_event::{SweepEvent, ResultTransition};
 use geo_types::{Coordinate};
 use super::helper::Float;
 use std::collections::HashSet;
-use std::collections::HashMap;
 use std::rc::Rc;
 
 fn order_events<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Rc<SweepEvent<F>>>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     let mut result_events: Vec<Rc<SweepEvent<F>>> = Vec::new();
 
@@ -140,7 +139,7 @@ use std::fs::File;
 use std::io::Write;
 fn debug_print_results<F>(events: &[Rc<SweepEvent<F>>])
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     let mut writer = File::create("debug.csv").unwrap();
     writeln!(&mut writer,
@@ -167,7 +166,7 @@ where
 
 fn mark_as_processed<F>(processed: &mut HashSet<i32>, result_events: &[Rc<SweepEvent<F>>], pos: i32, contour_id: i32)
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     processed.insert(pos);
     result_events[pos as usize].set_output_contour_id(contour_id);
@@ -176,7 +175,7 @@ where
 
 pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Contour<F>>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     let result_events = order_events(sorted_events);
     debug_print_results(&result_events);

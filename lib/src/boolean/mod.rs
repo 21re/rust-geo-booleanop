@@ -51,7 +51,7 @@ where
 
 impl<F> BooleanOp<F> for Polygon<F>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     fn boolean(&self, rhs: &Polygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(&[self.clone()], &[rhs.clone()], operation)
@@ -60,7 +60,7 @@ where
 
 impl<F> BooleanOp<F, MultiPolygon<F>> for Polygon<F>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     fn boolean(&self, rhs: &MultiPolygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(&[self.clone()], rhs.0.as_slice(), operation)
@@ -69,7 +69,7 @@ where
 
 impl<F> BooleanOp<F> for MultiPolygon<F>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     fn boolean(&self, rhs: &MultiPolygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(self.0.as_slice(), rhs.0.as_slice(), operation)
@@ -78,7 +78,7 @@ where
 
 impl<F> BooleanOp<F, Polygon<F>> for MultiPolygon<F>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     fn boolean(&self, rhs: &Polygon<F>, operation: Operation) -> MultiPolygon<F> {
         boolean_operation(self.0.as_slice(), &[rhs.clone()], operation)
@@ -87,7 +87,7 @@ where
 
 fn boolean_operation<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operation: Operation) -> MultiPolygon<F>
 where
-    F: Float + std::fmt::Debug,
+    F: Float,
 {
     let mut sbbox = Rect {
         min: Coordinate {
