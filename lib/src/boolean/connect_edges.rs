@@ -124,11 +124,50 @@ where
         }
     }
 
-    /// The semantics of `is_exterior` are in the sense of an exterior ring of a polygon
-    /// in GeoJSON. This is not to be confused with "external contour" as used in the
+    /// This logic implements the 4 cases of parent contours from Fig. 4 in the Martinez paper.
+    pub fn initialize_from_context(event: &Rc<SweepEvent<F>>, contours: &mut [Contour<F>], contour_id: i32) -> Contour<F> {
+        if let Some(prev_in_result) = event.get_prev_in_result() {
+            // Note that it is valid to query the "previous in result" for its output contour id,
+            // because we must have already processed it (i.e., assigned an output contour id)
+            // in an earlier iteration, otherwise it wouldn't be possible that it is "previous in
+            // result".
+            let lower_contour_id = prev_in_result.get_output_contour_id();
+            if prev_in_result.get_result_transition() == ResultTransition::OutIn {
+                // We are inside. Now we have to check if the thing below us is another hole or
+                // an exterior contour.
+                let lower_contour = &contours[lower_contour_id as usize];
+                if let Some(parent_contour_id) = lower_contour.hole_of {
+                    // The lower contour is a hole => Connect the new contour as a hole to its parent,
+                    // and use same depth.
+                    contours[parent_contour_id as usize].hole_ids.push(contour_id);
+                    let hole_of = Some(parent_contour_id);
+                    let depth = contours[lower_contour_id as usize].depth;
+                    Contour::new(hole_of, depth)
+                } else {
+                    // The lower contour is an exterior contour => Connect the new contour as a hole,
+                    // and increment depth.
+                    contours[lower_contour_id as usize].hole_ids.push(contour_id);
+                    let hole_of = Some(lower_contour_id);
+                    let depth = contours[lower_contour_id as usize].depth + 1;
+                    Contour::new(hole_of, depth)
+                }
+            } else {
+                // We are outside => this contour is an exterior contour of same depth.
+                let depth = contours[lower_contour_id as usize].depth;
+                Contour::new(None, depth)
+            }
+        } else {
+            // There is no lower/previous contour => this contour is an exterior contour of depth 0.
+            Contour::new(None, 0)
+        }
+    }
+
+    /// Whether a contour is an exterior contour or a hole.
+    /// Note: The semantics of `is_exterior` are in the sense of an exterior ring of a
+    /// polygon in GeoJSON, not to be confused with "external contour" as used in the
     /// Martinez paper (which refers to contours that are not included in any of the
-    /// other polygon contours). `is_exterior` is true for all outer contours, not just
-    /// the outermost.
+    /// other polygon contours; `is_exterior` is true for all outer contours, not just
+    /// the outermost).
     pub fn is_exterior(&self) -> bool {
         self.hole_of.is_none()
     }
@@ -180,7 +219,7 @@ where
     let result_events = order_events(sorted_events);
     debug_print_results(&result_events);
 
-    let mut result: Vec<Contour<F>> = Vec::new();
+    let mut contours: Vec<Contour<F>> = Vec::new();
     let mut processed: HashSet<i32> = HashSet::new();
 
     for i in 0..(result_events.len() as i32) {
@@ -188,43 +227,12 @@ where
             continue;
         }
 
-        let contour_id = result.len() as i32;
-
-        // This logic implements the 4 cases of parent contours from Fig. 4 in the Martinez paper.
-        let mut contour = if let Some(prev_in_result) = result_events[i as usize].get_prev_in_result() {
-            // Note that it is valid to query the "previous in result" for its output contour id,
-            // because we must have already processed it (i.e., assigned an output contour id)
-            // in an earlier iteration, otherwise it wouldn't be possible that it is "previous in
-            // result".
-            let lower_contour_id = prev_in_result.get_output_contour_id();
-            if prev_in_result.get_result_transition() == ResultTransition::OutIn {
-                // We are inside. Now we have to check if the thing below us is another hole or
-                // an exterior contour.
-                let lower_contour = &result[lower_contour_id as usize];
-                if let Some(parent_contour_id) = lower_contour.hole_of {
-                    // The lower contour is a hole => Connect the new contour as a hole to its parent,
-                    // and use same depth.
-                    result[parent_contour_id as usize].hole_ids.push(contour_id);
-                    let hole_of = Some(parent_contour_id);
-                    let depth = result[lower_contour_id as usize].depth;
-                    Contour::new(hole_of, depth)
-                } else {
-                    // The lower contour is an exterior contour => Connect the new contour as a hole,
-                    // and increment depth.
-                    result[lower_contour_id as usize].hole_ids.push(contour_id);
-                    let hole_of = Some(lower_contour_id);
-                    let depth = result[lower_contour_id as usize].depth + 1;
-                    Contour::new(hole_of, depth)
-                }
-            } else {
-                // We are outside => this contour is an exterior contour of same depth.
-                let depth = result[lower_contour_id as usize].depth;
-                Contour::new(None, depth)
-            }
-        } else {
-            // There is no lower/previous contour => this contour is an exterior contour of depth 0.
-            Contour::new(None, 0)
-        };
+        let contour_id = contours.len() as i32;
+        let mut contour = Contour::initialize_from_context(
+            &result_events[i as usize],
+            &mut contours,
+            contour_id,
+        );
 
         let orig_pos = i; // Alias just for clarity
         let mut pos = i;
@@ -244,12 +252,12 @@ where
             //   terminates the loop.
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
 
-            pos = result_events[pos as usize].get_other_pos();              // pos advancment (A)
+            pos = result_events[pos as usize].get_other_pos();              // pos advancement (A)
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
 
-            pos = next_pos(pos, &result_events, &processed, orig_pos);      // pos advancment (B)
+            pos = next_pos(pos, &result_events, &processed, orig_pos);      // pos advancement (B)
 
             if pos == orig_pos {
                 break;
@@ -259,8 +267,8 @@ where
         // This assert should be possible once the first stage of the algorithm is robust.
         // debug_assert_eq!(contour.points.first(), contour.points.last());
 
-        result.push(contour);
+        contours.push(contour);
     }
 
-    result
+    contours
 }
