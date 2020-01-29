@@ -112,20 +112,19 @@ where
 
     let contours = connect_edges(&sorted_events);
 
-    let mut polygons: Vec<Polygon<F>> = Vec::new();
-
-    for contour in &contours {
-        if contour.is_exterior() {
+    // Convert contours into polygons
+    let polygons: Vec<Polygon<F>> = contours
+        .iter()
+        .filter(|contour| contour.is_exterior())
+        .map(|contour| {
             let exterior = LineString(contour.points.clone());
             let mut interios: Vec<LineString<F>> = Vec::new();
             for hole_id in &contour.hole_ids {
                 interios.push(LineString(contours[*hole_id as usize].points.clone()));
             }
-
-            let polygon = Polygon::new(exterior, interios);
-            polygons.push(polygon);
-        }
-    }
+            Polygon::new(exterior, interios)
+        })
+        .collect();
 
     MultiPolygon(polygons)
 }
