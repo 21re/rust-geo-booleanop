@@ -1,6 +1,7 @@
 extern crate geo_booleanop_tests;
 
 use std::fs;
+use std::path::Path;
 use std::process::Command;
 use geo_booleanop_tests::helper::run_generic_test_case;
 
@@ -13,7 +14,15 @@ fn main() {
 
     run_generic_test_case(&filename_out, true);
 
-    Command::new("../martinez/polygon_ops_debugging/plot_test_cases.py")
+    // Try to run Python plot
+    let script_path = Path::new(file!()).to_path_buf()
+        .canonicalize().unwrap()
+        .parent().unwrap().to_path_buf() // -> bin
+        .parent().unwrap().to_path_buf() // -> src
+        .parent().unwrap().to_path_buf() // -> tests
+        .join("scripts")
+        .join("plot_test_cases.py");
+    Command::new(script_path.as_os_str())
         .arg("-i")
         .arg(&filename_out)
         .spawn()
