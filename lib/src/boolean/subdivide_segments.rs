@@ -5,7 +5,7 @@ use super::sweep_event::SweepEvent;
 use super::Operation;
 use crate::splay::SplaySet;
 use geo_types::Rect;
-use num_traits::Float;
+use super::helper::Float;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 

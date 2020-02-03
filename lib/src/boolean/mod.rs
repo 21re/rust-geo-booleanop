@@ -1,6 +1,4 @@
-use num_traits::Float;
-
-use geo_types::{Coordinate, MultiPolygon, Polygon, Rect};
+use geo_types::{Coordinate, MultiPolygon, Polygon, LineString, Rect};
 
 pub mod compare_segments;
 pub mod compute_fields;
@@ -13,6 +11,8 @@ mod segment_intersection;
 mod signed_area;
 pub mod subdivide_segments;
 pub mod sweep_event;
+
+pub use helper::Float;
 
 use self::connect_edges::connect_edges;
 use self::fill_queue::fill_queue;
@@ -110,7 +110,23 @@ where
 
     let sorted_events = subdivide(&mut event_queue, &sbbox, &cbbox, operation);
 
-    MultiPolygon(connect_edges(&sorted_events, operation))
+    let contours = connect_edges(&sorted_events);
+
+    // Convert contours into polygons
+    let polygons: Vec<Polygon<F>> = contours
+        .iter()
+        .filter(|contour| contour.is_exterior())
+        .map(|contour| {
+            let exterior = LineString(contour.points.clone());
+            let mut interios: Vec<LineString<F>> = Vec::new();
+            for hole_id in &contour.hole_ids {
+                interios.push(LineString(contours[*hole_id as usize].points.clone()));
+            }
+            Polygon::new(exterior, interios)
+        })
+        .collect();
+
+    MultiPolygon(polygons)
 }
 
 fn trivial_result<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operation: Operation) -> MultiPolygon<F>

@@ -1,6 +1,6 @@
 use super::signed_area::signed_area;
 use super::sweep_event::SweepEvent;
-use num_traits::Float;
+use super::helper::Float;
 use std::cmp::Ordering;
 use std::rc::Rc;
 

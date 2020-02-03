@@ -1,7 +1,7 @@
 use super::divide_segment::divide_segment;
 use super::segment_intersection::{intersection, LineIntersection};
 use super::sweep_event::{EdgeType, SweepEvent};
-use num_traits::Float;
+use super::helper::Float;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 
