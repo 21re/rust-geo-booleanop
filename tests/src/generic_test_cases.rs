@@ -1,6 +1,5 @@
-use super::helper::{run_generic_test_case};
+use super::helper::run_generic_test_case;
 use glob::glob;
-
 
 #[test]
 fn test_generic_test_cases() {
@@ -12,7 +11,9 @@ fn test_generic_test_cases() {
     }
 
     if regenerate {
-        assert!(false,
-            "Regenerate is set to true. Won't let tests pass in this mode, because assertions are disabled.");
+        assert!(
+            false,
+            "Regenerate is set to true. Won't let tests pass in this mode, because assertions are disabled."
+        );
     }
 }

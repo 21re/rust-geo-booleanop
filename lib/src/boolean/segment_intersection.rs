@@ -1,5 +1,5 @@
-use geo_types::Coordinate;
 use super::helper::Float;
+use geo_types::Coordinate;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LineIntersection<F>

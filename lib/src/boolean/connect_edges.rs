@@ -1,6 +1,6 @@
-use super::sweep_event::{SweepEvent, ResultTransition};
-use geo_types::{Coordinate};
 use super::helper::Float;
+use super::sweep_event::{ResultTransition, SweepEvent};
+use geo_types::Coordinate;
 use std::collections::HashSet;
 use std::rc::Rc;
 
@@ -46,7 +46,6 @@ where
     result_events
 }
 
-
 fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_pos: i32) -> i32
 where
     F: Float,
@@ -79,10 +78,9 @@ where
     new_pos
 }
 
-
 pub struct Contour<F>
 where
-    F: Float
+    F: Float,
 {
     /// Raw coordinates of contour
     pub points: Vec<Coordinate<F>>,
@@ -98,19 +96,23 @@ where
 
 impl<F> Contour<F>
 where
-    F: Float
+    F: Float,
 {
     pub fn new(hole_of: Option<i32>, depth: i32) -> Contour<F> {
         Contour {
             points: Vec::new(),
             hole_ids: Vec::new(),
-            hole_of: hole_of,
-            depth: depth,
+            hole_of,
+            depth,
         }
     }
 
     /// This logic implements the 4 cases of parent contours from Fig. 4 in the Martinez paper.
-    pub fn initialize_from_context(event: &Rc<SweepEvent<F>>, contours: &mut [Contour<F>], contour_id: i32) -> Contour<F> {
+    pub fn initialize_from_context(
+        event: &Rc<SweepEvent<F>>,
+        contours: &mut [Contour<F>],
+        contour_id: i32,
+    ) -> Contour<F> {
         if let Some(prev_in_result) = event.get_prev_in_result() {
             // Note that it is valid to query the "previous in result" for its output contour id,
             // because we must have already processed it (i.e., assigned an output contour id)
@@ -158,7 +160,6 @@ where
     }
 }
 
-
 fn mark_as_processed<F>(processed: &mut HashSet<i32>, result_events: &[Rc<SweepEvent<F>>], pos: i32, contour_id: i32)
 where
     F: Float,
@@ -166,7 +167,6 @@ where
     processed.insert(pos);
     result_events[pos as usize].set_output_contour_id(contour_id);
 }
-
 
 pub fn connect_edges<F>(sorted_events: &[Rc<SweepEvent<F>>]) -> Vec<Contour<F>>
 where
@@ -183,11 +183,7 @@ where
         }
 
         let contour_id = contours.len() as i32;
-        let mut contour = Contour::initialize_from_context(
-            &result_events[i as usize],
-            &mut contours,
-            contour_id,
-        );
+        let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
 
         let orig_pos = i; // Alias just for clarity
         let mut pos = i;
@@ -207,12 +203,12 @@ where
             //   terminates the loop.
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
 
-            pos = result_events[pos as usize].get_other_pos();              // pos advancement (A)
+            pos = result_events[pos as usize].get_other_pos(); // pos advancement (A)
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
 
-            pos = next_pos(pos, &result_events, &processed, orig_pos);      // pos advancement (B)
+            pos = next_pos(pos, &result_events, &processed, orig_pos); // pos advancement (B)
 
             if pos == orig_pos {
                 break;
