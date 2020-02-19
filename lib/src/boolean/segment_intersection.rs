@@ -20,6 +20,49 @@ pub fn intersection<F>(
 where
     F: Float,
 {
+    let inter = intersection_impl(a1, a2, b1, b2);
+    match inter {
+        LineIntersection::Point(mut p) => {
+            let a_min_x = a1.x.min(a2.x);
+            let a_max_x = a1.x.max(a2.x);
+            let a_min_y = a1.y.min(a2.y);
+            let a_max_y = a1.y.max(a2.y);
+            let b_min_x = b1.x.min(b2.x);
+            let b_max_x = b1.x.max(b2.x);
+            let b_min_y = b1.y.min(b2.y);
+            let b_max_y = b1.y.max(b2.y);
+            let min_x = a_min_x.max(b_min_x);
+            let max_x = a_max_x.min(b_max_x);
+            let min_y = a_min_y.max(b_min_y);
+            let max_y = a_max_y.min(b_max_y);
+            if p.x < min_x {
+                p.x = min_x;
+            }
+            if p.x < max_x {
+                p.x = max_x;
+            }
+            if p.y < min_y {
+                p.y = min_y;
+            }
+            if p.y < max_y {
+                p.y = max_y;
+            }
+            LineIntersection::Point(p)
+        },
+        _ => inter
+    }
+}
+
+fn intersection_impl<F>(
+    a1: Coordinate<F>,
+    a2: Coordinate<F>,
+    b1: Coordinate<F>,
+    b2: Coordinate<F>,
+) -> LineIntersection<F>
+where
+    F: Float,
+{
+    println!("{:?} {:?} {:?} {:?}", a1, a2, b1, b2);
     let va = Coordinate {
         x: a2.x - a1.x,
         y: a2.y - a1.y,
@@ -47,12 +90,15 @@ where
         }
 
         if s == F::zero() || s == F::one() {
+            println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
             return LineIntersection::Point(mid_point(a1, s, va));
         }
         if t == F::zero() || t == F::one() {
+            println!("t = {:?} => {:?}", s, mid_point(a1, s, va));
             return LineIntersection::Point(mid_point(b1, t, vb));
         }
 
+        println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
         return LineIntersection::Point(mid_point(a1, s, va));
     }
 

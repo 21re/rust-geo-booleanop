@@ -8,6 +8,8 @@ pub fn divide_segment<F>(se: &Rc<SweepEvent<F>>, inter: Coordinate<F>, queue: &m
 where
     F: Float,
 {
+    debug_assert!(se.is_left());
+    println!("dividing segment {:?} {:?} {:?}", se.point, inter, se.get_other_event().unwrap().point);
     let other_event = match se.get_other_event() {
         Some(other_event) => other_event,
         None => return,
@@ -24,7 +26,9 @@ where
     );
 
     if l < other_event {
-        se.set_left(true);
+        println!("l < other_event {:?} {:?} {:?}", l.point, other_event.point, l < other_event);
+        se.get_other_event().unwrap().set_left(true);
+        //se.set_left(true);
         l.set_left(false);
     }
 
