@@ -1,4 +1,4 @@
-use geo_types::{Coordinate, MultiPolygon, Polygon, LineString, Rect};
+use geo_types::{Coordinate, LineString, MultiPolygon, Polygon, Rect};
 
 pub mod compare_segments;
 pub mod compute_fields;

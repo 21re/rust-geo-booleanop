@@ -1,11 +1,11 @@
 use super::compare_segments::compare_segments;
 use super::compute_fields::compute_fields;
+use super::helper::Float;
 use super::possible_intersection::possible_intersection;
 use super::sweep_event::{SweepEvent, JsonDebug};
 use super::Operation;
 use crate::splay::SplaySet;
 use geo_types::Rect;
-use super::helper::Float;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 

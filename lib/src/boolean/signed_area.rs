@@ -1,13 +1,16 @@
-use geo_types::Coordinate;
 use super::helper::Float;
-use robust::{Coord, orient2d};
+use geo_types::Coordinate;
+use robust::{orient2d, Coord};
 
 #[inline]
-pub fn coordinate_to_robust<F>(p : Coordinate<F>) -> Coord
+pub fn coordinate_to_robust<F>(p: Coordinate<F>) -> Coord
 where
     F: Float,
 {
-    Coord{x: p.x.to_f64().unwrap(), y: p.y.to_f64().unwrap()}
+    Coord {
+        x: p.x.to_f64().unwrap(),
+        y: p.y.to_f64().unwrap(),
+    }
 }
 
 #[inline]

@@ -1,6 +1,6 @@
-use super::sweep_event::{EdgeType, SweepEvent, ResultTransition};
-use super::Operation;
 use super::helper::Float;
+use super::sweep_event::{EdgeType, ResultTransition, SweepEvent};
+use super::Operation;
 use std::rc::Rc;
 
 pub fn compute_fields<F>(event: &Rc<SweepEvent<F>>, maybe_prev: Option<&Rc<SweepEvent<F>>>, operation: Operation)
@@ -66,15 +66,21 @@ where
     let that_in = !event.is_other_in_out();
     let is_in = match operation {
         Operation::Intersection => this_in && that_in,
-        Operation::Union        => this_in || that_in,
-        Operation::Xor          => this_in ^  that_in,
-        Operation::Difference   =>
-            // Difference is assymmetric, so subject vs clipping matters.
+        Operation::Union => this_in || that_in,
+        Operation::Xor => this_in ^ that_in,
+        Operation::Difference =>
+        // Difference is assymmetric, so subject vs clipping matters.
+        {
             if event.is_subject {
                 this_in && !that_in
             } else {
                 that_in && !this_in
             }
+        }
     };
-    if is_in { ResultTransition::OutIn } else { ResultTransition::InOut }
+    if is_in {
+        ResultTransition::OutIn
+    } else {
+        ResultTransition::InOut
+    }
 }

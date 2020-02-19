@@ -3,13 +3,12 @@ use geo_booleanop::boolean::BooleanOp;
 use super::compact_geojson::write_compact_geojson;
 
 use geo::{Coordinate, MultiPolygon, Polygon};
-use geojson::{GeoJson, Feature, Value, Geometry};
+use geojson::{Feature, GeoJson, Geometry, Value};
 use pretty_assertions::assert_eq;
 
-use std::fs::File;
 use std::convert::TryInto;
+use std::fs::File;
 use std::io::prelude::*;
-
 
 pub fn load_fixture_from_path(path: &str) -> GeoJson {
     let mut file = File::open(path).expect("Cannot open/find fixture");
@@ -95,7 +94,12 @@ struct ExpectedResult {
 }
 
 fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
-    let geometry_value = feature.geometry.as_ref().expect("Feature must have 'geometry' property").value.clone();
+    let geometry_value = feature
+        .geometry
+        .as_ref()
+        .expect("Feature must have 'geometry' property")
+        .value
+        .clone();
     let multi_polygon: MultiPolygon<f64> = match geometry_value {
         Value::Polygon(_) => MultiPolygon(vec![geometry_value.try_into().unwrap()]),
         Value::MultiPolygon(_) => geometry_value.try_into().unwrap(),
@@ -107,7 +111,8 @@ fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
 fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     let multi_polygon = extract_multi_polygon(feature);
 
-    let op = feature.properties
+    let op = feature
+        .properties
         .as_ref()
         .expect("Feature needs 'properties'.")
         .get("operation")
@@ -124,9 +129,9 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
         _ => panic!(format!("Invalid operation: {}", op)),
     };
 
-    ExpectedResult{
+    ExpectedResult {
         result: multi_polygon,
-        op: op,
+        op,
     }
 }
 
@@ -144,8 +149,8 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) {
 
     let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
 
-    for i in 2 .. features.len() {
-        let expected_result = extract_expected_result(&features[i]);
+    for feature in features.iter().skip(2) {
+        let expected_result = extract_expected_result(&feature);
         println!("Testing operation: {:?}", expected_result.op);
 
         let result = match expected_result.op {
@@ -158,13 +163,13 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) {
 
         if !regenerate {
             assert_eq!(
-                result,
-                expected_result.result,
-                "Deviation found in test case {} with operation {:?}", filename, expected_result.op,
+                result, expected_result.result,
+                "Deviation found in test case {} with operation {:?}",
+                filename, expected_result.op,
             );
         }
 
-        let mut output_feature = features[i].clone();
+        let mut output_feature = feature.clone();
         output_feature.geometry = Some(Geometry::new(Value::from(&result)));
         output_features.push(output_feature);
     }
