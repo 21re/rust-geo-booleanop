@@ -9,11 +9,18 @@ where
     F: Float,
 {
     debug_assert!(se.is_left());
-    println!("dividing segment {:?} {:?} {:?}", se.point, inter, se.get_other_event().unwrap().point);
+    //println!("dividing segment {:?} {:?} {:?}", se.point, inter, se.get_other_event().unwrap().point);
+
     let other_event = match se.get_other_event() {
         Some(other_event) => other_event,
         None => return,
     };
+
+    let mut inter = inter;
+    if inter.x == se.point.x && inter.y < se.point.y {
+        //println!("ZZZ incrementing x {} => {}", inter.x, inter.x.nextafter(true));
+        inter.x = inter.x.nextafter(true);
+    }
 
     let r = SweepEvent::new_rc(se.contour_id, inter, false, Rc::downgrade(&se), se.is_subject, true);
     let l = SweepEvent::new_rc(
@@ -25,10 +32,10 @@ where
         true,
     );
 
-    if l < other_event {
-        println!("l < other_event {:?} {:?} {:?}", l.point, other_event.point, l < other_event);
+    debug_assert!(r.is_after(se));
+    if l.is_after(&other_event) {
+        //println!("XXX l > other_event {:?} < {:?}", l.point, other_event.point);
         se.get_other_event().unwrap().set_left(true);
-        //se.set_left(true);
         l.set_left(false);
     }
 

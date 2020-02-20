@@ -59,7 +59,7 @@ where
         event.set_other_pos(pos as i32)
     }
     for event in &result_events {
-        if !event.is_left() {
+        if event.is_left() {
             if let Some(other) = event.get_other_event() {
                 let (a, b) = (event.get_other_pos(), other.get_other_pos());
                 event.set_other_pos(b);
@@ -234,7 +234,6 @@ fn mark_as_processed<F>(processed: &mut HashSet<i32>, result_events: &[Rc<SweepE
 where
     F: Float,
 {
-    println!("{} {}", pos, result_events.len());
     processed.insert(pos);
     result_events[pos as usize].set_output_contour_id(contour_id);
 }
@@ -282,7 +281,7 @@ where
 
             pos = next_pos(pos, &result_events, &processed, orig_pos); // pos advancement (B)
 
-            if pos == orig_pos || pos == -1 {
+            if pos == orig_pos {
                 break;
             }
         }

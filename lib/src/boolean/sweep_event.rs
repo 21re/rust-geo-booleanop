@@ -178,6 +178,16 @@ where
             None => false,
         }
     }
+
+    /// Helper function to avoid confusion by inverted ordering
+    pub fn is_before(&self, other: &SweepEvent<F>) -> bool {
+        self > other
+    }
+
+    /// Helper function to avoid confusion by inverted ordering
+    pub fn is_after(&self, other: &SweepEvent<F>) -> bool {
+        self < other
+    }
 }
 
 impl<F> PartialEq for SweepEvent<F>
