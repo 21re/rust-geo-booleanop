@@ -13,6 +13,7 @@ where
     for (pos, event) in sorted_events.iter().enumerate() {
         event.set_other_pos(pos as i32)
     }
+    /*
     for (i, r) in sorted_events.iter().enumerate() {
         println!("pos {:3} linked to {:3}    {}    {:?} => {:?}    {:?}",
             i,
@@ -24,7 +25,6 @@ where
         );
     }
 
-    ///*
     for (pos, event) in sorted_events.iter().enumerate() {
         event.set_other_pos(-999);
     }
@@ -33,7 +33,7 @@ where
             //assert_eq!(event.get_other_event().unwrap().get_other_pos(), -999);
         }
     }
-    //*/
+    */
 
     for event in sorted_events {
         if (event.is_left() && event.is_in_result())
@@ -68,6 +68,7 @@ where
         }
     }
 
+    /*
     for r in &result_events {
         println!("{:?}", r);
         debug_assert!(r.get_other_event().is_some());
@@ -82,6 +83,7 @@ where
             r.get_other_event().map(|o| o.point).unwrap(),
         );
     }
+    */
 
     result_events
 }
@@ -243,7 +245,7 @@ where
     F: Float,
 {
     let result_events = order_events(sorted_events);
-    debug_print_results(&result_events);
+    // debug_print_results(&result_events);
 
     let mut contours: Vec<Contour<F>> = Vec::new();
     let mut processed: HashSet<i32> = HashSet::new();

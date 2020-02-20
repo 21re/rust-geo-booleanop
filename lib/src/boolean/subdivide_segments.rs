@@ -23,12 +23,12 @@ where
     let rightbound = sbbox.max.x.min(cbbox.max.x);
 
     while let Some(event) = event_queue.pop() {
-        println!("");
-        println!("size event queue begin iter: {}", event_queue.len());
-        println!("{{\"processEvent\": {}}}", event.to_json_debug());
+        //println!("");
+        //println!("size event queue begin iter: {}", event_queue.len());
+        //println!("{{\"processEvent\": {}}}", event.to_json_debug());
         sorted_events.push(event.clone());
 
-        println!("{} {}", event.point.x, rightbound);
+        //println!("{} {}", event.point.x, rightbound);
         if operation == Operation::Intersection && event.point.x > rightbound
             || operation == Operation::Difference && event.point.x > sbbox.max.x
         {
@@ -44,19 +44,19 @@ where
             compute_fields(&event, maybe_prev, operation);
 
             if let Some(next) = maybe_next {
-                println!("{{\"seNextEvent\": {}}}", next.to_json_debug());
+                //println!("{{\"seNextEvent\": {}}}", next.to_json_debug());
                 if possible_intersection(&event, &next, event_queue) == 2 {
-                    println!("Intersection with next");
+                    //println!("Intersection with next");
                     compute_fields(&event, maybe_prev, operation);
                     compute_fields(&event, Some(next), operation);
                 }
             }
 
             if let Some(prev) = maybe_prev {
-                println!("{{\"sePrevEvent\": {}}}", prev.to_json_debug());
+                //println!("{{\"sePrevEvent\": {}}}", prev.to_json_debug());
                 if possible_intersection(&prev, &event, event_queue) == 2 {
                     let maybe_prev_prev = sweep_line.prev(&prev);
-                    println!("Intersection with prev");
+                    //println!("Intersection with prev");
                     compute_fields(&prev, maybe_prev_prev, operation);
                     compute_fields(&event, Some(prev), operation);
                 }
@@ -67,18 +67,18 @@ where
                 let maybe_next = sweep_line.next(&other_event).cloned();
 
                 if let (Some(prev), Some(next)) = (maybe_prev, maybe_next) {
-                    println!("Possible post intersection");
-                    println!("{{\"sePostNextEvent\": {}}}", next.to_json_debug());
-                    println!("{{\"sePostPrevEvent\": {}}}", prev.to_json_debug());
+                    //println!("Possible post intersection");
+                    //println!("{{\"sePostNextEvent\": {}}}", next.to_json_debug());
+                    //println!("{{\"sePostPrevEvent\": {}}}", prev.to_json_debug());
                     possible_intersection(&prev, &next, event_queue);
                 }
 
-                println!("{{\"removing\": {}}}", other_event.to_json_debug());
+                //println!("{{\"removing\": {}}}", other_event.to_json_debug());
                 sweep_line.remove(&other_event);
             }
         }
 
-        println!("size event queue end iter: {}", event_queue.len());
+        // println!("size event queue end iter: {}", event_queue.len());
 
         //let s: Vec<String> = &sweep_line.into_iter().map(|e| e.to_json_debug()).collect();
         //let s = s.join(", ");

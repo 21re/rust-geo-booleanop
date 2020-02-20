@@ -110,7 +110,7 @@ fn intersection_impl<F>(
 where
     F: Float,
 {
-    println!("{:?} {:?} {:?} {:?}", a1, a2, b1, b2);
+    //println!("{:?} {:?} {:?} {:?}", a1, a2, b1, b2);
     let va = Coordinate {
         x: a2.x - a1.x,
         y: a2.y - a1.y,
@@ -138,15 +138,15 @@ where
         }
 
         if s == F::zero() || s == F::one() {
-            println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
+            //println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
             return LineIntersection::Point(mid_point(a1, s, va));
         }
         if t == F::zero() || t == F::one() {
-            println!("t = {:?} => {:?}", s, mid_point(a1, s, va));
+            //println!("t = {:?} => {:?}", s, mid_point(a1, s, va));
             return LineIntersection::Point(mid_point(b1, t, vb));
         }
 
-        println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
+        //println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
         return LineIntersection::Point(mid_point(a1, s, va));
     }
 

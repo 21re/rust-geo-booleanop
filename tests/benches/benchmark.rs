@@ -1,20 +1,25 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion, BatchSize};
+use criterion::{criterion_group, criterion_main, Criterion};
 
 use geo_booleanop::boolean::BooleanOp;
 use geo_booleanop_tests::helper::load_test_case;
 
+fn benchmarks(c: &mut Criterion) {
+    let (_, p1, p2) = load_test_case("fixtures/generic_test_cases/issue96.geojson");
+    c.bench_function("issue96 - intersection", |b| b.iter(
+        || p1.intersection(&p2),
+    ));
+    c.bench_function("issue96 - union", |b| b.iter(
+        || p1.union(&p2),
+    ));
 
-fn basics(c: &mut Criterion) {
-    c.bench_function("multiply", |b| b.iter_batched(
-        || load_test_case("fixtures/generic_test_cases/issue96.geojson"),
-        |(_, p1, p2)| p1.union(&p2),
-        BatchSize::LargeInput,
+    let (_, p1, p2) = load_test_case("fixtures/generic_test_cases/checkerboard1.geojson");
+    c.bench_function("checkerboard1 - union", |b| b.iter(
+        || p1.union(&p2),
     ));
 }
 
-
 criterion_group!(
     benches,
-    basics,
+    benchmarks,
 );
 criterion_main!(benches);
