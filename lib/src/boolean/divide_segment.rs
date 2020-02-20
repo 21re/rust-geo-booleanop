@@ -69,7 +69,7 @@ mod test {
     }
 
     #[test]
-    fn devide_segments() {
+    fn divide_segments() {
         let (se1, other1) = make_simple(0.0, 0.0, 5.0, 5.0, true);
         let (se2, other2) = make_simple(0.0, 5.0, 5.0, 0.0, false);
         let mut queue = BinaryHeap::new();

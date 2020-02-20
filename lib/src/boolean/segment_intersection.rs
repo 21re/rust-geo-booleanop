@@ -1,5 +1,5 @@
 use super::helper::Float;
-use geo_types::Coordinate;
+use geo_types::{Coordinate, Rect};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LineIntersection<F>
@@ -11,6 +11,57 @@ where
     Overlap(Coordinate<F>, Coordinate<F>),
 }
 
+#[inline]
+fn get_intersection_bounding_box<F>(
+    a1: Coordinate<F>,
+    a2: Coordinate<F>,
+    b1: Coordinate<F>,
+    b2: Coordinate<F>,
+) -> Option<Rect<F>>
+where
+    F: Float,
+{
+    let a_min_x = a1.x.min(a2.x);
+    let a_max_x = a1.x.max(a2.x);
+    let a_min_y = a1.y.min(a2.y);
+    let a_max_y = a1.y.max(a2.y);
+    let b_min_x = b1.x.min(b2.x);
+    let b_max_x = b1.x.max(b2.x);
+    let b_min_y = b1.y.min(b2.y);
+    let b_max_y = b1.y.max(b2.y);
+    let min_x = a_min_x.max(b_min_x);
+    let max_x = a_max_x.min(b_max_x);
+    let min_y = a_min_y.max(b_min_y);
+    let max_y = a_max_y.min(b_max_y);
+    Some(Rect{
+        min: Coordinate{x: min_x, y: min_y},
+        max: Coordinate{x: max_x, y: max_y},
+    })
+}
+
+#[inline]
+fn constrain_to_bounding_box<F>(p: Coordinate<F>, bb: Rect<F>) -> Coordinate<F>
+where
+    F: Float,
+{
+    Coordinate{
+        x: if p.x < bb.min.x {
+            bb.min.x
+        } else if p.x > bb.max.x {
+            bb.max.x
+        } else {
+            p.x
+        },
+        y: if p.y < bb.min.y {
+            bb.min.y
+        } else if p.y > bb.max.y {
+            bb.max.y
+        } else {
+            p.y
+        },
+    }
+}
+
 pub fn intersection<F>(
     a1: Coordinate<F>,
     a2: Coordinate<F>,
@@ -20,36 +71,17 @@ pub fn intersection<F>(
 where
     F: Float,
 {
-    let inter = intersection_impl(a1, a2, b1, b2);
-    match inter {
-        LineIntersection::Point(mut p) => {
-            let a_min_x = a1.x.min(a2.x);
-            let a_max_x = a1.x.max(a2.x);
-            let a_min_y = a1.y.min(a2.y);
-            let a_max_y = a1.y.max(a2.y);
-            let b_min_x = b1.x.min(b2.x);
-            let b_max_x = b1.x.max(b2.x);
-            let b_min_y = b1.y.min(b2.y);
-            let b_max_y = b1.y.max(b2.y);
-            let min_x = a_min_x.max(b_min_x);
-            let max_x = a_max_x.min(b_max_x);
-            let min_y = a_min_y.max(b_min_y);
-            let max_y = a_max_y.min(b_max_y);
-            if p.x < min_x {
-                p.x = min_x;
-            }
-            if p.x < max_x {
-                p.x = max_x;
-            }
-            if p.y < min_y {
-                p.y = min_y;
-            }
-            if p.y < max_y {
-                p.y = max_y;
-            }
-            LineIntersection::Point(p)
-        },
-        _ => inter
+    let bb = get_intersection_bounding_box(a1, a2, b1, b2);
+    if let Some(bb) = bb {
+        let inter = intersection_impl(a1, a2, b1, b2);
+        match inter {
+            LineIntersection::Point(p) => {
+                LineIntersection::Point(constrain_to_bounding_box(p, bb))
+            },
+            _ => inter
+        }
+    } else {
+        LineIntersection::None
     }
 }
 
@@ -161,6 +193,34 @@ where
 mod test {
     use super::super::helper::test::xy;
     use super::*;
+
+    #[test]
+    fn test_get_intersection_bounding_box() {
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 0), xy(2, 2), xy(1, 1), xy(3, 3)),
+            Some(Rect{min: xy(1, 1), max: xy(2, 2)}),
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(-1, 0), xy(1, 0), xy(0, -1), xy(0, 1)),
+            Some(Rect{min: xy(0, 0), max: xy(0, 0)}),
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 0), xy(1, 1), xy(2, 0), xy(3, 1)),
+            None,
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(3, 0), xy(2, 1), xy(1, 0), xy(0, 1)),
+            None,
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 0), xy(1, 1), xy(0, 2), xy(1, 3)),
+            None,
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 3), xy(1, 2), xy(0, 1), xy(1, 0)),
+            None,
+        );
+    }
 
     #[test]
     fn test_intersection() {
