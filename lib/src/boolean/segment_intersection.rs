@@ -21,22 +21,38 @@ fn get_intersection_bounding_box<F>(
 where
     F: Float,
 {
-    let a_min_x = a1.x.min(a2.x);
-    let a_max_x = a1.x.max(a2.x);
-    let a_min_y = a1.y.min(a2.y);
-    let a_max_y = a1.y.max(a2.y);
-    let b_min_x = b1.x.min(b2.x);
-    let b_max_x = b1.x.max(b2.x);
-    let b_min_y = b1.y.min(b2.y);
-    let b_max_y = b1.y.max(b2.y);
-    let min_x = a_min_x.max(b_min_x);
-    let max_x = a_max_x.min(b_max_x);
-    let min_y = a_min_y.max(b_min_y);
-    let max_y = a_max_y.min(b_max_y);
-    Some(Rect{
-        min: Coordinate{x: min_x, y: min_y},
-        max: Coordinate{x: max_x, y: max_y},
-    })
+    let (a_start_x, a_end_x) = if a1.x < a2.x {
+        (a1.x, a2.x)
+    } else {
+        (a2.x, a1.x)
+    };
+    let (a_start_y, a_end_y) = if a1.y < a2.y {
+        (a1.y, a2.y)
+    } else {
+        (a2.y, a1.y)
+    };
+    let (b_start_x, b_end_x) = if b1.x < b2.x {
+        (b1.x, b2.x)
+    } else {
+        (b2.x, b1.x)
+    };
+    let (b_start_y, b_end_y) = if b1.y < b2.y {
+        (b1.y, b2.y)
+    } else {
+        (b2.y, b1.y)
+    };
+    let interval_start_x = a_start_x.max(b_start_x);
+    let interval_start_y = a_start_y.max(b_start_y);
+    let interval_end_x = a_end_x.min(b_end_x);
+    let interval_end_y = a_end_y.min(b_end_y);
+    if interval_start_x <= interval_end_x && interval_start_y <= interval_end_y {
+        Some(Rect{
+            min: Coordinate{x: interval_start_x, y: interval_start_y},
+            max: Coordinate{x: interval_end_x, y: interval_end_y},
+        })
+    } else {
+        None
+    }
 }
 
 #[inline]
