@@ -135,9 +135,7 @@ fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     }
 }
 
-pub fn run_generic_test_case(filename: &str, regenerate: bool) {
-    println!("\n *** Running test case: {}", filename);
-
+pub fn load_test_case(filename: &str) -> (Vec<Feature>, MultiPolygon<f64>, MultiPolygon<f64>) {
     let original_geojson = load_fixture_from_path(filename);
     let features = match original_geojson {
         GeoJson::FeatureCollection(collection) => collection.features,
@@ -146,6 +144,13 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) {
     assert!(features.len() >= 2);
     let p1 = extract_multi_polygon(&features[0]);
     let p2 = extract_multi_polygon(&features[1]);
+    (features, p1, p2)
+}
+
+pub fn run_generic_test_case(filename: &str, regenerate: bool) {
+    println!("\n *** Running test case: {}", filename);
+
+    let (features, p1, p2) = load_test_case(filename);
 
     let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
 
