@@ -239,6 +239,26 @@ mod test {
     }
 
     #[test]
+    fn test_constrain_to_bounding_box() {
+        assert_eq!(
+            constrain_to_bounding_box(xy(100, 0), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            xy(1, 0),
+        );
+        assert_eq!(
+            constrain_to_bounding_box(xy(-100, 0), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            xy(-1, 0),
+        );
+        assert_eq!(
+            constrain_to_bounding_box(xy(0, 100), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            xy(0, 1),
+        );
+        assert_eq!(
+            constrain_to_bounding_box(xy(0, -100), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            xy(0, -1),
+        );
+    }
+
+    #[test]
     fn test_intersection() {
         assert_eq!(
             intersection(xy(0, 0), xy(1, 1), xy(1, 0), xy(2, 2)),
