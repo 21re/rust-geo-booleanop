@@ -8,8 +8,8 @@ where
     F: Float,
 {
     Coord {
-        x: p.x.to_f64().unwrap(),
-        y: p.y.to_f64().unwrap(),
+        x: p.x.into(),
+        y: p.y.into(),
     }
 }
 

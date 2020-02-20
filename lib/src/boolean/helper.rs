@@ -1,8 +1,14 @@
-use float_extras::f64::nextafter;
 use num_traits::Float as NumTraitsFloat;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
+use libc::{c_double, c_float};
+use std::{f32, f64};
 
+#[link_name = "m"]
+extern "C" {
+    pub fn nextafter(x: c_double, y: c_double) -> c_double;
+    pub fn nextafterf(x: c_float, y: c_float) -> c_float;
+}
 
 pub trait Float: NumTraitsFloat + Debug + Display + NextAfter + Into<f64> {}
 
@@ -10,32 +16,25 @@ impl<T: NumTraitsFloat + Debug + Display + NextAfter + Into<f64>> Float for T {}
 
 pub trait NextAfter: NumTraitsFloat {
     fn nextafter(self, up: bool) -> Self;
-    fn nextafter_steps(self, steps: i32) -> Self;
-
-    fn ulp(self) -> Self {
-        if self > Self::zero() {
-            self.nextafter(true) - self
-        } else {
-            self.nextafter(false) - self
-        }
-    }
 }
 
 impl NextAfter for f64 {
     fn nextafter(self, up: bool) -> Self {
         if up {
-            nextafter(self, std::f64::INFINITY)
+            unsafe { nextafter(self, std::f64::INFINITY) }
         } else {
-            nextafter(self, std::f64::NEG_INFINITY)
+            unsafe { nextafter(self, std::f64::NEG_INFINITY) }
         }
     }
+}
 
-    fn nextafter_steps(self, steps: i32) -> Self {
-        let mut x = self;
-        for _ in 0..steps.abs() {
-            x = x.nextafter(steps > 0);
+impl NextAfter for f32 {
+    fn nextafter(self, up: bool) -> Self {
+        if up {
+            unsafe { nextafterf(self, std::f32::INFINITY) }
+        } else {
+            unsafe { nextafterf(self, std::f32::NEG_INFINITY) }
         }
-        x
     }
 }
 
