@@ -3,6 +3,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use geo_booleanop::boolean::BooleanOp;
 use geo_booleanop_tests::helper::load_test_case;
 
+#[rustfmt::skip]
 fn benchmarks(c: &mut Criterion) {
     let (_, p1, p2) = load_test_case("fixtures/generic_test_cases/issue96.geojson");
     c.bench_function("issue96 - intersection", |b| b.iter(
@@ -18,8 +19,5 @@ fn benchmarks(c: &mut Criterion) {
     ));
 }
 
-criterion_group!(
-    benches,
-    benchmarks,
-);
+criterion_group!(benches, benchmarks,);
 criterion_main!(benches);

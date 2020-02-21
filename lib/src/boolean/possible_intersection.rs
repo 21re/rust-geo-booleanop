@@ -23,16 +23,15 @@ where
     match inter {
         LineIntersection::Point(inter) => {
             //println!("{{\"intersection\": {{\"x\": {}, \"y\": {}}}}}", inter.x, inter.y);
-        },
+        }
         _ => {}
     }
     match inter {
         LineIntersection::None => 0, // No intersection
-        LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point =>
-        {
+        LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => {
             //println!(" => line segments intersect at an endpoint of both line segments");
             0
-        }, // the line segments intersect at an endpoint of both line segments
+        } // the line segments intersect at an endpoint of both line segments
         LineIntersection::Point(inter) => {
             //println!(" => point intersection");
             if se1.point != inter && other1.point != inter {

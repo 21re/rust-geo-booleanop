@@ -2,7 +2,7 @@ use super::compare_segments::compare_segments;
 use super::compute_fields::compute_fields;
 use super::helper::Float;
 use super::possible_intersection::possible_intersection;
-use super::sweep_event::{SweepEvent, JsonDebug};
+use super::sweep_event::{JsonDebug, SweepEvent};
 use super::Operation;
 use crate::splay::SplaySet;
 use geo_types::Rect;
@@ -83,7 +83,6 @@ where
         //let s: Vec<String> = &sweep_line.into_iter().map(|e| e.to_json_debug()).collect();
         //let s = s.join(", ");
         //println!("{{\"sweepLineState\": {{{}}}}}", s);
-
     }
 
     sorted_events

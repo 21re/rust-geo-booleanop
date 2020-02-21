@@ -249,13 +249,12 @@ where
     }
 }
 
-
 pub trait JsonDebug {
     fn to_json_debug(&self) -> String;
     fn to_json_debug_short(&self) -> String;
 }
 
-impl<F> JsonDebug for Rc::<SweepEvent<F>>
+impl<F> JsonDebug for Rc<SweepEvent<F>>
 where
     F: Float,
 {

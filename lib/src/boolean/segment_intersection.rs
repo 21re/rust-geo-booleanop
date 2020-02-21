@@ -21,34 +21,24 @@ fn get_intersection_bounding_box<F>(
 where
     F: Float,
 {
-    let (a_start_x, a_end_x) = if a1.x < a2.x {
-        (a1.x, a2.x)
-    } else {
-        (a2.x, a1.x)
-    };
-    let (a_start_y, a_end_y) = if a1.y < a2.y {
-        (a1.y, a2.y)
-    } else {
-        (a2.y, a1.y)
-    };
-    let (b_start_x, b_end_x) = if b1.x < b2.x {
-        (b1.x, b2.x)
-    } else {
-        (b2.x, b1.x)
-    };
-    let (b_start_y, b_end_y) = if b1.y < b2.y {
-        (b1.y, b2.y)
-    } else {
-        (b2.y, b1.y)
-    };
+    let (a_start_x, a_end_x) = if a1.x < a2.x { (a1.x, a2.x) } else { (a2.x, a1.x) };
+    let (a_start_y, a_end_y) = if a1.y < a2.y { (a1.y, a2.y) } else { (a2.y, a1.y) };
+    let (b_start_x, b_end_x) = if b1.x < b2.x { (b1.x, b2.x) } else { (b2.x, b1.x) };
+    let (b_start_y, b_end_y) = if b1.y < b2.y { (b1.y, b2.y) } else { (b2.y, b1.y) };
     let interval_start_x = a_start_x.max(b_start_x);
     let interval_start_y = a_start_y.max(b_start_y);
     let interval_end_x = a_end_x.min(b_end_x);
     let interval_end_y = a_end_y.min(b_end_y);
     if interval_start_x <= interval_end_x && interval_start_y <= interval_end_y {
-        Some(Rect{
-            min: Coordinate{x: interval_start_x, y: interval_start_y},
-            max: Coordinate{x: interval_end_x, y: interval_end_y},
+        Some(Rect {
+            min: Coordinate {
+                x: interval_start_x,
+                y: interval_start_y,
+            },
+            max: Coordinate {
+                x: interval_end_x,
+                y: interval_end_y,
+            },
         })
     } else {
         None
@@ -60,7 +50,7 @@ fn constrain_to_bounding_box<F>(p: Coordinate<F>, bb: Rect<F>) -> Coordinate<F>
 where
     F: Float,
 {
-    Coordinate{
+    Coordinate {
         x: if p.x < bb.min.x {
             bb.min.x
         } else if p.x > bb.max.x {
@@ -91,10 +81,8 @@ where
     if let Some(bb) = bb {
         let inter = intersection_impl(a1, a2, b1, b2);
         match inter {
-            LineIntersection::Point(p) => {
-                LineIntersection::Point(constrain_to_bounding_box(p, bb))
-            },
-            _ => inter
+            LineIntersection::Point(p) => LineIntersection::Point(constrain_to_bounding_box(p, bb)),
+            _ => inter,
         }
     } else {
         LineIntersection::None
@@ -218,11 +206,17 @@ mod test {
     fn test_get_intersection_bounding_box() {
         assert_eq!(
             get_intersection_bounding_box(xy(0, 0), xy(2, 2), xy(1, 1), xy(3, 3)),
-            Some(Rect{min: xy(1, 1), max: xy(2, 2)}),
+            Some(Rect {
+                min: xy(1, 1),
+                max: xy(2, 2)
+            }),
         );
         assert_eq!(
             get_intersection_bounding_box(xy(-1, 0), xy(1, 0), xy(0, -1), xy(0, 1)),
-            Some(Rect{min: xy(0, 0), max: xy(0, 0)}),
+            Some(Rect {
+                min: xy(0, 0),
+                max: xy(0, 0)
+            }),
         );
         assert_eq!(
             get_intersection_bounding_box(xy(0, 0), xy(1, 1), xy(2, 0), xy(3, 1)),

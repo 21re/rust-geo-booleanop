@@ -1,7 +1,7 @@
+use libc::{c_double, c_float};
 use num_traits::Float as NumTraitsFloat;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
-use libc::{c_double, c_float};
 use std::{f32, f64};
 
 #[link_name = "m"]
