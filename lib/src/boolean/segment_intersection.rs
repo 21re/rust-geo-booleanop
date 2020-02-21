@@ -210,6 +210,10 @@ mod test {
     use super::super::helper::test::xy;
     use super::*;
 
+    fn rect(min: Coordinate<f64>, max: Coordinate<f64>) -> Rect<f64> {
+        Rect { min, max }
+    }
+
     #[test]
     fn test_get_intersection_bounding_box() {
         assert_eq!(
@@ -241,19 +245,19 @@ mod test {
     #[test]
     fn test_constrain_to_bounding_box() {
         assert_eq!(
-            constrain_to_bounding_box(xy(100, 0), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            constrain_to_bounding_box(xy(100, 0), rect(xy(-1, -1), xy(1, 1))),
             xy(1, 0),
         );
         assert_eq!(
-            constrain_to_bounding_box(xy(-100, 0), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            constrain_to_bounding_box(xy(-100, 0), rect(xy(-1, -1), xy(1, 1))),
             xy(-1, 0),
         );
         assert_eq!(
-            constrain_to_bounding_box(xy(0, 100), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            constrain_to_bounding_box(xy(0, 100), rect(xy(-1, -1), xy(1, 1))),
             xy(0, 1),
         );
         assert_eq!(
-            constrain_to_bounding_box(xy(0, -100), Rect{min: xy(-1, -1), max: xy(1, 1)}),
+            constrain_to_bounding_box(xy(0, -100), rect(xy(-1, -1), xy(1, 1))),
             xy(0, -1),
         );
     }
