@@ -47,7 +47,7 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "This test case is also a bit dubious, because the input polygons aren't closed. For intersection that seems to be okay, ...",
+        "comment": "This test case is a bit dubious, because the input polygons aren't closed, but it seems to work nevertheless.",
         "operation": "intersection"
       },
       "type": "Feature"
@@ -77,7 +77,7 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "... but for union it is broken ...",
+        "comment": "This test case is a bit dubious, because the input polygons aren't closed, but it seems to work nevertheless.",
         "operation": "union"
       },
       "type": "Feature"
@@ -108,7 +108,7 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "... and for diff as well",
+        "comment": "This test case is a bit dubious, because the input polygons aren't closed, but it seems to work nevertheless.",
         "operation": "diff"
       },
       "type": "Feature"
