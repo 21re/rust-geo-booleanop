@@ -49,7 +49,7 @@ pub fn less_if(condition: bool) -> Ordering {
 
 #[cfg(test)]
 pub mod test {
-    use super::Float;
+    use super::{nextafter, nextafterf, Float};
     use geo_types::Coordinate;
 
     pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
@@ -65,10 +65,10 @@ pub mod test {
         where
             T: Float,
         {
-            x
+            x.nextafter(true)
         }
 
-        assert_eq!(dummy(0_f32), 0_f32);
-        assert_eq!(dummy(0_f64), 0_f64);
+        assert_eq!(dummy(0_f64), unsafe { nextafter(0_f64, std::f64::INFINITY) });
+        assert_eq!(dummy(0_f32), unsafe { nextafterf(0_f32, std::f32::INFINITY) });
     }
 }
