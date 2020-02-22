@@ -81,8 +81,11 @@ where
     if let Some(bb) = bb {
         let inter = intersection_impl(a1, a2, b1, b2);
         match inter {
+            LineIntersection::None => LineIntersection::None,
             LineIntersection::Point(p) => LineIntersection::Point(constrain_to_bounding_box(p, bb)),
-            _ => inter,
+            LineIntersection::Overlap(p1, p2) => {
+                LineIntersection::Overlap(constrain_to_bounding_box(p1, bb), constrain_to_bounding_box(p2, bb))
+            }
         }
     } else {
         LineIntersection::None
