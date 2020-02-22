@@ -18,22 +18,10 @@ where
         _ => return 0,
     };
 
-    let inter = intersection(se1.point, other1.point, se2.point, other2.point);
-    //println!("Intersection: {:?}", inter);
-    match inter {
-        LineIntersection::Point(inter) => {
-            //println!("{{\"intersection\": {{\"x\": {}, \"y\": {}}}}}", inter.x, inter.y);
-        }
-        _ => {}
-    }
-    match inter {
+    match intersection(se1.point, other1.point, se2.point, other2.point) {
         LineIntersection::None => 0, // No intersection
-        LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => {
-            //println!(" => line segments intersect at an endpoint of both line segments");
-            0
-        } // the line segments intersect at an endpoint of both line segments
+        LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => 0, // the line segments intersect at an endpoint of both line segments
         LineIntersection::Point(inter) => {
-            //println!(" => point intersection");
             if se1.point != inter && other1.point != inter {
                 divide_segment(&se1, inter, queue)
             }
@@ -44,7 +32,6 @@ where
         }
         LineIntersection::Overlap(_, _) if se1.is_subject == se2.is_subject => 0, // The line segments associated to se1 and se2 overlap
         LineIntersection::Overlap(_, _) => {
-            //println!(" => overlap");
             let mut events = Vec::new();
             let mut left_coincide = false;
             let mut right_coincide = false;

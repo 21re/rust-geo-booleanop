@@ -9,7 +9,6 @@ where
     F: Float,
 {
     debug_assert!(se_l.is_left());
-    //println!("dividing segment {:?} {:?} {:?}", se.point, inter, se.get_other_event().unwrap().point);
 
     let se_r = match se_l.get_other_event() {
         Some(se) => se,
@@ -44,7 +43,6 @@ where
     // Prevent from corner case 1
     let mut inter = inter;
     if inter.x == se_l.point.x && inter.y < se_l.point.y {
-        //println!("ZZZ incrementing x {} => {}", inter.x, inter.x.nextafter(true));
         inter.x = inter.x.nextafter(true);
     }
 
@@ -69,7 +67,6 @@ where
     debug_assert!(se_l.is_before(&r));
     // Corner case 2 can be accounted for by swapping l / se_r
     if !l.is_before(&se_r) {
-        //println!("XXX l > other_event {:?} < {:?}", l.point, other_event.point);
         se_r.set_left(true);
         l.set_left(false);
     }

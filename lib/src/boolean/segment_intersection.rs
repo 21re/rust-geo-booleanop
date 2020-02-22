@@ -120,12 +120,10 @@ where
 
     if sqr_kross > F::zero() {
         let s = cross_product(e, vb) / kross;
-        // println!("s = {:?} => {:?}", s, mid_point(a1, s, va));
         if s < F::zero() || s > F::one() {
             return LineIntersection::None;
         }
         let t = cross_product(e, va) / kross;
-        // println!("t = {:?} => {:?}", t, mid_point(b1, t, va));
         if t < F::zero() || t > F::one() {
             return LineIntersection::None;
         }
