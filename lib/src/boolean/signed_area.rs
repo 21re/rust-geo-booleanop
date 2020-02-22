@@ -23,13 +23,7 @@ where
         coordinate_to_robust(p1),
         coordinate_to_robust(p2),
     );
-    if res > 0f64 {
-        F::one()
-    } else if res < 0f64 {
-        -F::one()
-    } else {
-        F::zero()
-    }
+    F::from(res).unwrap()
 }
 
 #[cfg(test)]

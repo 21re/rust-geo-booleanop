@@ -62,11 +62,11 @@ where
             if other1.point == other2.point {
                 right_coincide = true
             } else if other1 < other2 {
-                events.push((other2.clone(), se2.clone()));
-                events.push((other1.clone(), se1.clone()));
+                events.push((other2, se2.clone()));
+                events.push((other1, se1.clone()));
             } else {
-                events.push((other1.clone(), se1.clone()));
-                events.push((other2.clone(), se2.clone()));
+                events.push((other1, se1.clone()));
+                events.push((other2, se2.clone()));
             }
 
             if left_coincide {

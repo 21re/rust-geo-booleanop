@@ -49,6 +49,7 @@ pub fn less_if(condition: bool) -> Ordering {
 
 #[cfg(test)]
 pub mod test {
+    use super::Float;
     use geo_types::Coordinate;
 
     pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
@@ -56,5 +57,18 @@ pub mod test {
             x: x.into(),
             y: y.into(),
         }
+    }
+
+    #[test]
+    fn test_float_type_trait() {
+        fn dummy<T>(x: T) -> T
+        where
+            T: Float,
+        {
+            x
+        }
+
+        assert_eq!(dummy(0_f32), 0_f32);
+        assert_eq!(dummy(0_f64), 0_f64);
     }
 }
