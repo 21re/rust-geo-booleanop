@@ -15,8 +15,8 @@ where
     }
 
     if let (Some(other1), Some(other2)) = (le1.get_other_event(), le2.get_other_event()) {
-        if signed_area(le1.point, other1.point, le2.point) != F::zero()
-            || signed_area(le1.point, other1.point, other2.point) != F::zero()
+        if signed_area(le1.point, other1.point, le2.point) != 0.
+            || signed_area(le1.point, other1.point, other2.point) != 0.
         {
             if le1.point == le2.point {
                 return less_if(le1.is_below(other2.point));

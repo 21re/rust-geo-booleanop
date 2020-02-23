@@ -14,16 +14,15 @@ where
 }
 
 #[inline]
-pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> F
+pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> f64
 where
     F: Float,
 {
-    let res = orient2d(
+    orient2d(
         coordinate_to_robust(p0),
         coordinate_to_robust(p1),
         coordinate_to_robust(p2),
-    );
-    F::from(res).unwrap()
+    )
 }
 
 #[cfg(test)]
