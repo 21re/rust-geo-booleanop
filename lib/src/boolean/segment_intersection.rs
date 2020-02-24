@@ -1,5 +1,5 @@
 use super::helper::Float;
-use geo_types::Coordinate;
+use geo_types::{Coordinate, Rect};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LineIntersection<F>
@@ -11,6 +11,63 @@ where
     Overlap(Coordinate<F>, Coordinate<F>),
 }
 
+#[inline]
+fn get_intersection_bounding_box<F>(
+    a1: Coordinate<F>,
+    a2: Coordinate<F>,
+    b1: Coordinate<F>,
+    b2: Coordinate<F>,
+) -> Option<Rect<F>>
+where
+    F: Float,
+{
+    let (a_start_x, a_end_x) = if a1.x < a2.x { (a1.x, a2.x) } else { (a2.x, a1.x) };
+    let (a_start_y, a_end_y) = if a1.y < a2.y { (a1.y, a2.y) } else { (a2.y, a1.y) };
+    let (b_start_x, b_end_x) = if b1.x < b2.x { (b1.x, b2.x) } else { (b2.x, b1.x) };
+    let (b_start_y, b_end_y) = if b1.y < b2.y { (b1.y, b2.y) } else { (b2.y, b1.y) };
+    let interval_start_x = a_start_x.max(b_start_x);
+    let interval_start_y = a_start_y.max(b_start_y);
+    let interval_end_x = a_end_x.min(b_end_x);
+    let interval_end_y = a_end_y.min(b_end_y);
+    if interval_start_x <= interval_end_x && interval_start_y <= interval_end_y {
+        Some(Rect {
+            min: Coordinate {
+                x: interval_start_x,
+                y: interval_start_y,
+            },
+            max: Coordinate {
+                x: interval_end_x,
+                y: interval_end_y,
+            },
+        })
+    } else {
+        None
+    }
+}
+
+#[inline]
+fn constrain_to_bounding_box<F>(p: Coordinate<F>, bb: Rect<F>) -> Coordinate<F>
+where
+    F: Float,
+{
+    Coordinate {
+        x: if p.x < bb.min.x {
+            bb.min.x
+        } else if p.x > bb.max.x {
+            bb.max.x
+        } else {
+            p.x
+        },
+        y: if p.y < bb.min.y {
+            bb.min.y
+        } else if p.y > bb.max.y {
+            bb.max.y
+        } else {
+            p.y
+        },
+    }
+}
+
 pub fn intersection<F>(
     a1: Coordinate<F>,
     a2: Coordinate<F>,
@@ -20,6 +77,31 @@ pub fn intersection<F>(
 where
     F: Float,
 {
+    let bb = get_intersection_bounding_box(a1, a2, b1, b2);
+    if let Some(bb) = bb {
+        let inter = intersection_impl(a1, a2, b1, b2);
+        match inter {
+            LineIntersection::None => LineIntersection::None,
+            LineIntersection::Point(p) => LineIntersection::Point(constrain_to_bounding_box(p, bb)),
+            LineIntersection::Overlap(p1, p2) => {
+                LineIntersection::Overlap(constrain_to_bounding_box(p1, bb), constrain_to_bounding_box(p2, bb))
+            }
+        }
+    } else {
+        LineIntersection::None
+    }
+}
+
+fn intersection_impl<F>(
+    a1: Coordinate<F>,
+    a2: Coordinate<F>,
+    b1: Coordinate<F>,
+    b2: Coordinate<F>,
+) -> LineIntersection<F>
+where
+    F: Float,
+{
+    // println!("{:?} {:?} {:?} {:?}", a1, a2, b1, b2);
     let va = Coordinate {
         x: a2.x - a1.x,
         y: a2.y - a1.y,
@@ -116,6 +198,64 @@ mod test {
     use super::super::helper::test::xy;
     use super::*;
 
+    fn rect(min: Coordinate<f64>, max: Coordinate<f64>) -> Rect<f64> {
+        Rect { min, max }
+    }
+
+    #[test]
+    fn test_get_intersection_bounding_box() {
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 0), xy(2, 2), xy(1, 1), xy(3, 3)),
+            Some(Rect {
+                min: xy(1, 1),
+                max: xy(2, 2)
+            }),
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(-1, 0), xy(1, 0), xy(0, -1), xy(0, 1)),
+            Some(Rect {
+                min: xy(0, 0),
+                max: xy(0, 0)
+            }),
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 0), xy(1, 1), xy(2, 0), xy(3, 1)),
+            None,
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(3, 0), xy(2, 1), xy(1, 0), xy(0, 1)),
+            None,
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 0), xy(1, 1), xy(0, 2), xy(1, 3)),
+            None,
+        );
+        assert_eq!(
+            get_intersection_bounding_box(xy(0, 3), xy(1, 2), xy(0, 1), xy(1, 0)),
+            None,
+        );
+    }
+
+    #[test]
+    fn test_constrain_to_bounding_box() {
+        assert_eq!(
+            constrain_to_bounding_box(xy(100, 0), rect(xy(-1, -1), xy(1, 1))),
+            xy(1, 0),
+        );
+        assert_eq!(
+            constrain_to_bounding_box(xy(-100, 0), rect(xy(-1, -1), xy(1, 1))),
+            xy(-1, 0),
+        );
+        assert_eq!(
+            constrain_to_bounding_box(xy(0, 100), rect(xy(-1, -1), xy(1, 1))),
+            xy(0, 1),
+        );
+        assert_eq!(
+            constrain_to_bounding_box(xy(0, -100), rect(xy(-1, -1), xy(1, 1))),
+            xy(0, -1),
+        );
+    }
+
     #[test]
     fn test_intersection() {
         assert_eq!(
@@ -199,6 +339,11 @@ mod test {
         assert_eq!(
             intersection(xy(0, 0.5), xy(1, 1.5), xy(0, 1), xy(1, 0)),
             LineIntersection::Point(xy(0.25, 0.75))
+        );
+
+        assert_eq!(
+            intersection(xy(0, 0), xy(1, 0), xy(1, -1), xy(2, 1)),
+            LineIntersection::None
         );
     }
 }

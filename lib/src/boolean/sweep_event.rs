@@ -159,9 +159,9 @@ where
     pub fn is_below(&self, p: Coordinate<F>) -> bool {
         if let Some(ref other_event) = self.get_other_event() {
             if self.is_left() {
-                signed_area(self.point, other_event.point, p) > F::zero()
+                signed_area(self.point, other_event.point, p) > 0.
             } else {
-                signed_area(other_event.point, self.point, p) > F::zero()
+                signed_area(other_event.point, self.point, p) > 0.
             }
         } else {
             false
@@ -177,6 +177,16 @@ where
             Some(ref other_event) => self.point.x == other_event.point.x,
             None => false,
         }
+    }
+
+    /// Helper function to avoid confusion by inverted ordering
+    pub fn is_before(&self, other: &SweepEvent<F>) -> bool {
+        self > other
+    }
+
+    /// Helper function to avoid confusion by inverted ordering
+    pub fn is_after(&self, other: &SweepEvent<F>) -> bool {
+        self < other
     }
 }
 
@@ -230,7 +240,7 @@ where
         }
 
         if let (Some(other1), Some(other2)) = (self.get_other_event(), other.get_other_event()) {
-            if signed_area(p1, other1.point, other2.point) != F::zero() {
+            if signed_area(p1, other1.point, other2.point) != 0. {
                 return less_if(!self.is_below(other2.point));
             }
         }

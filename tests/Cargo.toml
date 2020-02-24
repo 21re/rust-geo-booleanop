@@ -16,3 +16,10 @@ serde_json = { version = "1.0.44", features = ["arbitrary_precision"] }
 num-traits = "0.2"
 glob = "0.3"
 pretty_assertions = "0.6"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false

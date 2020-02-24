@@ -35,18 +35,19 @@
         "coordinates": [
           [
             [
-              [-19.3046867422006, -126.63400219275148],
               [-19.3046867422006, -107.63400219275148],
-              [10.695313257799395, -107.63400219275148],
+              [-19.304686742200598, -126.63400219275148],
               [10.695313257799395, -126.63400219275148],
-              [-19.3046867422006, -126.63400219275148]
+              [10.695313257799397, -126.63400219275148],
+              [10.695313257799395, -107.63400219275148],
+              [-19.3046867422006, -107.63400219275148]
             ]
           ]
         ],
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "This test case is also a bit dubious, because the input polygons aren't closed. For intersection that seems to be okay, ...",
+        "comment": "This test case is a bit dubious, because the input polygons aren't closed, but it seems to work nevertheless.",
         "operation": "intersection"
       },
       "type": "Feature"
@@ -58,9 +59,10 @@
             [
               [-96.66033269728321, -126.63400219275148],
               [-19.3046867422006, -126.63400219275148],
+              [-19.304686742200598, -126.63400219275148],
               [-19.304686742200587, -357.48241878255635],
               [10.695313257799413, -357.48241878255635],
-              [10.695313257799395, -126.63400219275148],
+              [10.695313257799397, -126.63400219275148],
               [13.370917302716792, -126.63400219275148],
               [13.370917302716792, -107.63400219275148],
               [10.695313257799395, -107.63400219275148],
@@ -75,7 +77,7 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "... but for union it is broken ...",
+        "comment": "This test case is a bit dubious, because the input polygons aren't closed, but it seems to work nevertheless.",
         "operation": "union"
       },
       "type": "Feature"
@@ -94,18 +96,19 @@
           ],
           [
             [
-              [-19.3046867422006, -126.63400219275148],
+              [-19.304686742200598, -126.63400219275148],
               [-19.304686742200587, -357.48241878255635],
               [10.695313257799413, -357.48241878255635],
+              [10.695313257799397, -126.63400219275148],
               [10.695313257799395, -126.63400219275148],
-              [-19.3046867422006, -126.63400219275148]
+              [-19.304686742200598, -126.63400219275148]
             ]
           ]
         ],
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "... and for diff as well",
+        "comment": "This test case is a bit dubious, because the input polygons aren't closed, but it seems to work nevertheless.",
         "operation": "diff"
       },
       "type": "Feature"

@@ -8,28 +8,21 @@ where
     F: Float,
 {
     Coord {
-        x: p.x.to_f64().unwrap(),
-        y: p.y.to_f64().unwrap(),
+        x: p.x.into(),
+        y: p.y.into(),
     }
 }
 
 #[inline]
-pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> F
+pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> f64
 where
     F: Float,
 {
-    let res = orient2d(
+    orient2d(
         coordinate_to_robust(p0),
         coordinate_to_robust(p1),
         coordinate_to_robust(p2),
-    );
-    if res > 0f64 {
-        F::one()
-    } else if res < 0f64 {
-        -F::one()
-    } else {
-        F::zero()
-    }
+    )
 }
 
 #[cfg(test)]
