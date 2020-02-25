@@ -47,6 +47,15 @@ pub fn less_if(condition: bool) -> Ordering {
     }
 }
 
+#[inline]
+pub fn less_if_inversed(condition: bool) -> Ordering {
+    if condition {
+        Ordering::Greater
+    } else {
+        Ordering::Less
+    }
+}
+
 #[cfg(test)]
 pub mod test {
     use super::{nextafter, nextafterf, Float};

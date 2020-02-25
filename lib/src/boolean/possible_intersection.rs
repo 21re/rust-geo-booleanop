@@ -23,10 +23,10 @@ where
         LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => 0, // the line segments intersect at an endpoint of both line segments
         LineIntersection::Point(inter) => {
             if se1.point != inter && other1.point != inter {
-                divide_segment(&se1, inter, queue)
+                divide_segment(&se1, inter, queue);
             }
             if se2.point != inter && other2.point != inter {
-                divide_segment(&se2, inter, queue)
+                divide_segment(&se2, inter, queue);
             }
             1
         }

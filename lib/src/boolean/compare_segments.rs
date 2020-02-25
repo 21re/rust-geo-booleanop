@@ -1,12 +1,13 @@
 use super::helper::Float;
 use super::signed_area::signed_area;
 use super::sweep_event::SweepEvent;
+use super::segment_intersection::{intersection, LineIntersection};
 use std::cmp::Ordering;
 use std::rc::Rc;
 
-use super::helper::less_if;
+use super::helper;
 
-pub fn compare_segments<F>(le1: &Rc<SweepEvent<F>>, le2: &Rc<SweepEvent<F>>) -> Ordering
+pub fn compare_segments_old<F>(le1: &Rc<SweepEvent<F>>, le2: &Rc<SweepEvent<F>>) -> Ordering
 where
     F: Float,
 {
@@ -19,18 +20,18 @@ where
             || signed_area(le1.point, other1.point, other2.point) != 0.
         {
             if le1.point == le2.point {
-                return less_if(le1.is_below(other2.point));
+                return helper::less_if(le1.is_below(other2.point));
             }
 
             if le1.point.x == le2.point.x {
-                return less_if(le1.point.y < le2.point.y);
+                return helper::less_if(le1.point.y < le2.point.y);
             }
 
             if le1 < le2 {
-                return less_if(le2.is_above(le1.point));
+                return helper::less_if(le2.is_above(le1.point));
             }
 
-            return less_if(le1.is_below(le2.point));
+            return helper::less_if(le1.is_below(le2.point));
         }
 
         if le1.is_subject == le2.is_subject {
@@ -38,15 +39,156 @@ where
                 if other1.point == other2.point {
                     return Ordering::Equal;
                 } else {
-                    return less_if(le1.contour_id < le2.contour_id);
+                    return helper::less_if(le1.contour_id < le2.contour_id);
                 }
             }
         } else {
-            return less_if(le1.is_subject);
+            return helper::less_if(le1.is_subject);
         }
     }
 
-    less_if(le1 > le2)
+    helper::less_if(le1 > le2)
+}
+
+
+pub fn compare_segments<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
+where
+    F: Float,
+{
+    debug_assert!(se1_l.is_left());
+    debug_assert!(se2_l.is_left());
+
+    if Rc::ptr_eq(&se1_l, &se2_l) {
+        return Ordering::Equal;
+    }
+
+    // The main logic of compare segments is to check the orientation of the later/older
+    // SweepEvent w.r.t. the segment of the earlier/newer one. The logic is easier to
+    // express by swapping them here according to their temporal order. In case we have
+    // to swap, the result function must be inverted accordingly.
+    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(&se2_l) {
+        (se1_l, se2_l, helper::less_if as fn(bool) -> Ordering)
+    } else {
+        (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)
+    };
+
+    if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
+        let sa_l = signed_area(se_old_l.point, se_old_r.point, se_new_l.point);
+        let sa_r = signed_area(se_old_l.point, se_old_r.point, se_new_r.point);
+        if sa_l != 0. || sa_r != 0. {
+            // Segments are not collinear
+
+            // Left endpoints exactly identical? Use the right endpoint to sort
+            if se_old_l.point == se_new_l.point {
+                return less_if(se_old_l.is_below(se_new_r.point));
+            }
+
+            // Left endpoints identical in x, but different in y? Sort by y
+            if se_old_l.point.x == se_new_l.point.x {
+                return less_if(se_old_l.point.y < se_new_l.point.y);
+            }
+
+            /*
+            // Add signum check?
+            if sa_a_b1.signum() == sa_a_b2.signum() {
+                less_if(sa_)
+            }
+            */
+
+            let inter = intersection(se_old_l.point, se_old_r.point, se_new_l.point, se_new_r.point);
+            println!("{:?} {:?} {:?}", se_new_l.point, se_new_r.point, inter);
+            debug_assert!(sa_l != 0. || inter != LineIntersection::None);
+            match inter {
+                LineIntersection::None => return less_if(sa_l > 0.),
+                LineIntersection::Point(p) => {
+                    if p == se_new_l.point || sa_l == 0. {
+                        println!("a");
+                        return less_if(sa_r > 0.)
+                    } else {
+                        println!("b");
+                        return less_if(sa_l > 0.)
+                    }
+                }
+                _ => panic!("woot")
+            }
+        }
+
+        if se_old_l.is_subject == se_new_l.is_subject {
+            if se_old_l.point == se_new_l.point {
+                if se_old_r.point == se_new_r.point {
+                    return Ordering::Equal;
+                } else {
+                    return less_if(se_old_l.contour_id < se_new_l.contour_id);
+                }
+            }
+        } else {
+            return less_if(se_old_l.is_subject);
+        }
+    }
+
+    less_if(se_old_l > se_new_l)
+}
+
+pub fn compare_segments_alt1<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
+where
+    F: Float,
+{
+    debug_assert!(se1_l.is_left());
+    debug_assert!(se2_l.is_left());
+
+    if Rc::ptr_eq(&se1_l, &se2_l) {
+        return Ordering::Equal;
+    }
+
+    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(&se2_l) {
+        (se1_l, se2_l, helper::less_if as fn(bool) -> Ordering)
+    } else {
+        (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)
+    };
+
+    if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
+        let sa_l = signed_area(se_old_l.point, se_old_r.point, se_new_l.point);
+        let sa_r = signed_area(se_old_l.point, se_old_r.point, se_new_r.point);
+        if sa_l != 0. || sa_r != 0. {
+            // Segments are not collinear
+
+            // Left endpoints exactly identical? Use the right endpoint to sort
+            if se_old_l.point == se_new_l.point {
+                return less_if(se_old_l.is_below(se_new_r.point));
+            }
+
+            // Left endpoints identical in x, but different in y? Sort by y
+            if se_old_l.point.x == se_new_l.point.x {
+                return less_if(se_old_l.point.y < se_new_l.point.y);
+            }
+            let (invert, se_old, se_new) = if se_old_l.is_before(&se_new_l) {
+                (-1_f64, se_old_l, se_new_l)
+            } else {
+                (1_f64, se_new_l, se_old_l)
+            };
+
+            let cmp_new_left_point = invert * signed_area(se_new.point, se_old.point, se_old.get_other_event().unwrap().point);
+            if cmp_new_left_point != 0. {
+              return less_if(cmp_new_left_point < 0.);
+            } else {
+              return less_if(invert * signed_area(se_new.get_other_event().unwrap().point, se_old.point, se_old.get_other_event().unwrap().point) < 0.);
+            }
+        }
+
+        if se_old_l.is_subject == se_new_l.is_subject {
+            if se_old_l.point == se_new_l.point {
+                if se_old_r.point == se_new_r.point {
+                    return Ordering::Equal;
+                } else {
+                    return less_if(se_old_l.contour_id < se_new_l.contour_id);
+                }
+            }
+        } else {
+            return less_if(se_old_l.is_subject);
+        }
+    }
+
+    less_if(se_old_l > se_new_l)
 }
 
 #[cfg(test)]
@@ -57,6 +199,18 @@ mod test {
     use geo_types::Coordinate;
     use std::cmp::Ordering;
     use std::rc::{Rc, Weak};
+
+    macro_rules! assert_ordering {
+        ($se1:expr, $se2:expr, $ordering:expr) => {
+            let inverse_ordering = match $ordering {
+                Ordering::Less => Ordering::Greater,
+                Ordering::Greater => Ordering::Less,
+                _ => Ordering::Equal,
+            };
+            assert_eq!(compare_segments(&$se1, &$se2), $ordering, "Comparing se1/se2 with expected value {:?}", $ordering);
+            assert_eq!(compare_segments(&$se2, &$se1), inverse_ordering, "Comparing se2/se1 with expected value {:?}", inverse_ordering);
+        };
+    }
 
     fn make_simple(
         contour_id: u32,
@@ -131,6 +285,7 @@ mod test {
         assert!(!se2.is_below(se1.point));
         assert!(se2.is_above(se1.point));
 
+        assert_ordering!(se1, se2, Ordering::Less);
         assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
         assert_eq!(compare_segments(&se2, &se1), Ordering::Greater);
 
@@ -145,6 +300,7 @@ mod test {
 
         assert!(!se1.is_below(se2.point));
         assert_eq!(compare_segments(&se1, &se2), Ordering::Greater);
+        assert_ordering!(se1, se2, Ordering::Greater);
     }
 
     #[test]
@@ -154,6 +310,7 @@ mod test {
 
         assert_ne!(se1.is_subject, se2.is_subject);
         assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
+        assert_ordering!(se1, se2, Ordering::Less);
     }
 
     #[test]
@@ -166,12 +323,14 @@ mod test {
             assert_eq!(se1.point, se2.point);
 
             assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
+            assert_ordering!(se1, se2, Ordering::Less);
         }
         {
             let (se1, _other2) = make_simple(2, 0.0, 1.0, 5.0, 1.0, false);
             let (se2, _other1) = make_simple(1, 0.0, 1.0, 3.0, 1.0, false);
 
             assert_eq!(compare_segments(&se1, &se2), Ordering::Greater);
+            assert_ordering!(se1, se2, Ordering::Greater);
         }
     }
 
@@ -184,5 +343,32 @@ mod test {
         assert_ne!(se1.point, se2.point);
         assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
         assert_eq!(compare_segments(&se2, &se1), Ordering::Greater);
+        assert_ordering!(se1, se2, Ordering::Less);
     }
+
+    #[test]
+    fn t_shaped_cases() {
+        // shape: \/
+        //         \
+        let (se1, _other1) = make_simple(0, 0.0, 1.0, 1.0, 0.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 0.5, 1.0, 1.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+
+        // shape:  /
+        //        /\
+        let (se1, _other1) = make_simple(0, 0.0, 0.0, 1.0, 1.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 0.5, 1.0, 0.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+
+        // shape: T
+        let (se1, _other1) = make_simple(0, 0.0, 1.0, 1.0, 1.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 1.0, 0.5, 0.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+
+        // shape: T upside down
+        let (se1, _other1) = make_simple(0, 0.0, 0.0, 1.0, 0.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 1.0, 0.5, 0.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+    }
+
 }
