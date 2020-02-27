@@ -244,6 +244,8 @@ mod test {
             is_subject,
             true,
         );
+        // Make sure test cases fulfill the invariant of left/right relationship.
+        assert!(event.is_before(&other));
 
         (event, other)
     }
@@ -369,6 +371,45 @@ mod test {
         let (se1, _other1) = make_simple(0, 0.0, 0.0, 1.0, 0.0, true);
         let (se2, _other2) = make_simple(0, 0.5, 1.0, 0.5, 0.0, true);
         assert_ordering!(se1, se2, Ordering::Less);
+    }
+
+    #[test]
+    fn vertical_segment() {
+        // vertical reference segment at x = 0, expanding from y = -1 to +1.
+        let (se1, _other1) = make_simple(0, 0.0, -1.0, 0.0, 1.0, true);
+
+        // "above" cases
+        let (se2, _other2) = make_simple(0, -1.0, 1.0, 0.0, 1.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+        let (se2, _other2) = make_simple(0, 0.0, 1.0, 1.0, 1.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+        let (se2, _other2) = make_simple(0, -1.0, 2.0, 0.0, 2.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+        let (se2, _other2) = make_simple(0, 0.0, 2.0, 1.0, 2.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+        let (se2, _other2) = make_simple(0, 0.0, 1.0, 0.0, 2.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+
+        // "below" cases
+        let (se2, _other2) = make_simple(0, -1.0, -1.0, 0.0, -1.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+        let (se2, _other2) = make_simple(0, 0.0, -1.0, 1.0, -1.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+        let (se2, _other2) = make_simple(0, -1.0, -2.0, 0.0, -2.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+        let (se2, _other2) = make_simple(0, 0.0, -2.0, 1.0, -2.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+        let (se2, _other2) = make_simple(0, 0.0, -2.0, 0.0, -1.0, true);
+        assert_ordering!(se1, se2, Ordering::Greater);
+
+        // overlaps
+        let (se2, _other2) = make_simple(0, 0.0, -0.5, 0.0, 0.5, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+        // When left endpoints are identical, the ordering is no longer anti-symmetric.
+        // TODO: Decide if this is a problem.
+        // let (se2, _other2) = make_simple(0, 0.0, -1.0, 0.0, 0.0, true);
+        // assert_ordering!(se1, se2, Ordering::Less); // fails because of its not anti-symmetric.
+
     }
 
 }
