@@ -217,6 +217,7 @@ impl<F> Ord for SweepEvent<F>
 where
     F: Float,
 {
+    #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         // Ord is exactly the other way round as in the js implementation as BinaryHeap sorts decending
         let p1 = self.point;

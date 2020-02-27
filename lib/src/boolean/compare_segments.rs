@@ -55,8 +55,10 @@ pub fn compare_segments<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>)
 where
     F: Float,
 {
-    debug_assert!(se1_l.is_left());
-    debug_assert!(se2_l.is_left());
+    debug_assert!(se1_l.is_left(), "compare_segments requires left-events, got a right-event.");
+    debug_assert!(se2_l.is_left(), "compare_segments requires left-events, got a right-event.");
+    debug_assert!(se1_l.get_other_event().is_some(), "missing right-event in compare_segments");
+    debug_assert!(se2_l.get_other_event().is_some(), "missing right-event in compare_segments");
 
     if Rc::ptr_eq(&se1_l, &se2_l) {
         return Ordering::Equal;
@@ -88,24 +90,27 @@ where
                 return less_if(se_old_l.point.y < se_new_l.point.y);
             }
 
-            /*
-            // Add signum check?
-            if sa_a_b1.signum() == sa_a_b2.signum() {
-                less_if(sa_)
+            // If l and r lie on the same side of the reference segment,
+            // no intersection check is necessary.
+            if (sa_l > 0.) == (sa_r > 0.) {
+                return less_if(sa_l > 0.)
             }
-            */
+
+            if sa_l == 0. {
+                return less_if(sa_r > 0.)
+            }
 
             let inter = intersection(se_old_l.point, se_old_r.point, se_new_l.point, se_new_r.point);
-            println!("{:?} {:?} {:?}", se_new_l.point, se_new_r.point, inter);
+            //println!("{:?} {:?} {:?}", se_new_l.point, se_new_r.point, inter);
             debug_assert!(sa_l != 0. || inter != LineIntersection::None);
             match inter {
                 LineIntersection::None => return less_if(sa_l > 0.),
                 LineIntersection::Point(p) => {
-                    if p == se_new_l.point || sa_l == 0. {
-                        println!("a");
+                    if p == se_new_l.point {
+                        //println!("a");
                         return less_if(sa_r > 0.)
                     } else {
-                        println!("b");
+                        //println!("b");
                         return less_if(sa_l > 0.)
                     }
                 }
@@ -124,9 +129,12 @@ where
         } else {
             return less_if(se_old_l.is_subject);
         }
+
     }
 
-    less_if(se_old_l > se_new_l)
+    // Fallback to purely temporal-based comparison. Since `less_if` already
+    // encodes "earlier-is-less" semantics, no comparison is needed.
+    less_if(true)
 }
 
 pub fn compare_segments_alt1<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
@@ -286,8 +294,6 @@ mod test {
         assert!(se2.is_above(se1.point));
 
         assert_ordering!(se1, se2, Ordering::Less);
-        assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
-        assert_eq!(compare_segments(&se2, &se1), Ordering::Greater);
 
         assert_eq!(se3.cmp(&se4), Ordering::Less);
         assert!(!se4.is_above(se3.point));
@@ -299,7 +305,6 @@ mod test {
         let (se1, _other1) = make_simple(0, -1.0, 0.0, 2.0, 3.0, false);
 
         assert!(!se1.is_below(se2.point));
-        assert_eq!(compare_segments(&se1, &se2), Ordering::Greater);
         assert_ordering!(se1, se2, Ordering::Greater);
     }
 
@@ -309,7 +314,6 @@ mod test {
         let (se2, _other2) = make_simple(0, 2.0, 01.0, 3.0, 1.0, false);
 
         assert_ne!(se1.is_subject, se2.is_subject);
-        assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
         assert_ordering!(se1, se2, Ordering::Less);
     }
 
@@ -322,14 +326,12 @@ mod test {
             assert_eq!(se1.is_subject, se2.is_subject);
             assert_eq!(se1.point, se2.point);
 
-            assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
             assert_ordering!(se1, se2, Ordering::Less);
         }
         {
             let (se1, _other2) = make_simple(2, 0.0, 1.0, 5.0, 1.0, false);
             let (se2, _other1) = make_simple(1, 0.0, 1.0, 3.0, 1.0, false);
 
-            assert_eq!(compare_segments(&se1, &se2), Ordering::Greater);
             assert_ordering!(se1, se2, Ordering::Greater);
         }
     }
@@ -341,8 +343,6 @@ mod test {
 
         assert_eq!(se1.is_subject, se2.is_subject);
         assert_ne!(se1.point, se2.point);
-        assert_eq!(compare_segments(&se1, &se2), Ordering::Less);
-        assert_eq!(compare_segments(&se2, &se1), Ordering::Greater);
         assert_ordering!(se1, se2, Ordering::Less);
     }
 

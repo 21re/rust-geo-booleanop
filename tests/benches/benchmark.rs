@@ -1,4 +1,5 @@
 use criterion::{criterion_group, criterion_main, Criterion};
+use std::time::Duration;
 
 use geo_booleanop::boolean::BooleanOp;
 use geo_booleanop_tests::helper::load_test_case;
@@ -20,5 +21,13 @@ fn benchmarks(c: &mut Criterion) {
     ));
 }
 
-criterion_group!(benches, benchmarks,);
+fn config() -> Criterion {
+    Criterion::default().measurement_time(Duration::from_millis(1))
+}
+
+criterion_group! {
+    name = benches;
+    config = config();
+    targets = benchmarks
+}
 criterion_main!(benches);
