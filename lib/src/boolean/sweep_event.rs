@@ -250,6 +250,34 @@ where
     }
 }
 
+pub trait JsonDebug {
+    fn to_json_debug(&self) -> String;
+    fn to_json_debug_short(&self) -> String;
+}
+
+impl<F> JsonDebug for Rc<SweepEvent<F>>
+where
+    F: Float,
+{
+    fn to_json_debug(&self) -> String {
+        format!(
+            "{{\"self\": {}, \"other\": {}}}",
+            self.to_json_debug_short(),
+            self.get_other_event().unwrap().to_json_debug_short(),
+        )
+    }
+
+    fn to_json_debug_short(&self) -> String {
+        format!(
+            "{{\"addr\": \"{:p}\", \"point\": {{\"x\": {}, \"y\": {}}}, \"type\": \"{}\"}}",
+            *self,
+            self.point.x,
+            self.point.y,
+            if self.is_left() { "L" } else { "R" },
+        )
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::super::helper::test::xy;

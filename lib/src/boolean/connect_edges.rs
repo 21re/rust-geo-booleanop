@@ -46,6 +46,37 @@ where
     result_events
 }
 
+// csv generator
+use std::fs::File;
+use std::io::Write;
+fn debug_print_results<F>(events: &[Rc<SweepEvent<F>>])
+where
+    F: Float,
+{
+    let mut writer = File::create("debug.csv").unwrap();
+    writeln!(
+        &mut writer,
+        "index;x;y;other_x;other_y;lr;result_transition;in_out;other_in_out;is_subject;is_exterior_ring;prev_in_result"
+    )
+    .expect("Failed to write to file");
+    for (i, evt) in events.iter().enumerate() {
+        writeln!(&mut writer, "{i};{x:?};{y:?};{other_x:?};{other_y:?};{lr};{transition:?};{in_out};{other_in_out};{subject};{exterior_ring};{prev_in_result:?}",
+            i=i,
+            x=evt.point.x,
+            y=evt.point.y,
+            other_x=evt.get_other_event().unwrap().point.x,
+            other_y=evt.get_other_event().unwrap().point.y,
+            lr=if evt.is_left() { "L" } else { "R" },
+            transition=evt.get_result_transition(),
+            in_out=evt.is_in_out(),
+            other_in_out=evt.is_other_in_out(),
+            subject=evt.is_subject,
+            exterior_ring=evt.is_exterior_ring,
+            prev_in_result=evt.get_prev_in_result().map(|o| format!("{:?}", o.point)),
+        ).expect("Failed to write to file");
+    }
+}
+
 fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_pos: i32) -> i32
 where
     F: Float,
@@ -173,6 +204,7 @@ where
     F: Float,
 {
     let result_events = order_events(sorted_events);
+    debug_print_results(&result_events);
 
     let mut contours: Vec<Contour<F>> = Vec::new();
     let mut processed: HashSet<i32> = HashSet::new();
