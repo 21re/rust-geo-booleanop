@@ -188,6 +188,7 @@ where
     pub fn is_after(&self, other: &SweepEvent<F>) -> bool {
         self < other
     }
+
 }
 
 impl<F> PartialEq for SweepEvent<F>
@@ -250,11 +251,13 @@ where
     }
 }
 
+#[cfg(feature="debug-booleanop")]
 pub trait JsonDebug {
     fn to_json_debug(&self) -> String;
     fn to_json_debug_short(&self) -> String;
 }
 
+#[cfg(feature="debug-booleanop")]
 impl<F> JsonDebug for Rc<SweepEvent<F>>
 where
     F: Float,
@@ -269,11 +272,12 @@ where
 
     fn to_json_debug_short(&self) -> String {
         format!(
-            "{{\"addr\": \"{:p}\", \"point\": {{\"x\": {}, \"y\": {}}}, \"type\": \"{}\"}}",
+            "{{\"addr\": \"{:p}\", \"point\": [{}, {}], \"type\": \"{}\", \"poly\": \"{}\"}}",
             *self,
             self.point.x,
             self.point.y,
             if self.is_left() { "L" } else { "R" },
+            if self.is_subject { "A" } else { "B" },
         )
     }
 }

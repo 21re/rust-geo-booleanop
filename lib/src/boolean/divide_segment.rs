@@ -4,6 +4,9 @@ use geo_types::Coordinate;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 
+#[cfg(feature="debug-booleanop")]
+use super::sweep_event::JsonDebug;
+
 pub fn divide_segment<F>(se_l: &Rc<SweepEvent<F>>, inter: Coordinate<F>, queue: &mut BinaryHeap<Rc<SweepEvent<F>>>)
 where
     F: Float,
@@ -76,6 +79,11 @@ where
 
     queue.push(l);
     queue.push(r);
+
+    #[cfg(feature="debug-booleanop")] {
+        println!("{{\"divide_segment_se_l\": {}}}", se_l.to_json_debug());
+        println!("{{\"divide_segment_se_r\": {}}}", se_r.to_json_debug());
+    }
 }
 
 #[cfg(test)]

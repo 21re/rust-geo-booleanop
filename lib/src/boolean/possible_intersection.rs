@@ -19,16 +19,18 @@ where
     };
 
     let inter = intersection(se1.point, other1.point, se2.point, other2.point);
-    //println!("Intersection: {:?}", inter);
+
+    #[cfg(feature="debug-booleanop")]
     match inter {
         LineIntersection::Point(inter) => {
-            println!("{{\"intersection\": {{\"x\": {}, \"y\": {}}}}}", inter.x, inter.y);
+            println!("{{\"intersection\": [{}, {}]}}", inter.x, inter.y);
         }
         LineIntersection::Overlap(p1, p2) => {
-            println!("{{\"overlap1\": {{\"x\": {}, \"y\": {}}}, \"overlap2\": {{\"x\": {}, \"y\": {}}}}}", p1.x, p1.y, p2.x, p2.y);
+            println!("{{\"overlap1\": [{}, {}], \"overlap2\": [{}, {}]}}", p1.x, p1.y, p2.x, p2.y);
         }
         _ => {}
     }
+
     match inter {
         LineIntersection::None => 0, // No intersection
         LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => 0, // the line segments intersect at an endpoint of both line segments
@@ -46,10 +48,10 @@ where
             let mut events = Vec::new();
             let mut left_coincide = false;
             let mut right_coincide = false;
-            println!("{:?}", se1.point);
-            println!("{:?}", se2.point);
-            println!("{:?}", other1.point);
-            println!("{:?}", other2.point);
+            //println!("{:?}", se1.point);
+            //println!("{:?}", se2.point);
+            //println!("{:?}", other1.point);
+            //println!("{:?}", other2.point);
 
             if se1.point == se2.point {
                 left_coincide = true
@@ -81,6 +83,7 @@ where
                 }
 
                 if left_coincide && !right_coincide {
+                    //println!("overlap subdivide case 1");
                     divide_segment(&events[1].1, events[0].0.point, queue)
                 }
                 return 2;
@@ -88,18 +91,21 @@ where
 
             if right_coincide {
                 // the line segments share the right endpoint
+                //println!("overlap subdivide case 2");
                 divide_segment(&events[0].0, events[1].0.point, queue);
                 return 3;
             }
 
             if !Rc::ptr_eq(&events[0].0, &events[3].1) {
                 // no line segment includes totally the other one
+                //println!("overlap subdivide case 3");
                 divide_segment(&events[0].0, events[1].0.point, queue);
                 divide_segment(&events[1].0, events[2].0.point, queue);
                 return 3;
             }
 
             // one line segment includes the other one
+            //println!("overlap subdivide case 4");
             divide_segment(&events[0].0, events[1].0.point, queue);
             divide_segment(&events[3].1, events[2].0.point, queue);
 

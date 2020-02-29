@@ -47,8 +47,12 @@ where
 }
 
 // csv generator
+#[cfg(feature="debug-booleanop")]
 use std::fs::File;
+#[cfg(feature="debug-booleanop")]
 use std::io::Write;
+
+#[cfg(feature="debug-booleanop")]
 fn debug_print_results<F>(events: &[Rc<SweepEvent<F>>])
 where
     F: Float,
@@ -204,6 +208,8 @@ where
     F: Float,
 {
     let result_events = order_events(sorted_events);
+
+    #[cfg(feature="debug-booleanop")]
     debug_print_results(&result_events);
 
     let mut contours: Vec<Contour<F>> = Vec::new();

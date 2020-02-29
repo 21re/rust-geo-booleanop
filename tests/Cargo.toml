@@ -5,6 +5,7 @@ authors = ["Bodo Junglas <junglas@objectcode.de>"]
 edition = "2018"
 
 [dependencies]
+#geo-booleanop = { path = "../lib", features = ["debug-booleanop"] }
 geo-booleanop = { path = "../lib" }
 geo = "0.12"
 
