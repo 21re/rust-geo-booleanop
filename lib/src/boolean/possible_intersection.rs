@@ -107,7 +107,7 @@ where
             // one line segment includes the other one
             //println!("overlap subdivide case 4");
             divide_segment(&events[0].0, events[1].0.point, queue);
-            divide_segment(&events[3].1, events[2].0.point, queue);
+            divide_segment(&events[3].0.get_other_event().unwrap(), events[2].0.point, queue);
 
             3
         }
