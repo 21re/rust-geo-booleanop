@@ -350,26 +350,26 @@ mod test {
 
     #[test]
     fn t_shaped_cases() {
-        // shape: \/
-        //         \
-        let (se1, _other1) = make_simple(0, 0.0, 1.0, 1.0, 0.0, true);
-        let (se2, _other2) = make_simple(0, 0.5, 0.5, 1.0, 1.0, true);
-        assert_ordering!(se1, se2, Ordering::Less);
-
         // shape:  /
         //        /\
         let (se1, _other1) = make_simple(0, 0.0, 0.0, 1.0, 1.0, true);
         let (se2, _other2) = make_simple(0, 0.5, 0.5, 1.0, 0.0, true);
         assert_ordering!(se1, se2, Ordering::Greater);
 
+        // shape: \/
+        //         \
+        let (se1, _other1) = make_simple(0, 0.0, 1.0, 1.0, 0.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 0.5, 1.0, 1.0, true);
+        assert_ordering!(se1, se2, Ordering::Less);
+
         // shape: T
         let (se1, _other1) = make_simple(0, 0.0, 1.0, 1.0, 1.0, true);
-        let (se2, _other2) = make_simple(0, 0.5, 1.0, 0.5, 0.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 0.0, 0.5, 1.0, true);
         assert_ordering!(se1, se2, Ordering::Greater);
 
         // shape: T upside down
         let (se1, _other1) = make_simple(0, 0.0, 0.0, 1.0, 0.0, true);
-        let (se2, _other2) = make_simple(0, 0.5, 1.0, 0.5, 0.0, true);
+        let (se2, _other2) = make_simple(0, 0.5, 0.0, 0.5, 1.0, true);
         assert_ordering!(se1, se2, Ordering::Less);
     }
 
