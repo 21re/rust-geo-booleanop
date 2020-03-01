@@ -2,7 +2,7 @@ extern crate geo_booleanop_tests;
 extern crate clap;
 
 use clap::{Arg, App, AppSettings};
-use geojson::{Feature, Geometry, Value};
+use geojson::Feature;
 
 use geo_booleanop_tests::helper::{apply_operation, load_test_case, extract_expected_result, update_feature};
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;

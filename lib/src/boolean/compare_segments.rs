@@ -74,7 +74,7 @@ where
         (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)
     };
 
-    return if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
+    if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
 
         let sa_l = signed_area(se_old_l.point, se_old_r.point, se_new_l.point);
         let sa_r = signed_area(se_old_l.point, se_old_r.point, se_new_r.point);
@@ -121,13 +121,11 @@ where
         // Segments are collinear
         if se_old_l.is_subject == se_new_l.is_subject {
             if se_old_l.point == se_new_l.point {
-                if se_old_r.point == se_new_r.point {
-                    // probably we need this here:
-                    less_if(se_old_l.contour_id < se_new_l.contour_id)
-                    //Ordering::Equal
-                } else {
-                    less_if(se_old_l.contour_id < se_new_l.contour_id)
-                }
+                // Previously this was returning Ordering::Equal if the segments had identical
+                // left and right endpoints. I think in order to properly support self-overlapping
+                // segments we must return Ordering::Equal if and only if segments are the same
+                // by identity (the Rc::ptr_eq above).
+                less_if(se_old_l.contour_id < se_new_l.contour_id)
             } else {
                 // Fallback to purely temporal-based comparison. Since `less_if` already
                 // encodes "earlier-is-less" semantics, no comparison is needed.
