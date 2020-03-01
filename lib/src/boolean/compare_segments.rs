@@ -74,7 +74,8 @@ where
         (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)
     };
 
-    if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
+    return if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
+
         let sa_l = signed_area(se_old_l.point, se_old_r.point, se_new_l.point);
         let sa_r = signed_area(se_old_l.point, se_old_r.point, se_new_r.point);
         if sa_l != 0. || sa_r != 0. {
@@ -90,51 +91,56 @@ where
                 return less_if(se_old_l.point.y < se_new_l.point.y);
             }
 
-            // If l and r lie on the same side of the reference segment,
+            // If `l` and `r` lie on the same side of the reference segment,
             // no intersection check is necessary.
             if (sa_l > 0.) == (sa_r > 0.) {
                 return less_if(sa_l > 0.)
             }
 
+            // If `l` lies on the reference segment, compare based on `r`.
             if sa_l == 0. {
                 return less_if(sa_r > 0.)
             }
 
+            // According to the signed-area values the segments cross. Verify if
+            // we can get an intersection point whic is truely different from `l`.
             let inter = intersection(se_old_l.point, se_old_r.point, se_new_l.point, se_new_r.point);
-            //println!("{:?} {:?} {:?}", se_new_l.point, se_new_r.point, inter);
-            debug_assert!(sa_l != 0. || inter != LineIntersection::None);
             match inter {
                 LineIntersection::None => return less_if(sa_l > 0.),
                 LineIntersection::Point(p) => {
                     if p == se_new_l.point {
-                        //println!("a");
                         return less_if(sa_r > 0.)
                     } else {
-                        //println!("b");
                         return less_if(sa_l > 0.)
                     }
                 }
-                _ => panic!("woot")
+                _ => {} // go into collinear logic below
             }
         }
 
+        // Segments are collinear
         if se_old_l.is_subject == se_new_l.is_subject {
             if se_old_l.point == se_new_l.point {
                 if se_old_r.point == se_new_r.point {
-                    return Ordering::Equal;
+                    // probably we need this here:
+                    less_if(se_old_l.contour_id < se_new_l.contour_id)
+                    //Ordering::Equal
                 } else {
-                    return less_if(se_old_l.contour_id < se_new_l.contour_id);
+                    less_if(se_old_l.contour_id < se_new_l.contour_id)
                 }
+            } else {
+                // Fallback to purely temporal-based comparison. Since `less_if` already
+                // encodes "earlier-is-less" semantics, no comparison is needed.
+                less_if(true)
             }
         } else {
-            return less_if(se_old_l.is_subject);
+            less_if(se_old_l.is_subject)
         }
 
+    } else {
+        debug_assert!(false, "Other events should always be defined in compare_segment.");
+        less_if(true)
     }
-
-    // Fallback to purely temporal-based comparison. Since `less_if` already
-    // encodes "earlier-is-less" semantics, no comparison is needed.
-    less_if(true)
 }
 
 pub fn compare_segments_alt1<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
