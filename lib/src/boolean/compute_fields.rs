@@ -38,7 +38,8 @@ where
     };
     event.set_result_transition(result_transition);
 
-    #[cfg(feature="debug-booleanop")] {
+    #[cfg(feature = "debug-booleanop")]
+    {
         println!(
             "{{\"computeFields\": {{\"inOut\": {}, \"otherOut\": {}, \"resultTransition\": \"{:?}\", \"edgeType\": \"{:?}\"}}}}",
             event.is_in_out(),

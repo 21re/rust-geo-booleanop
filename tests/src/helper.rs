@@ -6,10 +6,10 @@ use geo::{Coordinate, MultiPolygon, Polygon};
 use geojson::{Feature, GeoJson, Geometry, Value};
 use pretty_assertions::assert_eq;
 
-use std::panic::catch_unwind;
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
+use std::panic::catch_unwind;
 use std::thread::Result;
 
 pub fn load_fixture_from_path(path: &str) -> GeoJson {
@@ -114,10 +114,7 @@ pub fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
 pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     let multi_polygon = extract_multi_polygon(feature);
 
-    let properties = feature
-        .properties
-        .as_ref()
-        .expect("Feature needs 'properties'.");
+    let properties = feature.properties.as_ref().expect("Feature needs 'properties'.");
 
     let op = properties
         .get("operation")
@@ -182,7 +179,12 @@ enum ResultTag {
 
 type WrappedResult = (ResultTag, Result<MultiPolygon<f64>>);
 
-fn compute_all_results(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestOperation, skip_swap_ab: bool) -> Vec<WrappedResult> {
+fn compute_all_results(
+    p1: &MultiPolygon<f64>,
+    p2: &MultiPolygon<f64>,
+    op: TestOperation,
+    skip_swap_ab: bool,
+) -> Vec<WrappedResult> {
     let main_result = catch_unwind(|| {
         println!("Running operation {:?} / {:?}", op, ResultTag::MainResult);
         apply_operation(p1, p2, op)
@@ -222,21 +224,30 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
             match &result_poly {
                 Result::Err(_) => failures.push(format!("{} / {:?} / {:?} has panicked", filename, op, result_tag)),
                 Result::Ok(result) => {
-                    let assertion_result = std::panic::catch_unwind(||
+                    let assertion_result = std::panic::catch_unwind(|| {
                         assert_eq!(
                             *result, expected_result.result,
                             "{} / {:?} / {:?} has result deviation",
                             filename, op, result_tag,
-                    ));
+                        )
+                    });
                     if assertion_result.is_err() {
-                        failures.push(format!("{} / {:?} / {:?} has result deviation", filename, op, result_tag));
+                        failures.push(format!(
+                            "{} / {:?} / {:?} has result deviation",
+                            filename, op, result_tag
+                        ));
                     }
                 }
             }
         }
 
         if regenerate {
-            let result = all_results.first().expect("Need at least one result").1.as_ref().expect("Regeneration mode requires a valid result");
+            let result = all_results
+                .first()
+                .expect("Need at least one result")
+                .1
+                .as_ref()
+                .expect("Regeneration mode requires a valid result");
             output_features.push(update_feature(&feature, &result));
         }
     }

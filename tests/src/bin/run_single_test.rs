@@ -1,11 +1,11 @@
-extern crate geo_booleanop_tests;
 extern crate clap;
+extern crate geo_booleanop_tests;
 
-use clap::{Arg, App, AppSettings};
+use clap::{App, AppSettings, Arg};
 use geojson::Feature;
 
-use geo_booleanop_tests::helper::{apply_operation, load_test_case, extract_expected_result, update_feature};
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
+use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, update_feature};
 
 use std::fs;
 use std::path::Path;
@@ -37,6 +37,7 @@ pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
 }
 
 fn main() {
+    #[rustfmt::skip]
     let matches = App::new("Test case runner")
         .setting(AppSettings::ArgRequiredElseHelp)
         .arg(Arg::with_name("file")

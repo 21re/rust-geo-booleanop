@@ -1,7 +1,7 @@
 use super::helper::Float;
+use super::segment_intersection::{intersection, LineIntersection};
 use super::signed_area::signed_area;
 use super::sweep_event::SweepEvent;
-use super::segment_intersection::{intersection, LineIntersection};
 use std::cmp::Ordering;
 use std::rc::Rc;
 
@@ -50,15 +50,26 @@ where
     helper::less_if(le1 > le2)
 }
 
-
 pub fn compare_segments<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
 where
     F: Float,
 {
-    debug_assert!(se1_l.is_left(), "compare_segments requires left-events, got a right-event.");
-    debug_assert!(se2_l.is_left(), "compare_segments requires left-events, got a right-event.");
-    debug_assert!(se1_l.get_other_event().is_some(), "missing right-event in compare_segments");
-    debug_assert!(se2_l.get_other_event().is_some(), "missing right-event in compare_segments");
+    debug_assert!(
+        se1_l.is_left(),
+        "compare_segments requires left-events, got a right-event."
+    );
+    debug_assert!(
+        se2_l.is_left(),
+        "compare_segments requires left-events, got a right-event."
+    );
+    debug_assert!(
+        se1_l.get_other_event().is_some(),
+        "missing right-event in compare_segments"
+    );
+    debug_assert!(
+        se2_l.get_other_event().is_some(),
+        "missing right-event in compare_segments"
+    );
 
     if Rc::ptr_eq(&se1_l, &se2_l) {
         return Ordering::Equal;
@@ -75,7 +86,6 @@ where
     };
 
     if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
-
         let sa_l = signed_area(se_old_l.point, se_old_r.point, se_new_l.point);
         let sa_r = signed_area(se_old_l.point, se_old_r.point, se_new_r.point);
         if sa_l != 0. || sa_r != 0. {
@@ -94,12 +104,12 @@ where
             // If `l` and `r` lie on the same side of the reference segment,
             // no intersection check is necessary.
             if (sa_l > 0.) == (sa_r > 0.) {
-                return less_if(sa_l > 0.)
+                return less_if(sa_l > 0.);
             }
 
             // If `l` lies on the reference segment, compare based on `r`.
             if sa_l == 0. {
-                return less_if(sa_r > 0.)
+                return less_if(sa_r > 0.);
             }
 
             // According to the signed-area values the segments cross. Verify if
@@ -109,9 +119,9 @@ where
                 LineIntersection::None => return less_if(sa_l > 0.),
                 LineIntersection::Point(p) => {
                     if p == se_new_l.point {
-                        return less_if(sa_r > 0.)
+                        return less_if(sa_r > 0.);
                     } else {
-                        return less_if(sa_l > 0.)
+                        return less_if(sa_l > 0.);
                     }
                 }
                 _ => {} // go into collinear logic below
@@ -134,7 +144,6 @@ where
         } else {
             less_if(se_old_l.is_subject)
         }
-
     } else {
         debug_assert!(false, "Other events should always be defined in compare_segment.");
         less_if(true)
@@ -179,11 +188,20 @@ where
                 (1_f64, se_new_l, se_old_l)
             };
 
-            let cmp_new_left_point = invert * signed_area(se_new.point, se_old.point, se_old.get_other_event().unwrap().point);
+            let cmp_new_left_point =
+                invert * signed_area(se_new.point, se_old.point, se_old.get_other_event().unwrap().point);
             if cmp_new_left_point != 0. {
-              return less_if(cmp_new_left_point < 0.);
+                return less_if(cmp_new_left_point < 0.);
             } else {
-              return less_if(invert * signed_area(se_new.get_other_event().unwrap().point, se_old.point, se_old.get_other_event().unwrap().point) < 0.);
+                return less_if(
+                    invert
+                        * signed_area(
+                            se_new.get_other_event().unwrap().point,
+                            se_old.point,
+                            se_old.get_other_event().unwrap().point,
+                        )
+                        < 0.,
+                );
             }
         }
 
@@ -219,8 +237,18 @@ mod test {
                 Ordering::Greater => Ordering::Less,
                 _ => Ordering::Equal,
             };
-            assert_eq!(compare_segments(&$se1, &$se2), $ordering, "Comparing se1/se2 with expected value {:?}", $ordering);
-            assert_eq!(compare_segments(&$se2, &$se1), inverse_ordering, "Comparing se2/se1 with expected value {:?}", inverse_ordering);
+            assert_eq!(
+                compare_segments(&$se1, &$se2),
+                $ordering,
+                "Comparing se1/se2 with expected value {:?}",
+                $ordering
+            );
+            assert_eq!(
+                compare_segments(&$se2, &$se1),
+                inverse_ordering,
+                "Comparing se2/se1 with expected value {:?}",
+                inverse_ordering
+            );
         };
     }
 
@@ -413,7 +441,5 @@ mod test {
         // TODO: Decide if this is a problem.
         // let (se2, _other2) = make_simple(0, 0.0, -1.0, 0.0, 0.0, true);
         // assert_ordering!(se1, se2, Ordering::Less); // fails because of its not anti-symmetric.
-
     }
-
 }

@@ -9,7 +9,7 @@ use geo_types::Rect;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 
-#[cfg(feature="debug-booleanop")]
+#[cfg(feature = "debug-booleanop")]
 use super::sweep_event::JsonDebug;
 
 pub fn subdivide<F>(
@@ -26,7 +26,8 @@ where
     let rightbound = sbbox.max.x.min(cbbox.max.x);
 
     while let Some(event) = event_queue.pop() {
-        #[cfg(feature="debug-booleanop")] {
+        #[cfg(feature = "debug-booleanop")]
+        {
             println!("\n{{\"processEvent\": {}}}", event.to_json_debug());
         }
         sorted_events.push(event.clone());
@@ -46,7 +47,8 @@ where
             compute_fields(&event, maybe_prev, operation);
 
             if let Some(next) = maybe_next {
-                #[cfg(feature="debug-booleanop")] {
+                #[cfg(feature = "debug-booleanop")]
+                {
                     println!("{{\"seNextEvent\": {}}}", next.to_json_debug());
                 }
                 if possible_intersection(&event, &next, event_queue) == 2 {
@@ -57,7 +59,8 @@ where
             }
 
             if let Some(prev) = maybe_prev {
-                #[cfg(feature="debug-booleanop")] {
+                #[cfg(feature = "debug-booleanop")]
+                {
                     println!("{{\"sePrevEvent\": {}}}", prev.to_json_debug());
                 }
                 if possible_intersection(&prev, &event, event_queue) == 2 {
@@ -70,13 +73,17 @@ where
         } else if let Some(other_event) = event.get_other_event() {
             // This debug assert is only true, if we compare segments in the sweep line
             // based on identity (curently), and not by value (done previously).
-            debug_assert!(sweep_line.contains(&other_event), "Sweep line misses event to be removed");
+            debug_assert!(
+                sweep_line.contains(&other_event),
+                "Sweep line misses event to be removed"
+            );
             if sweep_line.contains(&other_event) {
                 let maybe_prev = sweep_line.prev(&other_event).cloned();
                 let maybe_next = sweep_line.next(&other_event).cloned();
 
                 if let (Some(prev), Some(next)) = (maybe_prev, maybe_next) {
-                    #[cfg(feature="debug-booleanop")] {
+                    #[cfg(feature = "debug-booleanop")]
+                    {
                         println!("Possible post intersection");
                         println!("{{\"sePostNextEvent\": {}}}", next.to_json_debug());
                         println!("{{\"sePostPrevEvent\": {}}}", prev.to_json_debug());
@@ -84,7 +91,8 @@ where
                     possible_intersection(&prev, &next, event_queue);
                 }
 
-                #[cfg(feature="debug-booleanop")] {
+                #[cfg(feature = "debug-booleanop")]
+                {
                     println!("{{\"removing\": {}}}", other_event.to_json_debug());
                 }
                 sweep_line.remove(&other_event);

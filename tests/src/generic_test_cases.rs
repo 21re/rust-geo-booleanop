@@ -4,7 +4,9 @@ use glob::glob;
 #[test]
 fn test_generic_test_cases() {
     let regenerate = std::env::var("REGEN").is_ok();
-    let test_cases: Vec<_> = glob("./fixtures/generic_test_cases/*.geojson").expect("Failed to read glob pattern").collect();
+    let test_cases: Vec<_> = glob("./fixtures/generic_test_cases/*.geojson")
+        .expect("Failed to read glob pattern")
+        .collect();
     assert!(test_cases.len() > 0, "Expected to find any test cases");
 
     let mut failures = Vec::new();
@@ -23,8 +25,6 @@ fn test_generic_test_cases() {
     }
 
     if regenerate {
-        panic!(
-            "Regenerate is set to true. Won't let tests pass in this mode, because it may succeed accidentally."
-        );
+        panic!("Regenerate is set to true. Won't let tests pass in this mode, because it may succeed accidentally.");
     }
 }

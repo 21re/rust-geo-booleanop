@@ -20,13 +20,16 @@ where
 
     let inter = intersection(se1.point, other1.point, se2.point, other2.point);
 
-    #[cfg(feature="debug-booleanop")]
+    #[cfg(feature = "debug-booleanop")]
     match inter {
         LineIntersection::Point(inter) => {
             println!("{{\"intersection\": [{}, {}]}}", inter.x, inter.y);
         }
         LineIntersection::Overlap(p1, p2) => {
-            println!("{{\"overlap1\": [{}, {}], \"overlap2\": [{}, {}]}}", p1.x, p1.y, p2.x, p2.y);
+            println!(
+                "{{\"overlap1\": [{}, {}], \"overlap2\": [{}, {}]}}",
+                p1.x, p1.y, p2.x, p2.y
+            );
         }
         _ => {}
     }

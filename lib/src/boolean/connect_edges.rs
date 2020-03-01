@@ -174,7 +174,7 @@ where
 {
     let result_events = order_events(sorted_events);
 
-    #[cfg(feature="debug-booleanop")]
+    #[cfg(feature = "debug-booleanop")]
     write_debug_csv(&result_events);
 
     let mut contours: Vec<Contour<F>> = Vec::new();
@@ -228,12 +228,12 @@ where
 }
 
 // Debug csv output generator
-#[cfg(feature="debug-booleanop")]
+#[cfg(feature = "debug-booleanop")]
 use std::fs::File;
-#[cfg(feature="debug-booleanop")]
+#[cfg(feature = "debug-booleanop")]
 use std::io::Write;
 
-#[cfg(feature="debug-booleanop")]
+#[cfg(feature = "debug-booleanop")]
 fn write_debug_csv<F>(events: &[Rc<SweepEvent<F>>])
 where
     F: Float,
