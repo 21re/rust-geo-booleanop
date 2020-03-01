@@ -6,9 +6,11 @@ use geo::{Coordinate, MultiPolygon, Polygon};
 use geojson::{Feature, GeoJson, Geometry, Value};
 use pretty_assertions::assert_eq;
 
+use std::panic::catch_unwind;
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
+use std::thread::Result;
 
 pub fn load_fixture_from_path(path: &str) -> GeoJson {
     let mut file = File::open(path).expect("Cannot open/find fixture");
@@ -135,6 +137,12 @@ pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     }
 }
 
+pub fn update_feature(feature: &Feature, p: &MultiPolygon<f64>) -> Feature {
+    let mut output_feature = feature.clone();
+    output_feature.geometry = Some(Geometry::new(Value::from(p)));
+    output_feature
+}
+
 pub fn load_test_case(filename: &str) -> (Vec<Feature>, MultiPolygon<f64>, MultiPolygon<f64>) {
     let original_geojson = load_fixture_from_path(filename);
     let features = match original_geojson {
@@ -157,10 +165,34 @@ pub fn apply_operation(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestO
     }
 }
 
-pub fn update_feature(feature: &Feature, p: &MultiPolygon<f64>) -> Feature {
-    let mut output_feature = feature.clone();
-    output_feature.geometry = Some(Geometry::new(Value::from(p)));
-    output_feature
+#[derive(Debug)]
+enum ResultTag {
+    MainResult,
+    SwapResult,
+}
+
+type WrappedResult = (ResultTag, Result<MultiPolygon<f64>>);
+
+fn compute_all_results(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestOperation) -> Vec<WrappedResult> {
+    let main_result = catch_unwind(|| {
+        println!("Running operation {:?} / {:?}", op, ResultTag::MainResult);
+        apply_operation(p1, p2, op)
+    });
+
+    let mut results = vec![(ResultTag::MainResult, main_result)];
+    let swappable_op = match op {
+        TestOperation::DifferenceAB => false,
+        TestOperation::DifferenceBA => false,
+        _ => true,
+    };
+    if swappable_op {
+        let swap_result = catch_unwind(|| {
+            println!("Running operation {:?} / {:?}", op, ResultTag::SwapResult);
+            apply_operation(p2, p1, op)
+        });
+        results.push((ResultTag::SwapResult, swap_result));
+    }
+    results
 }
 
 pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
@@ -169,40 +201,33 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
     let (features, p1, p2) = load_test_case(filename);
 
     let mut output_features = vec![features[0].clone(), features[1].clone()];
-
     let mut failures = Vec::new();
 
     for feature in features.iter().skip(2) {
         let expected_result = extract_expected_result(&feature);
-        println!("Testing operation: {:?}", expected_result.op);
+        let op = expected_result.op;
 
-        let result = std::panic::catch_unwind(|| match expected_result.op {
-            TestOperation::Union => p1.union(&p2),
-            TestOperation::Intersection => p1.intersection(&p2),
-            TestOperation::Xor => p1.xor(&p2),
-            TestOperation::DifferenceAB => p1.difference(&p2),
-            TestOperation::DifferenceBA => p2.difference(&p1),
-        });
-
-        match &result {
-            Result::Err(_) => failures.push(format!("{} / {:?} has panicked", filename, expected_result.op)),
-            Result::Ok(result) => {
-                if !regenerate {
-                    let result = std::panic::catch_unwind(||
+        let all_results = compute_all_results(&p1, &p2, op);
+        for result in &all_results {
+            let (result_tag, result_poly) = result;
+            match &result_poly {
+                Result::Err(_) => failures.push(format!("{} / {:?} / {:?} has panicked", filename, op, result_tag)),
+                Result::Ok(result) => {
+                    let assertion_result = std::panic::catch_unwind(||
                         assert_eq!(
                             *result, expected_result.result,
-                            "{} / {:?} has result deviation",
-                            filename, expected_result.op,
+                            "{} / {:?} / {:?} has result deviation",
+                            filename, op, result_tag,
                     ));
-                    if result.is_err() {
-                        failures.push(format!("{} / {:?} has result deviation", filename, expected_result.op));
+                    if assertion_result.is_err() {
+                        failures.push(format!("{} / {:?} / {:?} has result deviation", filename, op, result_tag));
                     }
                 }
             }
         }
 
         if regenerate {
-            let result = result.expect("Regeneration mode requires a valid result");
+            let result = all_results.first().expect("Need at least one result").1.as_ref().expect("Regeneration mode requires a valid result");
             output_features.push(update_feature(&feature, &result));
         }
     }
@@ -213,56 +238,3 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
 
     failures
 }
-
-/*
-pub fn run_generic_test_case_new(filename: &str, regenerate: bool) {
-    println!("\n *** Running test case: {}", filename);
-
-    let (features, p1, p2) = load_test_case(filename);
-
-    let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
-
-    let failures = Vec::new();
-
-    for feature in features.iter().skip(2) {
-        let expected_result = extract_expected_result(&feature);
-        println!("Testing operation: {:?}", expected_result.op);
-
-        let result = std::panic::catch_unwind(|| match expected_result.op {
-            TestOperation::Union => p1.union(&p2),
-            TestOperation::Intersection => p1.intersection(&p2),
-            TestOperation::Xor => p1.xor(&p2),
-            TestOperation::DifferenceAB => p1.difference(&p2),
-            TestOperation::DifferenceBA => p2.difference(&p1),
-        });
-
-        match result {
-            Result::Err(err) => failures.push(err),
-            Result::Ok(result) => {
-                if !regenerate {
-                    let result = std::panic::catch_unwind(||
-                        assert_eq!(
-                            result, expected_result.result,
-                            "Deviation found in test case {} with operation {:?}",
-                            filename, expected_result.op,
-                    ));
-                    if result.is_err() {
-                        println!("{:?}", result);
-                        panic!("A test case has failed");
-                    }
-                }
-            }
-        }
-
-
-        let mut output_feature = feature.clone();
-        output_feature.geometry = Some(Geometry::new(Value::from(&result)));
-        output_features.push(output_feature);
-    }
-
-    if regenerate {
-        write_compact_geojson(&output_features, filename);
-    }
-}
-*/
-

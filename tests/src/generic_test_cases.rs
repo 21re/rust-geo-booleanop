@@ -15,7 +15,7 @@ fn test_generic_test_cases() {
     println!("\nFinished running {} test cases", test_cases.len());
 
     if failures.len() > 0 {
-        println!("\nGeneric test case failures:");
+        println!("\nGeneric test case failures (see error details above):");
         for failure in &failures {
             println!(" - {}", failure);
         }
