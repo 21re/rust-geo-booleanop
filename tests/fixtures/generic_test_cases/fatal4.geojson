@@ -69,7 +69,6 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "This test case currently has a wrong result, but will most likely be fixed by #115",
         "operation": "union"
       },
       "type": "Feature"
@@ -90,7 +89,6 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "comment": "This test case currently has a wrong result, but will most likely be fixed by #115",
         "operation": "intersection"
       },
       "type": "Feature"

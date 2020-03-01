@@ -153,7 +153,8 @@ def main():
             p2 = extract_multi_polygon(features[1])
 
             for feature in features[2:]:
-                op = feature["properties"]["operation"]
+                properties = feature["properties"]
+                op = properties["operation"]
                 p_res = extract_multi_polygon(feature)
 
                 fig, axes = plt.subplots(1, 3, figsize=(15, 7), sharex=True, sharey=True)
@@ -175,11 +176,18 @@ def main():
                     axes[2].legend(loc="best", prop={"size": 9})
 
                 fig.suptitle("{} / {}".format(os.path.basename(f), op))
-                if "comment" in feature["properties"] and feature["properties"]["comment"] is not None:
+                if "comment" in properties and properties["comment"] is not None:
                     plt.figtext(
                         0.5, 0.93,
-                        feature["properties"]["comment"],
+                        properties["comment"],
                         ha='center', fontsize=9, color="#f2760d",
+                    )
+                if "swap_ab_is_broken" in properties and properties["swap_ab_is_broken"]:
+                    plt.figtext(
+                        0.99, 0.96,
+                        "Swap A/B broken",
+                        ha='right', fontsize=9, color="#111111",
+                        bbox=dict(facecolor='#FF3860', edgecolor='#111111', boxstyle='round,pad=0.5')
                     )
 
                 plt.tight_layout()
