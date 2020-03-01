@@ -109,6 +109,10 @@ where
 
             // one line segment includes the other one
             //println!("overlap subdivide case 4");
+            // TODO: write this in a non-panicking way. Note that we must not access the "other event"
+            // via events[3].1 because that is only a static reference, and the first divide segment
+            // internally modifies the other event point (we must access the updated other event).
+            // Probably the best solution is to introduce explicit return types for divide_segment.
             divide_segment(&events[0].0, events[1].0.point, queue);
             divide_segment(&events[3].0.get_other_event().unwrap(), events[2].0.point, queue);
 
