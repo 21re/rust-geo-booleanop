@@ -93,6 +93,7 @@ pub enum TestOperation {
 pub struct ExpectedResult {
     pub result: MultiPolygon<f64>,
     pub op: TestOperation,
+    pub swap_ab_is_broken: bool,
 }
 
 pub fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
@@ -113,14 +114,21 @@ pub fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
 pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     let multi_polygon = extract_multi_polygon(feature);
 
-    let op = feature
+    let properties = feature
         .properties
         .as_ref()
-        .expect("Feature needs 'properties'.")
+        .expect("Feature needs 'properties'.");
+
+    let op = properties
         .get("operation")
         .expect("Feature 'properties' needs an 'operation' entry.")
         .as_str()
         .expect("'operation' entry must be a string.");
+
+    let swap_ab_is_broken = properties
+        .get("swap_ab_is_broken")
+        .map(|x| x.as_bool().expect("swap_ab_is_broken must be a boolean"))
+        .unwrap_or(false);
 
     let op = match op {
         "union" => TestOperation::Union,
@@ -134,6 +142,7 @@ pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     ExpectedResult {
         result: multi_polygon,
         op,
+        swap_ab_is_broken,
     }
 }
 
@@ -173,7 +182,7 @@ enum ResultTag {
 
 type WrappedResult = (ResultTag, Result<MultiPolygon<f64>>);
 
-fn compute_all_results(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestOperation) -> Vec<WrappedResult> {
+fn compute_all_results(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestOperation, skip_swap_ab: bool) -> Vec<WrappedResult> {
     let main_result = catch_unwind(|| {
         println!("Running operation {:?} / {:?}", op, ResultTag::MainResult);
         apply_operation(p1, p2, op)
@@ -185,7 +194,7 @@ fn compute_all_results(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestO
         TestOperation::DifferenceBA => false,
         _ => true,
     };
-    if swappable_op {
+    if swappable_op && !skip_swap_ab {
         let swap_result = catch_unwind(|| {
             println!("Running operation {:?} / {:?}", op, ResultTag::SwapResult);
             apply_operation(p2, p1, op)
@@ -207,7 +216,7 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
         let expected_result = extract_expected_result(&feature);
         let op = expected_result.op;
 
-        let all_results = compute_all_results(&p1, &p2, op);
+        let all_results = compute_all_results(&p1, &p2, op, expected_result.swap_ab_is_broken);
         for result in &all_results {
             let (result_tag, result_poly) = result;
             match &result_poly {
