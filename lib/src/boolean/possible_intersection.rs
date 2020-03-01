@@ -51,10 +51,6 @@ where
             let mut events = Vec::new();
             let mut left_coincide = false;
             let mut right_coincide = false;
-            //println!("{:?}", se1.point);
-            //println!("{:?}", se2.point);
-            //println!("{:?}", other1.point);
-            //println!("{:?}", other2.point);
 
             if se1.point == se2.point {
                 left_coincide = true
@@ -86,7 +82,6 @@ where
                 }
 
                 if left_coincide && !right_coincide {
-                    //println!("overlap subdivide case 1");
                     divide_segment(&events[1].1, events[0].0.point, queue)
                 }
                 return 2;
@@ -94,21 +89,18 @@ where
 
             if right_coincide {
                 // the line segments share the right endpoint
-                //println!("overlap subdivide case 2");
                 divide_segment(&events[0].0, events[1].0.point, queue);
                 return 3;
             }
 
             if !Rc::ptr_eq(&events[0].0, &events[3].1) {
                 // no line segment includes totally the other one
-                //println!("overlap subdivide case 3");
                 divide_segment(&events[0].0, events[1].0.point, queue);
                 divide_segment(&events[1].0, events[2].0.point, queue);
                 return 3;
             }
 
             // one line segment includes the other one
-            //println!("overlap subdivide case 4");
             // TODO: write this in a non-panicking way. Note that we must not access the "other event"
             // via events[3].1 because that is only a static reference, and the first divide segment
             // internally modifies the other event point (we must access the updated other event).

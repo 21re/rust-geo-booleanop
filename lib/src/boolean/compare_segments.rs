@@ -7,49 +7,6 @@ use std::rc::Rc;
 
 use super::helper;
 
-pub fn compare_segments_old<F>(le1: &Rc<SweepEvent<F>>, le2: &Rc<SweepEvent<F>>) -> Ordering
-where
-    F: Float,
-{
-    if Rc::ptr_eq(&le1, &le2) {
-        return Ordering::Equal;
-    }
-
-    if let (Some(other1), Some(other2)) = (le1.get_other_event(), le2.get_other_event()) {
-        if signed_area(le1.point, other1.point, le2.point) != 0.
-            || signed_area(le1.point, other1.point, other2.point) != 0.
-        {
-            if le1.point == le2.point {
-                return helper::less_if(le1.is_below(other2.point));
-            }
-
-            if le1.point.x == le2.point.x {
-                return helper::less_if(le1.point.y < le2.point.y);
-            }
-
-            if le1 < le2 {
-                return helper::less_if(le2.is_above(le1.point));
-            }
-
-            return helper::less_if(le1.is_below(le2.point));
-        }
-
-        if le1.is_subject == le2.is_subject {
-            if le1.point == le2.point {
-                if other1.point == other2.point {
-                    return Ordering::Equal;
-                } else {
-                    return helper::less_if(le1.contour_id < le2.contour_id);
-                }
-            }
-        } else {
-            return helper::less_if(le1.is_subject);
-        }
-    }
-
-    helper::less_if(le1 > le2)
-}
-
 pub fn compare_segments<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
 where
     F: Float,
@@ -148,77 +105,6 @@ where
         debug_assert!(false, "Other events should always be defined in compare_segment.");
         less_if(true)
     }
-}
-
-pub fn compare_segments_alt1<F>(se1_l: &Rc<SweepEvent<F>>, se2_l: &Rc<SweepEvent<F>>) -> Ordering
-where
-    F: Float,
-{
-    debug_assert!(se1_l.is_left());
-    debug_assert!(se2_l.is_left());
-
-    if Rc::ptr_eq(&se1_l, &se2_l) {
-        return Ordering::Equal;
-    }
-
-    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(&se2_l) {
-        (se1_l, se2_l, helper::less_if as fn(bool) -> Ordering)
-    } else {
-        (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)
-    };
-
-    if let (Some(se_old_r), Some(se_new_r)) = (se_old_l.get_other_event(), se_new_l.get_other_event()) {
-        let sa_l = signed_area(se_old_l.point, se_old_r.point, se_new_l.point);
-        let sa_r = signed_area(se_old_l.point, se_old_r.point, se_new_r.point);
-        if sa_l != 0. || sa_r != 0. {
-            // Segments are not collinear
-
-            // Left endpoints exactly identical? Use the right endpoint to sort
-            if se_old_l.point == se_new_l.point {
-                return less_if(se_old_l.is_below(se_new_r.point));
-            }
-
-            // Left endpoints identical in x, but different in y? Sort by y
-            if se_old_l.point.x == se_new_l.point.x {
-                return less_if(se_old_l.point.y < se_new_l.point.y);
-            }
-            let (invert, se_old, se_new) = if se_old_l.is_before(&se_new_l) {
-                (-1_f64, se_old_l, se_new_l)
-            } else {
-                (1_f64, se_new_l, se_old_l)
-            };
-
-            let cmp_new_left_point =
-                invert * signed_area(se_new.point, se_old.point, se_old.get_other_event().unwrap().point);
-            if cmp_new_left_point != 0. {
-                return less_if(cmp_new_left_point < 0.);
-            } else {
-                return less_if(
-                    invert
-                        * signed_area(
-                            se_new.get_other_event().unwrap().point,
-                            se_old.point,
-                            se_old.get_other_event().unwrap().point,
-                        )
-                        < 0.,
-                );
-            }
-        }
-
-        if se_old_l.is_subject == se_new_l.is_subject {
-            if se_old_l.point == se_new_l.point {
-                if se_old_r.point == se_new_r.point {
-                    return Ordering::Equal;
-                } else {
-                    return less_if(se_old_l.contour_id < se_new_l.contour_id);
-                }
-            }
-        } else {
-            return less_if(se_old_l.is_subject);
-        }
-    }
-
-    less_if(se_old_l > se_new_l)
 }
 
 #[cfg(test)]
