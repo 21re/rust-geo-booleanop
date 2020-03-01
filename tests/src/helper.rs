@@ -163,39 +163,55 @@ pub fn update_feature(feature: &Feature, p: &MultiPolygon<f64>) -> Feature {
     output_feature
 }
 
-pub fn run_generic_test_case(filename: &str, regenerate: bool) {
+pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
     println!("\n *** Running test case: {}", filename);
 
     let (features, p1, p2) = load_test_case(filename);
 
-    let mut output_features: Vec<Feature> = vec![features[0].clone(), features[1].clone()];
+    let mut output_features = vec![features[0].clone(), features[1].clone()];
+
+    let mut failures = Vec::new();
 
     for feature in features.iter().skip(2) {
         let expected_result = extract_expected_result(&feature);
         println!("Testing operation: {:?}", expected_result.op);
 
-        let result = match expected_result.op {
+        let result = std::panic::catch_unwind(|| match expected_result.op {
             TestOperation::Union => p1.union(&p2),
             TestOperation::Intersection => p1.intersection(&p2),
             TestOperation::Xor => p1.xor(&p2),
             TestOperation::DifferenceAB => p1.difference(&p2),
             TestOperation::DifferenceBA => p2.difference(&p1),
-        };
+        });
 
-        if !regenerate {
-            assert_eq!(
-                result, expected_result.result,
-                "Deviation found in test case {} with operation {:?}",
-                filename, expected_result.op,
-            );
+        match &result {
+            Result::Err(_) => failures.push(format!("{} / {:?} has panicked", filename, expected_result.op)),
+            Result::Ok(result) => {
+                if !regenerate {
+                    let result = std::panic::catch_unwind(||
+                        assert_eq!(
+                            *result, expected_result.result,
+                            "{} / {:?} has result deviation",
+                            filename, expected_result.op,
+                    ));
+                    if result.is_err() {
+                        failures.push(format!("{} / {:?} has result deviation", filename, expected_result.op));
+                    }
+                }
+            }
         }
 
-        output_features.push(update_feature(&feature, &result));
+        if regenerate {
+            let result = result.expect("Regeneration mode requires a valid result");
+            output_features.push(update_feature(&feature, &result));
+        }
     }
 
     if regenerate {
         write_compact_geojson(&output_features, filename);
     }
+
+    failures
 }
 
 /*
