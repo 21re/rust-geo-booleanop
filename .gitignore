@@ -1,4 +1,5 @@
 target/
+
 **/*.rs.b
 *.iml
 
@@ -8,3 +9,5 @@ target/
 # Files generated from debugging
 test_cases.pdf
 *.geojson.generated
+*.log
+debug.csv
