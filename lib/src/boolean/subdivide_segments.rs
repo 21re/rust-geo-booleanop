@@ -27,7 +27,7 @@ where
 
     while let Some(event) = event_queue.pop() {
         #[cfg(feature="debug-booleanop")] {
-            println!("{{\"processEvent\": {}}}", event.to_json_debug());
+            println!("\n{{\"processEvent\": {}}}", event.to_json_debug());
         }
         sorted_events.push(event.clone());
 
@@ -50,9 +50,8 @@ where
                     println!("{{\"seNextEvent\": {}}}", next.to_json_debug());
                 }
                 if possible_intersection(&event, &next, event_queue) == 2 {
-                    println!("Intersection with next");
+                    // Recompute fields for current segment and the one above (in bottom to top order)
                     compute_fields(&event, maybe_prev, operation);
-                    //compute_fields(&event, Some(next), operation);
                     compute_fields(&next, Some(&event), operation);
                 }
             }
@@ -63,13 +62,15 @@ where
                 }
                 if possible_intersection(&prev, &event, event_queue) == 2 {
                     let maybe_prev_prev = sweep_line.prev(&prev);
-                    //println!("Intersection with prev");
+                    // Recompute fields for current segment and the one below (in bottom to top order)
                     compute_fields(&prev, maybe_prev_prev, operation);
                     compute_fields(&event, Some(prev), operation);
                 }
             }
         } else if let Some(other_event) = event.get_other_event() {
-            //println!("sweep_line.contains(&other_event) {}", sweep_line.contains(&other_event));
+            // This debug assert is only true, if we compare segments in the sweep line
+            // based on identity (curently), and not by value (done previously).
+            debug_assert!(sweep_line.contains(&other_event), "Sweep line misses event to be removed");
             if sweep_line.contains(&other_event) {
                 let maybe_prev = sweep_line.prev(&other_event).cloned();
                 let maybe_next = sweep_line.next(&other_event).cloned();
@@ -89,10 +90,6 @@ where
                 sweep_line.remove(&other_event);
             }
         }
-
-        //let s: Vec<String> = &sweep_line.into_iter().map(|e| e.to_json_debug()).collect();
-        //let s = s.join(", ");
-        //println!("{{\"sweepLineState\": {{{}}}}}", s);
     }
 
     sorted_events
