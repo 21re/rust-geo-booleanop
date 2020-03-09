@@ -217,6 +217,7 @@ impl<F> Ord for SweepEvent<F>
 where
     F: Float,
 {
+    #[inline]
     fn cmp(&self, other: &Self) -> Ordering {
         // Ord is exactly the other way round as in the js implementation as BinaryHeap sorts decending
         let p1 = self.point;
@@ -246,6 +247,37 @@ where
         }
 
         less_if(!self.is_subject && other.is_subject)
+    }
+}
+
+#[cfg(feature = "debug-booleanop")]
+pub trait JsonDebug {
+    fn to_json_debug(&self) -> String;
+    fn to_json_debug_short(&self) -> String;
+}
+
+#[cfg(feature = "debug-booleanop")]
+impl<F> JsonDebug for Rc<SweepEvent<F>>
+where
+    F: Float,
+{
+    fn to_json_debug(&self) -> String {
+        format!(
+            "{{\"self\": {}, \"other\": {}}}",
+            self.to_json_debug_short(),
+            self.get_other_event().unwrap().to_json_debug_short(),
+        )
+    }
+
+    fn to_json_debug_short(&self) -> String {
+        format!(
+            "{{\"addr\": \"{:p}\", \"point\": [{}, {}], \"type\": \"{}\", \"poly\": \"{}\"}}",
+            *self,
+            self.point.x,
+            self.point.y,
+            if self.is_left() { "L" } else { "R" },
+            if self.is_subject { "A" } else { "B" },
+        )
     }
 }
 

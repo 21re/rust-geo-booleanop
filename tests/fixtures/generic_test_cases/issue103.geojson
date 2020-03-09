@@ -152,7 +152,8 @@
         "type": "MultiPolygon"
       },
       "properties": {
-        "operation": "union"
+        "operation": "union",
+        "swap_ab_is_broken": true
       },
       "type": "Feature"
     }

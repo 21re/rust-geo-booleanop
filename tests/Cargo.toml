@@ -5,7 +5,7 @@ authors = ["Bodo Junglas <junglas@objectcode.de>"]
 edition = "2018"
 
 [dependencies]
-geo-booleanop = { path = "../lib" }
+geo-booleanop = { path = "../lib", features = [] }   # add "debug-booleanop" for debugging
 geo = "0.12"
 
 # Note: It is crucial to enable arbitrary_precision on serde_json, otherwise
@@ -13,6 +13,7 @@ geo = "0.12"
 geojson = { version = "0.16", features = ["geo-types"] }
 serde_json = { version = "1.0.44", features = ["arbitrary_precision"] }
 
+clap = "2.3.3"
 num-traits = "0.2"
 glob = "0.3"
 pretty_assertions = "0.6"

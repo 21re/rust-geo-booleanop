@@ -18,15 +18,31 @@ where
         _ => return 0,
     };
 
-    match intersection(se1.point, other1.point, se2.point, other2.point) {
+    let inter = intersection(se1.point, other1.point, se2.point, other2.point);
+
+    #[cfg(feature = "debug-booleanop")]
+    match inter {
+        LineIntersection::Point(inter) => {
+            println!("{{\"intersection\": [{}, {}]}}", inter.x, inter.y);
+        }
+        LineIntersection::Overlap(p1, p2) => {
+            println!(
+                "{{\"overlap1\": [{}, {}], \"overlap2\": [{}, {}]}}",
+                p1.x, p1.y, p2.x, p2.y
+            );
+        }
+        _ => {}
+    }
+
+    match inter {
         LineIntersection::None => 0, // No intersection
         LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => 0, // the line segments intersect at an endpoint of both line segments
         LineIntersection::Point(inter) => {
             if se1.point != inter && other1.point != inter {
-                divide_segment(&se1, inter, queue)
+                divide_segment(&se1, inter, queue);
             }
             if se2.point != inter && other2.point != inter {
-                divide_segment(&se2, inter, queue)
+                divide_segment(&se2, inter, queue);
             }
             1
         }
@@ -85,8 +101,12 @@ where
             }
 
             // one line segment includes the other one
+            // TODO: write this in a non-panicking way. Note that we must not access the "other event"
+            // via events[3].1 because that is only a static reference, and the first divide segment
+            // internally modifies the other event point (we must access the updated other event).
+            // Probably the best solution is to introduce explicit return types for divide_segment.
             divide_segment(&events[0].0, events[1].0.point, queue);
-            divide_segment(&events[3].1, events[2].0.point, queue);
+            divide_segment(&events[3].0.get_other_event().unwrap(), events[2].0.point, queue);
 
             3
         }

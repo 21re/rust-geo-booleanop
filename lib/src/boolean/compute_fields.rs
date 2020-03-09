@@ -37,6 +37,17 @@ where
         determine_result_transition(&event, operation)
     };
     event.set_result_transition(result_transition);
+
+    #[cfg(feature = "debug-booleanop")]
+    {
+        println!(
+            "{{\"computeFields\": {{\"inOut\": {}, \"otherOut\": {}, \"resultTransition\": \"{:?}\", \"edgeType\": \"{:?}\"}}}}",
+            event.is_in_out(),
+            event.is_other_in_out(),
+            event.get_result_transition(),
+            event.get_edge_type(),
+        );
+    }
 }
 
 fn in_result<F>(event: &SweepEvent<F>, operation: Operation) -> bool
