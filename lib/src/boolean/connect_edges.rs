@@ -46,6 +46,32 @@ where
     result_events
 }
 
+fn build_vertex_iteration_order<T, I, L>(data: &[T], is_identical: I, is_left: L) -> Vec<usize>
+where
+    I: Fn(&T, &T) -> bool,
+    L: Fn(T) -> bool,
+{
+    let mut map = vec![0; data.len()];
+
+    let mut i = 0 as i64;
+
+    while i < data.len() as i64 {
+        let from = i;
+        while i < data.len() as i64 && is_identical(&data[from as usize], &data[i as usize]) {
+            i += 1;
+        }
+        let upto = i - 1;
+        println!("from: {} upto: {}", from, upto);
+
+        for j in from .. upto {
+            map[j as usize] = (j + 1) as usize;
+        }
+        map[upto as usize] = from as usize;
+    }
+
+    map
+}
+
 fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_pos: i32) -> i32
 where
     F: Float,
@@ -174,6 +200,8 @@ where
 {
     let result_events = order_events(sorted_events);
 
+    build_vertex_iteration_order(&result_events, |a, b| a.point == b.point, |e| e.is_left());
+
     #[cfg(feature = "debug-booleanop")]
     write_debug_csv(&result_events);
 
@@ -187,12 +215,14 @@ where
 
         let contour_id = contours.len() as i32;
         let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
+        println!("\nCreating contour {}", contour_id);
 
         let orig_pos = i; // Alias just for clarity
         let mut pos = i;
 
         let initial = result_events[pos as usize].point;
         contour.points.push(initial);
+        println!("{:?}", initial);
 
         loop {
             // Loop clarifications:
@@ -207,11 +237,14 @@ where
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
 
             pos = result_events[pos as usize].get_other_pos(); // pos advancement (A)
+            println!("jumping to pos {}", pos);
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
+            println!("{:?}", result_events[pos as usize].point);
 
             pos = next_pos(pos, &result_events, &processed, orig_pos); // pos advancement (B)
+            println!("searched to pos {}", pos);
 
             if pos == orig_pos {
                 break;
@@ -260,4 +293,38 @@ where
             prev_in_result=evt.get_prev_in_result().map(|o| format!("{:?}", o.point)),
         ).expect("Failed to write to file");
     }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    fn cmp(a: &i32, b: &i32) -> bool {
+        a == b
+    }
+
+    #[test]
+    fn test_build_vertex_iteration_order() {
+        assert_eq!(
+            build_vertex_iteration_order(&[], cmp, |_| false),
+            vec![],
+        );
+        assert_eq!(
+            build_vertex_iteration_order(&[1, 2, 3], cmp, |_| false),
+            vec![0, 1, 2],
+        );
+        assert_eq!(
+            build_vertex_iteration_order(&[1, 1, 2, 2], cmp, |_| false),
+            vec![1, 0, 3, 2],
+        );
+        assert_eq!(
+            build_vertex_iteration_order(&[1, 1, 1, 1], cmp, |_| false),
+            vec![1, 2, 3, 0],
+        );
+        assert_eq!(
+            build_vertex_iteration_order(&[1, 2, 2, 1], cmp, |_| false),
+            vec![0, 2, 1, 3],
+        );
+    }
+
 }
