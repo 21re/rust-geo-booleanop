@@ -49,24 +49,72 @@ where
 fn build_vertex_iteration_order<T, I, L>(data: &[T], is_identical: I, is_left: L) -> Vec<usize>
 where
     I: Fn(&T, &T) -> bool,
-    L: Fn(T) -> bool,
+    L: Fn(&T) -> bool,
 {
     let mut map = vec![0; data.len()];
 
     let mut i = 0 as i64;
 
+    println!("\n{}", data.len());
+
     while i < data.len() as i64 {
-        let from = i;
-        while i < data.len() as i64 && is_identical(&data[from as usize], &data[i as usize]) {
+        let x_ref = &data[i as usize];
+
+        let r_from = i;
+        while i < data.len() as i64 && is_identical(x_ref, &data[i as usize]) && !is_left(&data[i as usize]) {
             i += 1;
         }
-        let upto = i - 1;
-        println!("from: {} upto: {}", from, upto);
+        let r_upto_exclusive = i; // - 1;
 
-        for j in from .. upto {
+        let l_from = i;
+        while i < data.len() as i64 && is_identical(x_ref, &data[i as usize]) {
+            debug_assert!(is_left(&data[i as usize]));
+            i += 1;
+        }
+        let l_upto_exclusive = i; // - 1;
+
+        println!("r_from: {} r_upto: {}", r_from, r_upto_exclusive);
+        println!("l_from: {} l_upto: {}", l_from, l_upto_exclusive);
+
+        let has_r_events = r_upto_exclusive > r_from;
+        let has_l_events = l_upto_exclusive > l_from;
+
+        if has_r_events {
+            let r_upto = r_upto_exclusive - 1;
+            // Connect elements in [r_from, r_upto) to higher index
+            for j in r_from .. r_upto {
+                map[j as usize] = (j + 1) as usize;
+            }
+            // Special handling of *last* element: Connect either the last L event
+            // or loop back to start of R events (if no L events).
+            if has_l_events {
+                map[r_upto as usize] = (l_upto_exclusive - 1) as usize;
+            } else {
+                map[r_upto as usize] = r_from as usize;
+            }
+        }
+        if has_l_events {
+            let l_upto = l_upto_exclusive - 1;
+            // Connect elements in (l_from, l_upto] to lower index
+            for j in l_from + 1 ..= l_upto {
+                map[j as usize] = (j - 1) as usize;
+            }
+            // Special handling of *first* element: Connect either to the first R event
+            // or loop back to end of L events (if no R events).
+            if has_r_events {
+                map[l_from as usize] = r_from as usize;
+            } else {
+                map[l_from as usize] = l_upto as usize;
+            }
+        }
+
+
+        /*
+        for j in r_from .. r_upto {
             map[j as usize] = (j + 1) as usize;
         }
-        map[upto as usize] = from as usize;
+        map[r_upto as usize] = r_from as usize;
+        */
     }
 
     map
@@ -296,35 +344,68 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod test_check_precompute_order {
     use super::*;
+    use LeftRight::*;
 
-    fn cmp(a: &i32, b: &i32) -> bool {
-        a == b
+    #[derive(Debug, PartialEq)]
+    enum LeftRight {
+        L,
+        R,
+    }
+
+    macro_rules! check {
+        ($data_values:expr, $data_lr:expr, $expected:expr) => {
+            let data_values: &[i32] = &$data_values;
+            let data_lr: &[LeftRight] = &$data_lr;
+            let data: Vec<(&i32, &LeftRight)> = data_values.iter().zip(data_lr.iter()).collect();
+            let expected: &[usize] = &$expected;
+            println!("\nData: {:?}\nExpected: {:?}", data, expected);
+            assert_eq!(
+                build_vertex_iteration_order(&data, |a, b| a.0 == b.0, |(_, lr)| **lr == L),
+                expected,
+            );
+        };
     }
 
     #[test]
-    fn test_build_vertex_iteration_order() {
-        assert_eq!(
-            build_vertex_iteration_order(&[], cmp, |_| false),
-            vec![],
-        );
-        assert_eq!(
-            build_vertex_iteration_order(&[1, 2, 3], cmp, |_| false),
-            vec![0, 1, 2],
-        );
-        assert_eq!(
-            build_vertex_iteration_order(&[1, 1, 2, 2], cmp, |_| false),
-            vec![1, 0, 3, 2],
-        );
-        assert_eq!(
-            build_vertex_iteration_order(&[1, 1, 1, 1], cmp, |_| false),
-            vec![1, 2, 3, 0],
-        );
-        assert_eq!(
-            build_vertex_iteration_order(&[1, 2, 2, 1], cmp, |_| false),
-            vec![0, 2, 1, 3],
-        );
+    fn test_build_vertex_iteration_order_right_events() {
+        check!([], [], []);
+        check!([1], [R], [0]);
+        check!([1, 2, 3], [R, R, R], [0, 1, 2]);
+
+        check!([1, 1], [R, R], [1, 0]);
+        check!([1, 1, 2, 2], [R, R, R, R], [1, 0, 3, 2]);
+        check!([1, 2, 2, 3], [R, R, R, R], [0, 2, 1, 3]);
+        check!([1, 1, 1, 1], [R, R, R, R], [1, 2, 3, 0]);
+    }
+
+    #[test]
+    fn test_build_vertex_iteration_order_left_events() {
+        check!([], [], []);
+        check!([1], [L], [0]);
+        check!([1, 2, 3], [L, L, L], [0, 1, 2]);
+
+        check!([1, 1], [L, L], [1, 0]);
+        check!([1, 1, 2, 2], [L, L, L, L], [1, 0, 3, 2]);
+        check!([1, 2, 2, 3], [L, L, L, L], [0, 2, 1, 3]);
+        check!([1, 1, 1, 1], [L, L, L, L], [3, 0, 1, 2]);
+
+    }
+
+    #[test]
+    fn test_build_vertex_iteration_order_mixed_events() {
+        check!([1, 2], [R, L], [0, 1]);
+        check!([1, 2], [L, R], [0, 1]);
+
+        check!([1, 1], [R, L], [1, 0]);
+
+        check!([1, 1, 1, 1], [R, R, L, L], [1, 3, 0, 2]);
+
+        check!([1, 1, 1, 2, 2, 2], [R, R, R, L, L, L], [1, 2, 0, 5, 3, 4]);
+        check!([1, 1, 1, 2, 2, 2], [L, L, L, R, R, R], [2, 0, 1, 4, 5, 3]);
+
+        check!([1, 1, 1, 1, 1, 1], [R, R, R, L, L, L], [1, 2, 5, 0, 3, 4]);
     }
 
 }
