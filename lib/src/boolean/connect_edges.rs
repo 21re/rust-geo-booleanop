@@ -46,6 +46,15 @@ where
     result_events
 }
 
+/// Helper function that identifies groups of sweep event that belong to one
+/// vertex, and precomputes in which order the events within one group should
+/// be iterated. The result is a vector with the semantics:
+///
+///     map[i] = index of next event belonging to vertex
+///
+/// Iteration order is in positive index direction for right events, but in
+/// reverse index direction for left events in order to ensure strict clockwise
+/// iteration around the vertex.
 fn precompute_iteration_order<T, I, L>(data: &[T], is_identical: I, is_left: L) -> Vec<usize>
 where
     I: Fn(&T, &T) -> bool,
@@ -80,7 +89,7 @@ where
 
         if has_r_events {
             let r_upto = r_upto_exclusive - 1;
-            // Connect elements in [r_from, r_upto) to higher index
+            // Connect elements in [r_from, r_upto) to larger index
             for j in r_from .. r_upto {
                 map[j] = j + 1;
             }
@@ -111,36 +120,20 @@ where
     map
 }
 
-fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_pos: i32) -> i32
-where
-    F: Float,
+fn get_next_pos(pos: i32, processed: &HashSet<i32>, iteration_map: &[usize]) -> Option<i32>
 {
-    let p = result_events[pos as usize].point;
-    let mut new_pos = pos + 1;
-    let length = result_events.len() as i32;
-    let mut p1 = if new_pos < length {
-        result_events[new_pos as usize].point
-    } else {
-        p
-    };
+    let mut pos = pos;
+    let start_pos = pos;
 
-    while new_pos < length && p == p1 {
-        if !processed.contains(&new_pos) {
-            return new_pos;
-        } else {
-            new_pos += 1;
-        }
-        if new_pos < length {
-            p1 = result_events[new_pos as usize].point;
+    loop {
+        pos = iteration_map[pos as usize] as i32;
+        if pos == start_pos {
+            // Entire group is already processed?
+            return None;
+        } else if !processed.contains(&pos) {
+            return Some(pos);
         }
     }
-
-    new_pos = pos - 1;
-
-    while processed.contains(&new_pos) && new_pos > orig_pos {
-        new_pos -= 1;
-    }
-    new_pos
 }
 
 pub struct Contour<F>
@@ -239,7 +232,7 @@ where
 {
     let result_events = order_events(sorted_events);
 
-    precompute_iteration_order(&result_events, |a, b| a.point == b.point, |e| e.is_left());
+    let iteration_map = precompute_iteration_order(&result_events, |a, b| a.point == b.point, |e| e.is_left());
 
     #[cfg(feature = "debug-booleanop")]
     write_debug_csv(&result_events);
@@ -254,14 +247,14 @@ where
 
         let contour_id = contours.len() as i32;
         let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
-        println!("\nCreating contour {}", contour_id);
+        // println!("\nCreating contour {}", contour_id);
 
-        let orig_pos = i; // Alias just for clarity
+        let contour_start_pos = i; // Alias just for clarity
         let mut pos = i;
 
         let initial = result_events[pos as usize].point;
         contour.points.push(initial);
-        println!("{:?}", initial);
+        // println!("{:?}", initial);
 
         loop {
             // Loop clarifications:
@@ -275,17 +268,23 @@ where
             //   terminates the loop.
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
 
-            pos = result_events[pos as usize].get_other_pos(); // pos advancement (A)
-            println!("jumping to pos {}", pos);
+            // pos advancement (A)
+            pos = result_events[pos as usize].get_other_pos();
+            // println!("jumping to pos {}", pos);
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
-            println!("{:?}", result_events[pos as usize].point);
+            // println!("{:?}", result_events[pos as usize].point);
 
-            pos = next_pos(pos, &result_events, &processed, orig_pos); // pos advancement (B)
-            println!("searched to pos {}", pos);
+            // pos advancement (B)
+            let next_pos_opt = get_next_pos(pos, &processed, &iteration_map);
+            match next_pos_opt {
+                Some(npos) => { pos = npos; }
+                None => { break; }
+            }
+            // println!("searched to pos {}", pos);
 
-            if pos == orig_pos {
+            if pos == contour_start_pos {
                 break;
             }
         }
