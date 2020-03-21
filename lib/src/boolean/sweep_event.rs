@@ -286,6 +286,36 @@ mod test {
     use super::super::helper::test::xy;
     use super::*;
 
+    pub fn se_pair(
+        contour_id: u32,
+        x: f64,
+        y: f64,
+        other_x: f64,
+        other_y: f64,
+        is_subject: bool,
+    ) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
+        let other = SweepEvent::new_rc(
+            contour_id,
+            Coordinate { x: other_x, y: other_y },
+            false,
+            Weak::new(),
+            is_subject,
+            true,
+        );
+        let event = SweepEvent::new_rc(
+            contour_id,
+            Coordinate { x, y },
+            true,
+            Rc::downgrade(&other),
+            is_subject,
+            true,
+        );
+        // Make sure test cases fulfill the invariant of left/right relationship.
+        assert!(event.is_before(&other));
+
+        (event, other)
+    }
+
     #[test]
     pub fn test_is_below() {
         let other_s1 = SweepEvent::new_rc(0, xy(1, 1), false, Weak::new(), false, true);
@@ -329,5 +359,50 @@ mod test {
 
         assert!(s1.is_vertical());
         assert!(!s2.is_vertical());
+    }
+
+    #[test]
+    fn test_order_star_pattern() {
+        // This test verifies the assumption underlying the `precompute_iteration_order` logic:
+        // Events with an identical points must be ordered:
+        // - R events before L events
+        // - R events in clockwise order
+        // - L events in counter-clockwise order
+        let id = 0;
+        let z = 0.;
+
+        // Group 'a' which have their right event at (0, 0), clockwise
+        let (_av_l, av_r) = se_pair(id,  0., -1., z, z, true);   // vertical comes first
+        let (_a1_l, a1_r) = se_pair(id, -2., -6., z, z, true);
+        let (_a2_l, a2_r) = se_pair(id, -1., -2., z, z, true);
+        let (_a3_l, a3_r) = se_pair(id, -1., -1., z, z, true);
+        let (_a4_l, a4_r) = se_pair(id, -2., -1., z, z, true);
+        let (_a5_l, a5_r) = se_pair(id, -2.,  1., z, z, true);
+        let (_a6_l, a6_r) = se_pair(id, -1.,  1., z, z, true);
+        let (_a7_l, a7_r) = se_pair(id, -1.,  2., z, z, true);
+        let (_a8_l, a8_r) = se_pair(id, -2.,  6., z, z, true);
+
+        // Group 'b' which have their left event at (0, 0), counter clockwise
+        let (b1_l, _b1_r) = se_pair(id, z, z, 2., -6., true);
+        let (b2_l, _b2_r) = se_pair(id, z, z, 1., -2., true);
+        let (b3_l, _b3_r) = se_pair(id, z, z, 1., -1., true);
+        let (b4_l, _b4_r) = se_pair(id, z, z, 2., -1., true);
+        let (b5_l, _b5_r) = se_pair(id, z, z, 2.,  1., true);
+        let (b6_l, _b6_r) = se_pair(id, z, z, 1.,  1., true);
+        let (b7_l, _b7_r) = se_pair(id, z, z, 1.,  2., true);
+        let (b8_l, _b8_r) = se_pair(id, z, z, 2.,  6., true);
+        let (bv_l, _bv_r) = se_pair(id, z, z, 0.,  1., true);    // vertical comes last
+
+        let events_expected_order = [
+            av_r, a1_r, a2_r, a3_r, a4_r, a5_r, a6_r, a7_r, a8_r,
+            b1_l, b2_l, b3_l, b4_l, b5_l, b6_l, b7_l, b8_l, bv_l,
+        ];
+
+        for i in 0 .. events_expected_order.len() - 1{
+            for j in i + 1 .. events_expected_order.len() {
+                assert!(events_expected_order[i].is_before(&events_expected_order[j]));
+            }
+        }
+
     }
 }
