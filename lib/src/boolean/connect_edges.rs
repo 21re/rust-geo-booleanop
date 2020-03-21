@@ -198,7 +198,12 @@ where
                 }
             } else {
                 // We are outside => this contour is an exterior contour of same depth.
-                let depth = contours[lower_contour_id as usize].depth;
+                let depth = if lower_contour_id < 0 || lower_contour_id as usize >= contours.len() {
+                    debug_assert!(false, "Invalid lower_contour_id should be impossible.");
+                    0
+                } else {
+                    contours[lower_contour_id as usize].depth
+                };
                 Contour::new(None, depth)
             }
         } else {
@@ -246,15 +251,15 @@ where
         }
 
         let contour_id = contours.len() as i32;
-        let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
         // println!("\nCreating contour {}", contour_id);
+        let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
 
         let contour_start_pos = i; // Alias just for clarity
         let mut pos = i;
 
         let initial = result_events[pos as usize].point;
         contour.points.push(initial);
-        // println!("{:?}", initial);
+        // println!("{:?} contour_id: {}", initial, contour_id);
 
         loop {
             // Loop clarifications:
@@ -274,7 +279,7 @@ where
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
-            // println!("{:?}", result_events[pos as usize].point);
+            // println!("{:?} contour_id: {}", result_events[pos as usize].point, contour_id);
 
             // pos advancement (B)
             let next_pos_opt = get_next_pos(pos, &processed, &iteration_map);
