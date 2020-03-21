@@ -254,7 +254,6 @@ where
         // println!("\nCreating contour {}", contour_id);
         let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
 
-        let contour_start_pos = i; // Alias just for clarity
         let mut pos = i;
 
         let initial = result_events[pos as usize].point;
@@ -289,7 +288,10 @@ where
             }
             // println!("searched to pos {}", pos);
 
-            if pos == contour_start_pos {
+            // Optional: Terminate contours early (to avoid overly long contours that
+            // may mix clockwise and counter-clockwise winding rules, which can be more
+            // difficult to handle in some use cases).
+            if result_events[pos as usize].point == initial {
                 break;
             }
         }
