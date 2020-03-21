@@ -100,7 +100,7 @@ def plot(ax, multi_polygon, label, shade_color=None):
             path_points += points_ordered
             path_commands += [Path.MOVETO] + [Path.LINETO] * (len(points_ordered) - 2) + [Path.CLOSEPOLY]
 
-        if shade_color is not None:
+        if shade_color is not None and len(path_points) > 0:
             path = Path(path_points, path_commands)
             patch = PathPatch(path, ec=None, fc=shade_color, alpha=0.15)
             ax.add_patch(patch)
