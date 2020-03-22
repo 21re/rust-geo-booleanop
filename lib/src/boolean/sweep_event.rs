@@ -105,6 +105,10 @@ where
         self.mutable.borrow_mut().prev_in_result = Rc::downgrade(prev_in_result);
     }
 
+    pub fn unset_prev_in_result(&self) {
+        self.mutable.borrow_mut().prev_in_result = Weak::new();
+    }
+
     pub fn get_edge_type(&self) -> EdgeType {
         self.mutable.borrow().edge_type
     }

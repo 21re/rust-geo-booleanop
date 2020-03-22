@@ -22,12 +22,17 @@ where
         if prev.is_in_result() && !prev.is_vertical() {
             event.set_prev_in_result(prev);
         } else if let Some(prev_of_prev) = prev.get_prev_in_result() {
-            if prev_of_prev.is_in_result() {
-                event.set_prev_in_result(&prev_of_prev);
-            }
+            event.set_prev_in_result(&prev_of_prev);
+        } else {
+            // Clearing prev_in_result is necessary for re-computations, if the first
+            // computation has already set prev_in_result, but it is no longer valid now.
+            event.unset_prev_in_result();
         }
     } else {
         event.set_in_out(false, true);
+        // Clearing prev_in_result is necessary for re-computations, if the first
+        // computation has already set prev_in_result, but it is no longer valid now.
+        event.unset_prev_in_result();
     }
 
     // Determine whether segment is in result, and if so, whether it is an
