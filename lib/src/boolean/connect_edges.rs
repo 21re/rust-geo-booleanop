@@ -55,6 +55,7 @@ where
 /// Iteration order is in positive index direction for right events, but in
 /// reverse index direction for left events in order to ensure strict clockwise
 /// iteration around the vertex.
+#[allow(clippy::needless_range_loop)] // Check has false positive here
 fn precompute_iteration_order<T, I, L>(data: &[T], is_identical: I, is_left: L) -> Vec<usize>
 where
     I: Fn(&T, &T) -> bool,
@@ -90,7 +91,7 @@ where
         if has_r_events {
             let r_upto = r_upto_exclusive - 1;
             // Connect elements in [r_from, r_upto) to larger index
-            for j in r_from .. r_upto {
+            for j in r_from..r_upto {
                 map[j] = j + 1;
             }
             // Special handling of *last* element: Connect either the last L event
@@ -104,7 +105,7 @@ where
         if has_l_events {
             let l_upto = l_upto_exclusive - 1;
             // Connect elements in (l_from, l_upto] to lower index
-            for j in l_from + 1 ..= l_upto {
+            for j in l_from + 1..=l_upto {
                 map[j] = j - 1;
             }
             // Special handling of *first* element: Connect either to the first R event
@@ -120,8 +121,7 @@ where
     map
 }
 
-fn get_next_pos(pos: i32, processed: &HashSet<i32>, iteration_map: &[usize]) -> Option<i32>
-{
+fn get_next_pos(pos: i32, processed: &HashSet<i32>, iteration_map: &[usize]) -> Option<i32> {
     let mut pos = pos;
     let start_pos = pos;
 
@@ -283,8 +283,12 @@ where
             // pos advancement (B)
             let next_pos_opt = get_next_pos(pos, &processed, &iteration_map);
             match next_pos_opt {
-                Some(npos) => { pos = npos; }
-                None => { break; }
+                Some(npos) => {
+                    pos = npos;
+                }
+                None => {
+                    break;
+                }
             }
             // println!("searched to pos {}", pos);
 
@@ -387,7 +391,6 @@ mod test_precompute_iteration_order {
         check!([1, 1, 2, 2], [L, L, L, L], [1, 0, 3, 2]);
         check!([1, 2, 2, 3], [L, L, L, L], [0, 2, 1, 3]);
         check!([1, 1, 1, 1], [L, L, L, L], [3, 0, 1, 2]);
-
     }
 
     #[test]
@@ -410,5 +413,4 @@ mod test_precompute_iteration_order {
             [1, 3, 0, 2, 5, 4, 7, 9, 6, 8]
         );
     }
-
 }

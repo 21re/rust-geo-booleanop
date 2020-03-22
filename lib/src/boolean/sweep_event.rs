@@ -365,6 +365,7 @@ mod test {
         assert!(!s2.is_vertical());
     }
 
+    #[rustfmt::skip]
     #[test]
     fn test_order_star_pattern() {
         // This test verifies the assumption underlying the `precompute_iteration_order` logic:
@@ -402,7 +403,7 @@ mod test {
             b1_l, b2_l, b3_l, b4_l, b5_l, b6_l, b7_l, b8_l, bv_l,
         ];
 
-        for i in 0 .. events_expected_order.len() - 1{
+        for i in 0 .. events_expected_order.len() - 1 {
             for j in i + 1 .. events_expected_order.len() {
                 assert!(events_expected_order[i].is_before(&events_expected_order[j]));
             }
