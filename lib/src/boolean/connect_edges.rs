@@ -82,9 +82,6 @@ where
         }
         let l_upto_exclusive = i;
 
-        // println!("r_from: {} r_upto: {}", r_from, r_upto_exclusive);
-        // println!("l_from: {} l_upto: {}", l_from, l_upto_exclusive);
-
         let has_r_events = r_upto_exclusive > r_from;
         let has_l_events = l_upto_exclusive > l_from;
 
@@ -251,14 +248,12 @@ where
         }
 
         let contour_id = contours.len() as i32;
-        // println!("\nCreating contour {}", contour_id);
         let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
 
         let mut pos = i;
 
         let initial = result_events[pos as usize].point;
         contour.points.push(initial);
-        // println!("{:?} contour_id: {}", initial, contour_id);
 
         loop {
             // Loop clarifications:
@@ -274,11 +269,9 @@ where
 
             // pos advancement (A)
             pos = result_events[pos as usize].get_other_pos();
-            // println!("jumping to pos {}", pos);
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
-            // println!("{:?} contour_id: {}", result_events[pos as usize].point, contour_id);
 
             // pos advancement (B)
             let next_pos_opt = get_next_pos(pos, &processed, &iteration_map);
@@ -290,7 +283,6 @@ where
                     break;
                 }
             }
-            // println!("searched to pos {}", pos);
 
             // Optional: Terminate contours early (to avoid overly long contours that
             // may mix clockwise and counter-clockwise winding rules, which can be more
