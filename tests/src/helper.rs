@@ -242,13 +242,9 @@ pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
         }
 
         if regenerate {
-            let result = all_results
-                .first()
-                .expect("Need at least one result")
-                .1
-                .as_ref()
-                .expect("Regeneration mode requires a valid result");
-            output_features.push(update_feature(&feature, &result));
+            if let Result::Ok(result) = &all_results.first().expect("Need at least one result").1 {
+                output_features.push(update_feature(&feature, &result));
+            }
         }
     }
 
