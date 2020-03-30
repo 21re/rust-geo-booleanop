@@ -50,7 +50,7 @@ where
 /// vertex, and precomputes in which order the events within one group should
 /// be iterated. The result is a vector with the semantics:
 ///
-///     map[i] = index of next event belonging to vertex
+/// map[i] = index of next event belonging to vertex
 ///
 /// Iteration order is in positive index direction for right events, but in
 /// reverse index direction for left events in order to ensure strict clockwise
