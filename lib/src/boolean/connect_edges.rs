@@ -46,36 +46,91 @@ where
     result_events
 }
 
-fn next_pos<F>(pos: i32, result_events: &[Rc<SweepEvent<F>>], processed: &HashSet<i32>, orig_pos: i32) -> i32
+/// Helper function that identifies groups of sweep event that belong to one
+/// vertex, and precomputes in which order the events within one group should
+/// be iterated. The result is a vector with the semantics:
+///
+///     map[i] = index of next event belonging to vertex
+///
+/// Iteration order is in positive index direction for right events, but in
+/// reverse index direction for left events in order to ensure strict clockwise
+/// iteration around the vertex.
+#[allow(clippy::needless_range_loop)] // Check has false positive here
+fn precompute_iteration_order<T, I, L>(data: &[T], is_identical: I, is_left: L) -> Vec<usize>
 where
-    F: Float,
+    I: Fn(&T, &T) -> bool,
+    L: Fn(&T) -> bool,
 {
-    let p = result_events[pos as usize].point;
-    let mut new_pos = pos + 1;
-    let length = result_events.len() as i32;
-    let mut p1 = if new_pos < length {
-        result_events[new_pos as usize].point
-    } else {
-        p
-    };
+    let mut map = vec![0; data.len()];
 
-    while new_pos < length && p == p1 {
-        if !processed.contains(&new_pos) {
-            return new_pos;
-        } else {
-            new_pos += 1;
+    let mut i = 0;
+    while i < data.len() {
+        let x_ref = &data[i];
+
+        // Find index range of R events
+        let r_from = i;
+        while i < data.len() && is_identical(x_ref, &data[i]) && !is_left(&data[i]) {
+            i += 1;
         }
-        if new_pos < length {
-            p1 = result_events[new_pos as usize].point;
+        let r_upto_exclusive = i;
+
+        // Find index range of L event
+        let l_from = i;
+        while i < data.len() && is_identical(x_ref, &data[i]) {
+            debug_assert!(is_left(&data[i]));
+            i += 1;
+        }
+        let l_upto_exclusive = i;
+
+        let has_r_events = r_upto_exclusive > r_from;
+        let has_l_events = l_upto_exclusive > l_from;
+
+        if has_r_events {
+            let r_upto = r_upto_exclusive - 1;
+            // Connect elements in [r_from, r_upto) to larger index
+            for j in r_from..r_upto {
+                map[j] = j + 1;
+            }
+            // Special handling of *last* element: Connect either the last L event
+            // or loop back to start of R events (if no L events).
+            if has_l_events {
+                map[r_upto] = l_upto_exclusive - 1;
+            } else {
+                map[r_upto] = r_from;
+            }
+        }
+        if has_l_events {
+            let l_upto = l_upto_exclusive - 1;
+            // Connect elements in (l_from, l_upto] to lower index
+            for j in l_from + 1..=l_upto {
+                map[j] = j - 1;
+            }
+            // Special handling of *first* element: Connect either to the first R event
+            // or loop back to end of L events (if no R events).
+            if has_r_events {
+                map[l_from] = r_from;
+            } else {
+                map[l_from] = l_upto;
+            }
         }
     }
 
-    new_pos = pos - 1;
+    map
+}
 
-    while processed.contains(&new_pos) && new_pos > orig_pos {
-        new_pos -= 1;
+fn get_next_pos(pos: i32, processed: &HashSet<i32>, iteration_map: &[usize]) -> Option<i32> {
+    let mut pos = pos;
+    let start_pos = pos;
+
+    loop {
+        pos = iteration_map[pos as usize] as i32;
+        if pos == start_pos {
+            // Entire group is already processed?
+            return None;
+        } else if !processed.contains(&pos) {
+            return Some(pos);
+        }
     }
-    new_pos
 }
 
 pub struct Contour<F>
@@ -140,7 +195,12 @@ where
                 }
             } else {
                 // We are outside => this contour is an exterior contour of same depth.
-                let depth = contours[lower_contour_id as usize].depth;
+                let depth = if lower_contour_id < 0 || lower_contour_id as usize >= contours.len() {
+                    debug_assert!(false, "Invalid lower_contour_id should be impossible.");
+                    0
+                } else {
+                    contours[lower_contour_id as usize].depth
+                };
                 Contour::new(None, depth)
             }
         } else {
@@ -174,6 +234,8 @@ where
 {
     let result_events = order_events(sorted_events);
 
+    let iteration_map = precompute_iteration_order(&result_events, |a, b| a.point == b.point, |e| e.is_left());
+
     #[cfg(feature = "debug-booleanop")]
     write_debug_csv(&result_events);
 
@@ -188,7 +250,6 @@ where
         let contour_id = contours.len() as i32;
         let mut contour = Contour::initialize_from_context(&result_events[i as usize], &mut contours, contour_id);
 
-        let orig_pos = i; // Alias just for clarity
         let mut pos = i;
 
         let initial = result_events[pos as usize].point;
@@ -206,14 +267,27 @@ where
             //   terminates the loop.
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
 
-            pos = result_events[pos as usize].get_other_pos(); // pos advancement (A)
+            // pos advancement (A)
+            pos = result_events[pos as usize].get_other_pos();
 
             mark_as_processed(&mut processed, &result_events, pos, contour_id);
             contour.points.push(result_events[pos as usize].point);
 
-            pos = next_pos(pos, &result_events, &processed, orig_pos); // pos advancement (B)
+            // pos advancement (B)
+            let next_pos_opt = get_next_pos(pos, &processed, &iteration_map);
+            match next_pos_opt {
+                Some(npos) => {
+                    pos = npos;
+                }
+                None => {
+                    break;
+                }
+            }
 
-            if pos == orig_pos {
+            // Optional: Terminate contours early (to avoid overly long contours that
+            // may mix clockwise and counter-clockwise winding rules, which can be more
+            // difficult to handle in some use cases).
+            if result_events[pos as usize].point == initial {
                 break;
             }
         }
@@ -259,5 +333,76 @@ where
             exterior_ring=evt.is_exterior_ring,
             prev_in_result=evt.get_prev_in_result().map(|o| format!("{:?}", o.point)),
         ).expect("Failed to write to file");
+    }
+}
+
+#[cfg(test)]
+mod test_precompute_iteration_order {
+    use super::*;
+    use LeftRight::*;
+
+    #[derive(Debug, PartialEq)]
+    enum LeftRight {
+        L,
+        R,
+    }
+
+    macro_rules! check {
+        ($data_values:expr, $data_lr:expr, $expected:expr) => {
+            let data_values: &[i32] = &$data_values;
+            let data_lr: &[LeftRight] = &$data_lr;
+            let data: Vec<(&i32, &LeftRight)> = data_values.iter().zip(data_lr.iter()).collect();
+            let expected: &[usize] = &$expected;
+            println!("\nData: {:?}\nExpected: {:?}", data, expected);
+            assert_eq!(
+                precompute_iteration_order(&data, |a, b| a.0 == b.0, |(_, lr)| **lr == L),
+                expected,
+            );
+        };
+    }
+
+    #[test]
+    fn test_precompute_iteration_order_right_events() {
+        check!([], [], []);
+        check!([1], [R], [0]);
+        check!([1, 2, 3], [R, R, R], [0, 1, 2]);
+
+        check!([1, 1], [R, R], [1, 0]);
+        check!([1, 1, 2, 2], [R, R, R, R], [1, 0, 3, 2]);
+        check!([1, 2, 2, 3], [R, R, R, R], [0, 2, 1, 3]);
+        check!([1, 1, 1, 1], [R, R, R, R], [1, 2, 3, 0]);
+    }
+
+    #[test]
+    fn test_precompute_iteration_order_left_events() {
+        check!([], [], []);
+        check!([1], [L], [0]);
+        check!([1, 2, 3], [L, L, L], [0, 1, 2]);
+
+        check!([1, 1], [L, L], [1, 0]);
+        check!([1, 1, 2, 2], [L, L, L, L], [1, 0, 3, 2]);
+        check!([1, 2, 2, 3], [L, L, L, L], [0, 2, 1, 3]);
+        check!([1, 1, 1, 1], [L, L, L, L], [3, 0, 1, 2]);
+    }
+
+    #[test]
+    fn test_precompute_iteration_order_mixed_events() {
+        check!([1, 2], [R, L], [0, 1]);
+        check!([1, 2], [L, R], [0, 1]);
+
+        check!([1, 1], [R, L], [1, 0]);
+
+        check!([1, 1, 1, 1], [R, R, L, L], [1, 3, 0, 2]);
+
+        check!([1, 1, 1, 2, 2, 2], [R, R, R, L, L, L], [1, 2, 0, 5, 3, 4]);
+        check!([1, 1, 1, 2, 2, 2], [L, L, L, R, R, R], [2, 0, 1, 4, 5, 3]);
+
+        check!([1, 1, 1, 1, 1, 1], [R, R, R, L, L, L], [1, 2, 5, 0, 3, 4]);
+
+        check!(
+            [1, 1, 1, 1, 2, 2, 3, 3, 3, 3],
+            [R, R, L, L, R, L, R, R, L, L],
+            [1, 3, 0, 2, 5, 4, 7, 9, 6, 8]
+        );
     }
 }
