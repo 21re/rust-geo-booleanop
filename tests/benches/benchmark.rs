@@ -13,22 +13,55 @@ fn load(filename: &str) -> (MultiPolygon<f64>, MultiPolygon<f64>) {
 
 #[rustfmt::skip]
 fn benchmarks(c: &mut Criterion) {
+    let mut g = c.benchmark_group("benches");
 
-    c.bench_function("issue96 / intersection", |b| b.iter_batched(
+    // small cases
+    g.bench_function("hole_hole/union", |b| b.iter_batched(
+        || load("fixtures/benchmarks/hole_hole.geojson"),
+        |(p1, p2)| p1.union(&p2),
+        BatchSize::SmallInput,
+    ));
+
+    g.bench_function("many_rects/union", |b| b.iter_batched(
+        || load("fixtures/generic_test_cases/many_rects.geojson"),
+        |(p1, p2)| p1.union(&p2),
+        BatchSize::SmallInput,
+    ));
+
+    // medium cases
+    g.sample_size(30);
+
+    g.bench_function("state_source/union", |b| b.iter_batched(
+        || load("fixtures/benchmarks/states_source.geojson"),
+        |(p1, p2)| p1.union(&p2),
+        BatchSize::SmallInput,
+    ));
+
+    g.bench_function("issue96/intersection", |b| b.iter_batched(
         || load("fixtures/generic_test_cases/issue96.geojson"),
         |(p1, p2)| p1.intersection(&p2),
         BatchSize::SmallInput,
     ));
-    c.bench_function("issue96 / union", |b| b.iter_batched(
+
+    g.bench_function("issue96/union", |b| b.iter_batched(
         || load("fixtures/generic_test_cases/issue96.geojson"),
         |(p1, p2)| p1.union(&p2),
         BatchSize::SmallInput,
     ));
 
-    c.bench_function("many_rects / union", |b| b.iter_batched(
-        || load("fixtures/generic_test_cases/many_rects.geojson"),
+    // large benchmarks
+    g.sample_size(10);
+
+    g.bench_function("asia/union", |b| b.iter_batched(
+        || load("fixtures/benchmarks/asia.geojson"),
         |(p1, p2)| p1.union(&p2),
         BatchSize::SmallInput,
+    ));
+
+    g.bench_function("worldmap/intersection", |b| b.iter_batched(
+        || load("fixtures/benchmarks/worldmap.geojson"),
+        |(p1, p2)| p1.intersection(&p2),
+        BatchSize::LargeInput,
     ));
 }
 
