@@ -16,9 +16,9 @@ pub trait NextAfter: NumTraitsFloat {
 impl NextAfter for f64 {
     fn nextafter(self, up: bool) -> Self {
         if up {
-            self.next_after(&std::f64::INFINITY)
+            self.next_after(std::f64::INFINITY)
         } else {
-            self.next_after(&std::f64::NEG_INFINITY)
+            self.next_after(std::f64::NEG_INFINITY)
         }
     }
 }
@@ -26,9 +26,9 @@ impl NextAfter for f64 {
 impl NextAfter for f32 {
     fn nextafter(self, up: bool) -> Self {
         if up {
-            self.next_after(&std::f32::INFINITY)
+            self.next_after(std::f32::INFINITY)
         } else {
-            self.next_after(&std::f32::NEG_INFINITY)
+            self.next_after(std::f32::NEG_INFINITY)
         }
     }
 }
@@ -73,7 +73,7 @@ pub mod test {
             x.nextafter(true)
         }
 
-        assert_eq!(dummy(0_f64), 0_f64.next_after(&std::f64::INFINITY));
-        assert_eq!(dummy(0_f32), 0_f32.next_after(&std::f32::INFINITY));
+        assert_eq!(dummy(0_f64), 0_f64.next_after(std::f64::INFINITY));
+        assert_eq!(dummy(0_f32), 0_f32.next_after(std::f32::INFINITY));
     }
 }
