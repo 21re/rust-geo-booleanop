@@ -9,3 +9,4 @@ mod subdivide_segments_test;
 
 pub mod compact_geojson;
 pub mod helper;
+pub mod data_generators;
