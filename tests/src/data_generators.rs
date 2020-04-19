@@ -40,19 +40,6 @@ pub fn generate_grid(min: f64, max: f64, rect_size: f64, num_rects: i32) -> Mult
     MultiPolygon(polygons)
 }
 
-pub fn convert_to_feature(p: &MultiPolygon<f64>, operation: Option<String>) -> Feature {
-    Feature {
-        geometry: Some(Geometry::new(Value::from(p))),
-        bbox: None,
-        id: None,
-        properties: operation.map(
-            |operation| Map::from_iter(
-                std::iter::once(("operation".to_string(), json!(operation)))
-            )
-        ),
-        foreign_members: None,
-    }
-}
 
 /*
 pub fn write_testcase(polygons: &[MultiPolygon<f64>], filename: &str,) {

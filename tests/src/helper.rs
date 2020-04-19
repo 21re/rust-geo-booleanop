@@ -1,16 +1,48 @@
 use geo_booleanop::boolean::BooleanOp;
 
-use super::compact_geojson::write_compact_geojson;
-
 use geo::{Coordinate, MultiPolygon, Polygon};
+
 use geojson::{Feature, GeoJson, Geometry, Value};
-use pretty_assertions::assert_eq;
+use serde_json::{json, Map};
 
 use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
-use std::panic::catch_unwind;
-use std::thread::Result;
+use std::iter::FromIterator;
+
+// ----------------------------------------------------------------------------
+// General geo / booleanop helpers
+// ----------------------------------------------------------------------------
+
+pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
+    Coordinate {
+        x: x.into(),
+        y: y.into(),
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum TestOperation {
+    Intersection,
+    Union,
+    Xor,
+    DifferenceAB,
+    DifferenceBA,
+}
+
+pub fn apply_operation(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestOperation) -> MultiPolygon<f64> {
+    match op {
+        TestOperation::Union => p1.union(p2),
+        TestOperation::Intersection => p1.intersection(p2),
+        TestOperation::Xor => p1.xor(p2),
+        TestOperation::DifferenceAB => p1.difference(p2),
+        TestOperation::DifferenceBA => p2.difference(p1),
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Fixture loading
+// ----------------------------------------------------------------------------
 
 pub fn load_fixture_from_path(path: &str) -> GeoJson {
     let mut file = File::open(path).expect("Cannot open/find fixture");
@@ -73,21 +105,21 @@ pub fn fixture_shapes(name: &str) -> (Polygon<f64>, Polygon<f64>) {
     (s, c)
 }
 
-pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
-    Coordinate {
-        x: x.into(),
-        y: y.into(),
-    }
+pub fn load_test_case(filename: &str) -> (Vec<Feature>, MultiPolygon<f64>, MultiPolygon<f64>) {
+    let original_geojson = load_fixture_from_path(filename);
+    let features = match original_geojson {
+        GeoJson::FeatureCollection(collection) => collection.features,
+        _ => panic!("Fixture is not a feature collection"),
+    };
+    assert!(features.len() >= 2);
+    let p1 = extract_multi_polygon(&features[0]);
+    let p2 = extract_multi_polygon(&features[1]);
+    (features, p1, p2)
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum TestOperation {
-    Intersection,
-    Union,
-    Xor,
-    DifferenceAB,
-    DifferenceBA,
-}
+// ----------------------------------------------------------------------------
+// JSON <=> geo type conversion helpers
+// ----------------------------------------------------------------------------
 
 #[derive(Debug)]
 pub struct ExpectedResult {
@@ -112,8 +144,6 @@ pub fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
 }
 
 pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
-    let multi_polygon = extract_multi_polygon(feature);
-
     let properties = feature.properties.as_ref().expect("Feature needs 'properties'.");
 
     let op = properties
@@ -121,12 +151,6 @@ pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
         .expect("Feature 'properties' needs an 'operation' entry.")
         .as_str()
         .expect("'operation' entry must be a string.");
-
-    let swap_ab_is_broken = properties
-        .get("swap_ab_is_broken")
-        .map(|x| x.as_bool().expect("swap_ab_is_broken must be a boolean"))
-        .unwrap_or(false);
-
     let op = match op {
         "union" => TestOperation::Union,
         "intersection" => TestOperation::Intersection,
@@ -136,121 +160,45 @@ pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
         _ => panic!(format!("Invalid operation: {}", op)),
     };
 
+    let swap_ab_is_broken = properties
+        .get("swap_ab_is_broken")
+        .map(|x| x.as_bool().expect("swap_ab_is_broken must be a boolean"))
+        .unwrap_or(false);
+
     ExpectedResult {
-        result: multi_polygon,
+        result: extract_multi_polygon(feature),
         op,
         swap_ab_is_broken,
     }
 }
 
+pub fn convert_to_feature(p: &MultiPolygon<f64>, operation: Option<TestOperation>) -> Feature {
+    Feature {
+        geometry: Some(Geometry::new(Value::from(p))),
+        bbox: None,
+        id: None,
+        properties: operation.map(
+            |operation| Map::from_iter(
+                std::iter::once(("operation".to_string(), json!(
+                    match operation {
+                        TestOperation::Union => "union",
+                        TestOperation::Intersection => "intersection",
+                        TestOperation::Xor => "xor",
+                        TestOperation::DifferenceAB => "diff",
+                        TestOperation::DifferenceBA => "diff_ba",
+                    }
+                )))
+            )
+        ),
+        foreign_members: None,
+    }
+}
+
+/*
 pub fn update_feature(feature: &Feature, p: &MultiPolygon<f64>) -> Feature {
     let mut output_feature = feature.clone();
     output_feature.geometry = Some(Geometry::new(Value::from(p)));
     output_feature
 }
+*/
 
-pub fn load_test_case(filename: &str) -> (Vec<Feature>, MultiPolygon<f64>, MultiPolygon<f64>) {
-    let original_geojson = load_fixture_from_path(filename);
-    let features = match original_geojson {
-        GeoJson::FeatureCollection(collection) => collection.features,
-        _ => panic!("Fixture is not a feature collection"),
-    };
-    assert!(features.len() >= 2);
-    let p1 = extract_multi_polygon(&features[0]);
-    let p2 = extract_multi_polygon(&features[1]);
-    (features, p1, p2)
-}
-
-pub fn apply_operation(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestOperation) -> MultiPolygon<f64> {
-    match op {
-        TestOperation::Union => p1.union(p2),
-        TestOperation::Intersection => p1.intersection(p2),
-        TestOperation::Xor => p1.xor(p2),
-        TestOperation::DifferenceAB => p1.difference(p2),
-        TestOperation::DifferenceBA => p2.difference(p1),
-    }
-}
-
-#[derive(Debug)]
-enum ResultTag {
-    MainResult,
-    SwapResult,
-}
-
-type WrappedResult = (ResultTag, Result<MultiPolygon<f64>>);
-
-fn compute_all_results(
-    p1: &MultiPolygon<f64>,
-    p2: &MultiPolygon<f64>,
-    op: TestOperation,
-    skip_swap_ab: bool,
-) -> Vec<WrappedResult> {
-    let main_result = catch_unwind(|| {
-        println!("Running operation {:?} / {:?}", op, ResultTag::MainResult);
-        apply_operation(p1, p2, op)
-    });
-
-    let mut results = vec![(ResultTag::MainResult, main_result)];
-    let swappable_op = match op {
-        TestOperation::DifferenceAB => false,
-        TestOperation::DifferenceBA => false,
-        _ => true,
-    };
-    if swappable_op && !skip_swap_ab {
-        let swap_result = catch_unwind(|| {
-            println!("Running operation {:?} / {:?}", op, ResultTag::SwapResult);
-            apply_operation(p2, p1, op)
-        });
-        results.push((ResultTag::SwapResult, swap_result));
-    }
-    results
-}
-
-pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
-    println!("\n *** Running test case: {}", filename);
-
-    let (features, p1, p2) = load_test_case(filename);
-
-    let mut output_features = vec![features[0].clone(), features[1].clone()];
-    let mut failures = Vec::new();
-
-    for feature in features.iter().skip(2) {
-        let expected_result = extract_expected_result(&feature);
-        let op = expected_result.op;
-
-        let all_results = compute_all_results(&p1, &p2, op, expected_result.swap_ab_is_broken);
-        for result in &all_results {
-            let (result_tag, result_poly) = result;
-            match &result_poly {
-                Result::Err(_) => failures.push(format!("{} / {:?} / {:?} has panicked", filename, op, result_tag)),
-                Result::Ok(result) => {
-                    let assertion_result = std::panic::catch_unwind(|| {
-                        assert_eq!(
-                            *result, expected_result.result,
-                            "{} / {:?} / {:?} has result deviation",
-                            filename, op, result_tag,
-                        )
-                    });
-                    if assertion_result.is_err() {
-                        failures.push(format!(
-                            "{} / {:?} / {:?} has result deviation",
-                            filename, op, result_tag
-                        ));
-                    }
-                }
-            }
-        }
-
-        if regenerate {
-            if let Result::Ok(result) = &all_results.first().expect("Need at least one result").1 {
-                output_features.push(update_feature(&feature, &result));
-            }
-        }
-    }
-
-    if regenerate {
-        write_compact_geojson(&output_features, filename);
-    }
-
-    failures
-}

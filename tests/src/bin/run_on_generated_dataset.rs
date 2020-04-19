@@ -7,8 +7,8 @@ use geojson::Feature;
 use geo_booleanop::boolean::BooleanOp;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, update_feature};
-use geo_booleanop_tests::data_generators::{generate_grid, convert_to_feature};
+use geo_booleanop_tests::helper::{TestOperation, apply_operation, extract_expected_result, load_test_case, convert_to_feature};
+use geo_booleanop_tests::data_generators::{generate_grid};
 
 use std::fs;
 use std::path::Path;
@@ -26,15 +26,17 @@ fn main() {
         .get_matches();
     */
 
-    let grid1 = generate_grid(-10.0, 10.0, 0.4, 21);
-    let grid2 = generate_grid(-10.4, 10.4, 0.4, 21);
+    let a = generate_grid(-10.0, 10.0, 0.4, 21);
+    let b = generate_grid(-10.4, 10.4, 0.4, 21);
 
-    let xor = grid1.xor(&grid2);
+    let op = TestOperation::Xor;
+
+    let result = apply_operation(&a, &b, op);
 
     write_compact_geojson(&[
-        convert_to_feature(&grid1, None),
-        convert_to_feature(&grid2, None),
-        convert_to_feature(&xor, Some("xor".to_string())),
+        convert_to_feature(&a, None),
+        convert_to_feature(&b, None),
+        convert_to_feature(&result, Some(op)),
     ], "newtest.geoson");
 
     //write_testcase(&[grid1, grid2, xor], "newtest.geoson");

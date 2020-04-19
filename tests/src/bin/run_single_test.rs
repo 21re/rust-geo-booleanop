@@ -5,7 +5,7 @@ use clap::{App, AppSettings, Arg};
 use geojson::Feature;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, update_feature};
+use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, convert_to_feature};
 
 use std::fs;
 use std::path::Path;
@@ -30,7 +30,7 @@ pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
 
         let result = apply_operation(&p1, &p2, op);
 
-        output_features.push(update_feature(&feature, &result));
+        output_features.push(convert_to_feature(&result, Some(op)));
     }
 
     write_compact_geojson(&output_features, filename);
