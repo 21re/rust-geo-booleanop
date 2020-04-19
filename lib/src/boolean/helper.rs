@@ -1,14 +1,9 @@
-use libc::{c_double, c_float};
 use num_traits::Float as NumTraitsFloat;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::{f32, f64};
+use float_next_after::NextAfter as NextAfterFloat;
 
-#[link_name = "m"]
-extern "C" {
-    pub fn nextafter(x: c_double, y: c_double) -> c_double;
-    pub fn nextafterf(x: c_float, y: c_float) -> c_float;
-}
 
 pub trait Float: NumTraitsFloat + Debug + Display + NextAfter + Into<f64> {}
 
@@ -21,9 +16,9 @@ pub trait NextAfter: NumTraitsFloat {
 impl NextAfter for f64 {
     fn nextafter(self, up: bool) -> Self {
         if up {
-            unsafe { nextafter(self, std::f64::INFINITY) }
+            self.next_after(std::f64::INFINITY)
         } else {
-            unsafe { nextafter(self, std::f64::NEG_INFINITY) }
+            self.next_after(std::f64::NEG_INFINITY)
         }
     }
 }
@@ -31,9 +26,9 @@ impl NextAfter for f64 {
 impl NextAfter for f32 {
     fn nextafter(self, up: bool) -> Self {
         if up {
-            unsafe { nextafterf(self, std::f32::INFINITY) }
+            self.next_after(std::f32::INFINITY)
         } else {
-            unsafe { nextafterf(self, std::f32::NEG_INFINITY) }
+            self.next_after(std::f32::NEG_INFINITY)
         }
     }
 }
@@ -58,8 +53,9 @@ pub fn less_if_inversed(condition: bool) -> Ordering {
 
 #[cfg(test)]
 pub mod test {
-    use super::{nextafter, nextafterf, Float};
+    use super::{Float};
     use geo_types::Coordinate;
+    use float_next_after::NextAfter as NextAfterFloat;
 
     pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
         Coordinate {
@@ -77,7 +73,7 @@ pub mod test {
             x.nextafter(true)
         }
 
-        assert_eq!(dummy(0_f64), unsafe { nextafter(0_f64, std::f64::INFINITY) });
-        assert_eq!(dummy(0_f32), unsafe { nextafterf(0_f32, std::f32::INFINITY) });
+        assert_eq!(dummy(0_f64), 0_f64.next_after(std::f64::INFINITY));
+        assert_eq!(dummy(0_f32), 0_f32.next_after(std::f32::INFINITY));
     }
 }

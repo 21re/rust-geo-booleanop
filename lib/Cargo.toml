@@ -1,6 +1,6 @@
 [package]
 name = "geo-booleanop"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Bodo Junglas <junglas@objectcode.de>"]
 edition = "2018"
 license = "MIT"
@@ -13,7 +13,7 @@ keywords = ["gis", "geo", "geography", "geospatial"]
 geo-types = { version = "0.4", default-features = false }
 num-traits = "0.2"
 robust = "0.1"
-libc = "0.2"
+float_next_after = "0.1"
 
 [dev-dependencies]
 rand = "0.3"
