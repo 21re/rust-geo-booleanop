@@ -44,7 +44,7 @@ pub fn apply_operation(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>, op: TestO
 // Fixture loading
 // ----------------------------------------------------------------------------
 
-pub fn load_fixture_from_path(path: &str) -> GeoJson {
+fn load_fixture_from_path(path: &str) -> GeoJson {
     let mut file = File::open(path).expect("Cannot open/find fixture");
     let mut content = String::new();
 
@@ -53,35 +53,9 @@ pub fn load_fixture_from_path(path: &str) -> GeoJson {
     content.parse::<GeoJson>().expect("Fixture is no geojson")
 }
 
-pub fn load_fixture(name: &str) -> GeoJson {
-    load_fixture_from_path(&format!("./fixtures/{}", name))
-}
-
-pub fn fixture_polygon(name: &str) -> Polygon<f64> {
-    let shape = match load_fixture(name) {
-        GeoJson::Feature(feature) => feature.geometry.unwrap(),
-        _ => panic!("Fixture is not a feature collection"),
-    };
-    shape.value.try_into().expect("Shape is not a polygon")
-}
-
-pub fn fixture_multi_polygon(name: &str) -> MultiPolygon<f64> {
-    let shape = match load_fixture(name) {
-        GeoJson::Feature(feature) => feature.geometry.unwrap(),
-        _ => panic!("Fixture is not a feature collection"),
-    };
-
-    shape
-        .value
-        .clone()
-        .try_into()
-        .map(|p: Polygon<f64>| MultiPolygon(vec![p]))
-        .or_else(|_| shape.value.try_into())
-        .expect("Shape is not a multi polygon")
-}
-
 pub fn fixture_shapes(name: &str) -> (Polygon<f64>, Polygon<f64>) {
-    let shapes = match load_fixture(name) {
+    let path = format!("./fixtures/{}", name);
+    let shapes = match load_fixture_from_path(&path) {
         GeoJson::FeatureCollection(collection) => collection.features,
         _ => panic!("Fixture is not a feature collection"),
     };
@@ -128,6 +102,7 @@ pub struct ExpectedResult {
     pub swap_ab_is_broken: bool,
 }
 
+/// Conversion of Feature to MultiPolygon
 pub fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
     let geometry_value = feature
         .geometry
@@ -143,6 +118,7 @@ pub fn extract_multi_polygon(feature: &Feature) -> MultiPolygon<f64> {
     multi_polygon
 }
 
+/// Extended conversion of Feature to MultiPolygon, extracting additional result annotations.
 pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     let properties = feature.properties.as_ref().expect("Feature needs 'properties'.");
 
@@ -172,6 +148,7 @@ pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
     }
 }
 
+/// Conversion of MultiPolygon => Feature
 pub fn convert_to_feature(p: &MultiPolygon<f64>, operation: Option<TestOperation>) -> Feature {
     Feature {
         geometry: Some(Geometry::new(Value::from(p))),
@@ -193,12 +170,3 @@ pub fn convert_to_feature(p: &MultiPolygon<f64>, operation: Option<TestOperation
         foreign_members: None,
     }
 }
-
-/*
-pub fn update_feature(feature: &Feature, p: &MultiPolygon<f64>) -> Feature {
-    let mut output_feature = feature.clone();
-    output_feature.geometry = Some(Geometry::new(Value::from(p)));
-    output_feature
-}
-*/
-
