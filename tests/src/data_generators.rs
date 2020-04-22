@@ -55,7 +55,7 @@ pub fn generate_grid(min: f64, max: f64, rect_size: f64, num_rects: i32) -> Mult
     MultiPolygon(polygons)
 }
 
-pub fn generate_concentric_circles(
+pub fn generate_nested_circles(
     center: Coordinate<f64>,
     r_min: f64,
     r_max: f64,
@@ -82,9 +82,27 @@ pub fn generate_concentric_circles(
     MultiPolygon(polygons)
 }
 
-/*
-pub fn write_testcase(polygons: &[MultiPolygon<f64>], filename: &str,) {
-    let features: Vec<_> = polygons.iter().map(|p| convert_to_feature(p)).collect();
-    write_compact_geojson(&features, filename);
+pub fn generate_nested_rects(
+    center: Coordinate<f64>,
+    width_min: f64,
+    width_max: f64,
+    num_polys: usize,
+) -> MultiPolygon<f64> {
+    assert!(width_max > width_min);
+    assert!(width_min > 0.0);
+    assert!(num_polys >= 1);
+
+    let num_widths = 2 * num_polys; // We need 2*n widths in total
+    let widths: Vec<_> = (0..num_widths)
+        .map(|i| width_min + (i as f64) * (width_max - width_min) / ((num_widths - 1) as f64))
+        .collect();
+
+    let mut polygons = Vec::new();
+    for i in (0..num_widths).step_by(2) {
+        let ring1 = generate_rect_centered(center, widths[i], widths[i]).exterior().clone();
+        let ring2 = generate_rect_centered(center, widths[i + 1], widths[i + 1]).exterior().clone();
+        polygons.push(Polygon::new(ring1, vec![ring2]))
+    }
+
+    MultiPolygon(polygons)
 }
-*/
