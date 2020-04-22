@@ -1,6 +1,7 @@
-extern crate clap;
-extern crate geo_booleanop_tests;
-
+//!
+//! This binary allows running a test case directly by specifying its path
+//! as argument.
+//!
 use clap::{App, AppSettings, Arg};
 use geojson::Feature;
 

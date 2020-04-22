@@ -1,6 +1,9 @@
 use geo::{Coordinate, LineString, MultiPolygon, Point, Polygon};
 use geojson::{Feature, FeatureCollection, GeoJson, Geometry, Value};
 
+use rand::{Rng, SeedableRng};
+use rand::rngs::StdRng;
+
 use serde_json::{json, Map};
 
 use std::iter::FromIterator;
@@ -105,4 +108,24 @@ pub fn generate_nested_rects(
     }
 
     MultiPolygon(polygons)
+}
+
+pub fn generate_random_triangles(num_polys: usize, seed: u64) -> MultiPolygon<f64> {
+    let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
+
+    let mut rand_coord = || {
+        Coordinate{
+            x: rng.gen_range(-1.0f64, 1.0f64),
+            y: rng.gen_range(-1.0f64, 1.0f64)
+        }
+    };
+
+    MultiPolygon((0..num_polys).map(|_| {
+        let p1 = rand_coord();
+        let p2 = rand_coord();
+        let p3 = rand_coord();
+        Polygon::new(LineString(vec![
+            p1, p2, p3, p1,
+        ]), vec![])
+    }).collect())
 }
