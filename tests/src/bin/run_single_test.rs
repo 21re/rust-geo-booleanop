@@ -5,11 +5,9 @@ use clap::{App, AppSettings, Arg};
 use geojson::Feature;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, convert_to_feature};
+use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, convert_to_feature, plot_generic_test_case};
 
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
     println!("\n *** Running test case: {}", filename);
@@ -56,17 +54,5 @@ fn main() {
 
     run_generic_test_case_with_extra_options(&filename_out, swap_ab);
 
-    // Try to run Python plot
-    let script_path = Path::new(file!()).to_path_buf()
-        .canonicalize().unwrap()
-        .parent().unwrap().to_path_buf() // -> bin
-        .parent().unwrap().to_path_buf() // -> src
-        .parent().unwrap().to_path_buf() // -> tests
-        .join("scripts")
-        .join("plot_test_cases.py");
-    Command::new(script_path.as_os_str())
-        .arg("-i")
-        .arg(&filename_out)
-        .spawn()
-        .expect("Failed to run Python plot.");
+    plot_generic_test_case(&filename_out);
 }

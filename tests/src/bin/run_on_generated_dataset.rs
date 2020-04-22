@@ -7,8 +7,9 @@ use geojson::Feature;
 use geo_booleanop::boolean::BooleanOp;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::helper::{TestOperation, apply_operation, extract_expected_result, load_test_case, convert_to_feature, xy};
+use geo_booleanop_tests::helper::{TestOperation, apply_operation, extract_expected_result, load_test_case, convert_to_feature, xy, plot_generic_test_case};
 use geo_booleanop_tests::data_generators::{generate_grid, generate_concentric_circles};
+
 
 use std::fs;
 use std::path::Path;
@@ -53,5 +54,6 @@ fn main() {
         convert_to_feature(&result, Some(op)),
     ], "newtest_circle.geoson");
 
+    plot_generic_test_case(&"newtest_circle.geoson");
     //write_testcase(&[grid1, grid2, xor], "newtest.geoson");
 }

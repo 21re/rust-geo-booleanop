@@ -9,6 +9,8 @@ use std::convert::TryInto;
 use std::fs::File;
 use std::io::prelude::*;
 use std::iter::FromIterator;
+use std::path::Path;
+use std::process::Command;
 
 // ----------------------------------------------------------------------------
 // General geo / booleanop helpers
@@ -169,4 +171,24 @@ pub fn convert_to_feature(p: &MultiPolygon<f64>, operation: Option<TestOperation
         ),
         foreign_members: None,
     }
+}
+
+// ----------------------------------------------------------------------------
+// Misc (plotting)
+// ----------------------------------------------------------------------------
+
+/// Wrapper around the Python plotting script to visualize test cases.
+pub fn plot_generic_test_case(test_case_file: &str) {
+    // Try to run Python plot
+    let script_path = Path::new(file!()).to_path_buf()
+        .canonicalize().unwrap()
+        .parent().unwrap().to_path_buf() // -> src
+        .parent().unwrap().to_path_buf() // -> tests
+        .join("scripts")
+        .join("plot_test_cases.py");
+    Command::new(script_path.as_os_str())
+        .arg("-i")
+        .arg(test_case_file)
+        .spawn()
+        .expect("Failed to run Python plot.");
 }

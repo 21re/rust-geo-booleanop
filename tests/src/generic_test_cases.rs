@@ -42,7 +42,7 @@ fn compute_all_results(
     results
 }
 
-pub fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
+fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
     println!("\n *** Running test case: {}", filename);
 
     let (features, p1, p2) = load_test_case(filename);
