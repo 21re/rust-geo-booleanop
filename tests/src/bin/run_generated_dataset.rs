@@ -8,8 +8,10 @@ use clap::{App, AppSettings, Arg};
 use geo::MultiPolygon;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::data_generators::{generate_grid, generate_nested_circles, generate_nested_rects, generate_random_triangles};
-use geo_booleanop_tests::helper::{apply_operation, convert_to_feature, TestOperation, plot_generic_test_case, xy};
+use geo_booleanop_tests::data_generators::{
+    generate_grid, generate_nested_circles, generate_nested_rects, generate_random_triangles,
+};
+use geo_booleanop_tests::helper::{apply_operation, convert_to_feature, plot_generic_test_case, xy, TestOperation};
 
 fn generate_grid_polygons() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
     let a = generate_grid(-10.0, 10.0, 0.4, 21);

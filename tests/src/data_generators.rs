@@ -1,14 +1,8 @@
-use geo::{Coordinate, LineString, MultiPolygon, Point, Polygon};
-use geojson::{Feature, FeatureCollection, GeoJson, Geometry, Value};
+use geo::{Coordinate, LineString, MultiPolygon, Polygon};
 
-use rand::{Rng, SeedableRng};
 use rand::rngs::StdRng;
+use rand::{Rng, SeedableRng};
 
-use serde_json::{json, Map};
-
-use std::iter::FromIterator;
-
-use super::compact_geojson::write_compact_geojson;
 use super::helper::xy;
 
 fn generate_rect_centered(center: Coordinate<f64>, w: f64, h: f64) -> Polygon<f64> {
@@ -102,8 +96,10 @@ pub fn generate_nested_rects(
 
     let mut polygons = Vec::new();
     for i in (0..num_widths).step_by(2) {
-        let ring1 = generate_rect_centered(center, widths[i], widths[i]).exterior().clone();
-        let ring2 = generate_rect_centered(center, widths[i + 1], widths[i + 1]).exterior().clone();
+        let w1 = widths[i];
+        let w2 = widths[i + 1];
+        let ring1 = generate_rect_centered(center, w1, w1).exterior().clone();
+        let ring2 = generate_rect_centered(center, w2, w2).exterior().clone();
         polygons.push(Polygon::new(ring1, vec![ring2]))
     }
 
@@ -113,19 +109,19 @@ pub fn generate_nested_rects(
 pub fn generate_random_triangles(num_polys: usize, seed: u64) -> MultiPolygon<f64> {
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
 
-    let mut rand_coord = || {
-        Coordinate{
-            x: rng.gen_range(-1.0f64, 1.0f64),
-            y: rng.gen_range(-1.0f64, 1.0f64)
-        }
+    let mut rand_coord = || Coordinate {
+        x: rng.gen_range(-1.0f64, 1.0f64),
+        y: rng.gen_range(-1.0f64, 1.0f64),
     };
 
-    MultiPolygon((0..num_polys).map(|_| {
-        let p1 = rand_coord();
-        let p2 = rand_coord();
-        let p3 = rand_coord();
-        Polygon::new(LineString(vec![
-            p1, p2, p3, p1,
-        ]), vec![])
-    }).collect())
+    MultiPolygon(
+        (0..num_polys)
+            .map(|_| {
+                let p1 = rand_coord();
+                let p2 = rand_coord();
+                let p3 = rand_coord();
+                Polygon::new(LineString(vec![p1, p2, p3, p1]), vec![])
+            })
+            .collect(),
+    )
 }
