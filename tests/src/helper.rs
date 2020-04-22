@@ -156,19 +156,18 @@ pub fn convert_to_feature(p: &MultiPolygon<f64>, operation: Option<TestOperation
         geometry: Some(Geometry::new(Value::from(p))),
         bbox: None,
         id: None,
-        properties: operation.map(
-            |operation| Map::from_iter(
-                std::iter::once(("operation".to_string(), json!(
-                    match operation {
-                        TestOperation::Union => "union",
-                        TestOperation::Intersection => "intersection",
-                        TestOperation::Xor => "xor",
-                        TestOperation::DifferenceAB => "diff",
-                        TestOperation::DifferenceBA => "diff_ba",
-                    }
-                )))
-            )
-        ),
+        properties: operation.map(|operation| {
+            Map::from_iter(std::iter::once((
+                "operation".to_string(),
+                json!(match operation {
+                    TestOperation::Union => "union",
+                    TestOperation::Intersection => "intersection",
+                    TestOperation::Xor => "xor",
+                    TestOperation::DifferenceAB => "diff",
+                    TestOperation::DifferenceBA => "diff_ba",
+                }),
+            )))
+        }),
         foreign_members: None,
     }
 }

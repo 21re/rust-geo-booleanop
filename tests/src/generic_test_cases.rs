@@ -4,8 +4,8 @@ use std::thread::Result;
 
 use geo::MultiPolygon;
 
-use super::helper::{TestOperation, load_test_case, extract_expected_result, apply_operation, convert_to_feature};
 use super::compact_geojson::write_compact_geojson;
+use super::helper::{apply_operation, convert_to_feature, extract_expected_result, load_test_case, TestOperation};
 
 #[derive(Debug)]
 enum ResultTag {
@@ -80,7 +80,7 @@ fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
         if regenerate {
             if let Result::Ok(result) = &all_results.first().expect("Need at least one result").1 {
                 let mut new_feature = convert_to_feature(&result, Some(op));
-                new_feature.properties = feature.properties.clone();    // Copy existing properties to keep comments etc.
+                new_feature.properties = feature.properties.clone(); // Copy existing properties to keep comments etc.
                 output_features.push(new_feature);
             }
         }

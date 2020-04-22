@@ -5,7 +5,9 @@ use clap::{App, AppSettings, Arg};
 use geojson::Feature;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, convert_to_feature, plot_generic_test_case};
+use geo_booleanop_tests::helper::{
+    apply_operation, convert_to_feature, extract_expected_result, load_test_case, plot_generic_test_case,
+};
 
 use std::fs;
 
