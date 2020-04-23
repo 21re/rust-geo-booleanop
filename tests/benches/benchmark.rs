@@ -4,10 +4,10 @@ use std::time::Duration;
 use geo::MultiPolygon;
 
 use geo_booleanop::boolean::BooleanOp;
-use geo_booleanop_tests::helper::load_test_case;
 use geo_booleanop_tests::data_generators::{
-    generate_grid_polygons, generate_circles_vs_rects, generate_random_triangles_polygons
+    generate_circles_vs_rects, generate_grid_polygons, generate_random_triangles_polygons,
 };
+use geo_booleanop_tests::helper::load_test_case;
 
 fn load(filename: &str) -> (MultiPolygon<f64>, MultiPolygon<f64>) {
     let (_, p1, p2) = load_test_case(filename);

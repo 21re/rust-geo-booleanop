@@ -7,7 +7,7 @@ use clap::{App, AppSettings, Arg};
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
 use geo_booleanop_tests::data_generators::{
-    generate_grid_polygons, generate_circles_vs_rects, generate_random_triangles_polygons
+    generate_circles_vs_rects, generate_grid_polygons, generate_random_triangles_polygons,
 };
 use geo_booleanop_tests::helper::{apply_operation, convert_to_feature, plot_generic_test_case, TestOperation};
 
