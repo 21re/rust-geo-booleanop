@@ -125,3 +125,21 @@ pub fn generate_random_triangles(num_polys: usize, seed: u64) -> MultiPolygon<f6
             .collect(),
     )
 }
+
+pub fn generate_grid_polygons() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
+    let a = generate_grid(-15.0, 15.0, 0.4, 31);
+    let b = generate_grid(-15.4, 15.4, 0.4, 31);
+    (a, b)
+}
+
+pub fn generate_circles_vs_rects() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
+    let a = generate_nested_circles(xy(0, 0), 1.0, 10.0, 30, 500);
+    let b = generate_nested_rects(xy(1, 1), 2.0, 20.0, 30);
+    (a, b)
+}
+
+pub fn generate_random_triangles_polygons() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
+    let a = generate_random_triangles(10, 1);
+    let b = generate_random_triangles(10, 2);
+    (a, b)
+}

@@ -5,31 +5,11 @@
 
 use clap::{App, AppSettings, Arg};
 
-use geo::MultiPolygon;
-
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
 use geo_booleanop_tests::data_generators::{
-    generate_grid, generate_nested_circles, generate_nested_rects, generate_random_triangles,
+    generate_grid_polygons, generate_circles_vs_rects, generate_random_triangles_polygons
 };
-use geo_booleanop_tests::helper::{apply_operation, convert_to_feature, plot_generic_test_case, xy, TestOperation};
-
-fn generate_grid_polygons() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
-    let a = generate_grid(-10.0, 10.0, 0.4, 21);
-    let b = generate_grid(-10.4, 10.4, 0.4, 21);
-    (a, b)
-}
-
-fn generate_circles_vs_rects() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
-    let a = generate_nested_circles(xy(0, 0), 1.0, 10.0, 20, 100);
-    let b = generate_nested_rects(xy(1, 1), 2.0, 20.0, 20);
-    (a, b)
-}
-
-fn generate_random_triangles_polygons() -> (MultiPolygon<f64>, MultiPolygon<f64>) {
-    let a = generate_random_triangles(10, 1);
-    let b = generate_random_triangles(10, 2);
-    (a, b)
-}
+use geo_booleanop_tests::helper::{apply_operation, convert_to_feature, plot_generic_test_case, TestOperation};
 
 fn main() {
     #[rustfmt::skip]

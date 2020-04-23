@@ -5,6 +5,9 @@ use geo::MultiPolygon;
 
 use geo_booleanop::boolean::BooleanOp;
 use geo_booleanop_tests::helper::load_test_case;
+use geo_booleanop_tests::data_generators::{
+    generate_grid_polygons, generate_circles_vs_rects, generate_random_triangles_polygons
+};
 
 fn load(filename: &str) -> (MultiPolygon<f64>, MultiPolygon<f64>) {
     let (_, p1, p2) = load_test_case(filename);
@@ -49,6 +52,18 @@ fn benchmarks(c: &mut Criterion) {
         BatchSize::SmallInput,
     ));
 
+    g.bench_function("random_triangles/xor", |b| b.iter_batched(
+        || generate_random_triangles_polygons(),
+        |(p1, p2)| p1.xor(&p2),
+        BatchSize::LargeInput,
+    ));
+
+    g.bench_function("grid/xor", |b| b.iter_batched(
+        || generate_grid_polygons(),
+        |(p1, p2)| p1.xor(&p2),
+        BatchSize::LargeInput,
+    ));
+
     // large benchmarks
     g.sample_size(10);
 
@@ -58,9 +73,9 @@ fn benchmarks(c: &mut Criterion) {
         BatchSize::SmallInput,
     ));
 
-    g.bench_function("worldmap/intersection", |b| b.iter_batched(
-        || load("fixtures/benchmarks/worldmap.geojson"),
-        |(p1, p2)| p1.intersection(&p2),
+    g.bench_function("circles_vs_rects/xor", |b| b.iter_batched(
+        || generate_circles_vs_rects(),
+        |(p1, p2)| p1.xor(&p2),
         BatchSize::LargeInput,
     ));
 }
