@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/21re/rust-geo-booleanop.svg?branch=master)](https://travis-ci.org/21re/rust-geo-booleanop)
+[![crates.io](https://img.shields.io/crates/v/geo-booleanop.svg)](https://crates.io/crates/geo-booleanop)
 
 
 # Boolean operations on geo shapes
@@ -7,7 +8,7 @@ This is an implementation of the [Martinez-Rueda Polygon Clipping Algorithm](htt
 
 In fact the implementation closely follows the "reference" implementation in JavaScript: [https://github.com/w8r/martinez](https://github.com/w8r/martinez). Most of the concepts and fixtures have been taken from there.
 
-At the moment the implementation contains is own splay tree implementation (adapted from [https://github.com/alexcrichton/splay-rs](https://github.com/alexcrichton/splay-rs)) as the JavaScript implementation also uses a splay-tree. This might be refactored out in the future in favor of the standard collection types (like BTreeSet).
+At the moment the implementation contains its own splay tree implementation (adapted from [https://github.com/alexcrichton/splay-rs](https://github.com/alexcrichton/splay-rs)) as the JavaScript implementation also uses a splay-tree. This might be refactored out in the future in favor of the standard collection types (like BTreeSet).
 
 # IMPORTANT: How to report bugs
 
@@ -19,13 +20,13 @@ I.e. just create `package.json`, ìnsert your example coordinates in `main.js` a
 
 # Usage
 
-Pretty straight forward:
+Pretty straightforward:
 
 ```
-geo-booleanop = "0.1.4"
+geo-booleanop = "0.2.1"
 ```
 
-```
+```rust
 extern create geo;
 extern crate geo_booleanop;
 
