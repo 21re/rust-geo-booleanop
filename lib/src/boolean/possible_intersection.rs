@@ -36,7 +36,15 @@ where
 
     match inter {
         LineIntersection::None => 0, // No intersection
-        LineIntersection::Point(_) if se1.point == se2.point && other1.point == other2.point => 0, // the line segments intersect at an endpoint of both line segments
+        LineIntersection::Point(_) if se1.point == se2.point || other1.point == other2.point => {
+            // The line segments intersect at either the left or right endpoint.
+            // In this case we ignore the result of intersection computation for numerical
+            // stability (the computed intersection can slightly deviate from the endpoints).
+            // It may be tempting to make this check earlier to short-circuit the intersection
+            // computation, but it may be tricky, because we still need to differentiate from
+            // overlapping cases.
+            0
+        }
         LineIntersection::Point(inter) => {
             if se1.point != inter && other1.point != inter {
                 divide_segment(&se1, inter, queue);
