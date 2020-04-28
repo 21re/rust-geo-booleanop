@@ -8,4 +8,5 @@ mod possible_intersection_test;
 mod subdivide_segments_test;
 
 pub mod compact_geojson;
+pub mod data_generators;
 pub mod helper;

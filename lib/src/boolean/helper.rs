@@ -1,9 +1,8 @@
+use float_next_after::NextAfter as NextAfterFloat;
 use num_traits::Float as NumTraitsFloat;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::{f32, f64};
-use float_next_after::NextAfter as NextAfterFloat;
-
 
 pub trait Float: NumTraitsFloat + Debug + Display + NextAfter + Into<f64> {}
 
@@ -53,9 +52,9 @@ pub fn less_if_inversed(condition: bool) -> Ordering {
 
 #[cfg(test)]
 pub mod test {
-    use super::{Float};
-    use geo_types::Coordinate;
+    use super::Float;
     use float_next_after::NextAfter as NextAfterFloat;
+    use geo_types::Coordinate;
 
     pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
         Coordinate {

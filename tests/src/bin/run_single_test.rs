@@ -1,15 +1,16 @@
-extern crate clap;
-extern crate geo_booleanop_tests;
-
+//!
+//! This binary allows running a test case directly by specifying its path
+//! as argument.
+//!
 use clap::{App, AppSettings, Arg};
 use geojson::Feature;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
-use geo_booleanop_tests::helper::{apply_operation, extract_expected_result, load_test_case, update_feature};
+use geo_booleanop_tests::helper::{
+    apply_operation, convert_to_feature, extract_expected_result, load_test_case, plot_generic_test_case,
+};
 
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
     println!("\n *** Running test case: {}", filename);
@@ -30,7 +31,7 @@ pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
 
         let result = apply_operation(&p1, &p2, op);
 
-        output_features.push(update_feature(&feature, &result));
+        output_features.push(convert_to_feature(&result, Some(op)));
     }
 
     write_compact_geojson(&output_features, filename);
@@ -56,17 +57,5 @@ fn main() {
 
     run_generic_test_case_with_extra_options(&filename_out, swap_ab);
 
-    // Try to run Python plot
-    let script_path = Path::new(file!()).to_path_buf()
-        .canonicalize().unwrap()
-        .parent().unwrap().to_path_buf() // -> bin
-        .parent().unwrap().to_path_buf() // -> src
-        .parent().unwrap().to_path_buf() // -> tests
-        .join("scripts")
-        .join("plot_test_cases.py");
-    Command::new(script_path.as_os_str())
-        .arg("-i")
-        .arg(&filename_out)
-        .spawn()
-        .expect("Failed to run Python plot.");
+    plot_generic_test_case(&filename_out);
 }

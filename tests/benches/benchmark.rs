@@ -4,6 +4,9 @@ use std::time::Duration;
 use geo::MultiPolygon;
 
 use geo_booleanop::boolean::BooleanOp;
+use geo_booleanop_tests::data_generators::{
+    generate_circles_vs_rects, generate_grid_polygons, generate_random_triangles_polygons,
+};
 use geo_booleanop_tests::helper::load_test_case;
 
 fn load(filename: &str) -> (MultiPolygon<f64>, MultiPolygon<f64>) {
@@ -13,22 +16,67 @@ fn load(filename: &str) -> (MultiPolygon<f64>, MultiPolygon<f64>) {
 
 #[rustfmt::skip]
 fn benchmarks(c: &mut Criterion) {
+    let mut g = c.benchmark_group("benches");
 
-    c.bench_function("issue96 / intersection", |b| b.iter_batched(
+    // small cases
+    g.bench_function("hole_hole/union", |b| b.iter_batched(
+        || load("fixtures/benchmarks/hole_hole.geojson"),
+        |(p1, p2)| p1.union(&p2),
+        BatchSize::SmallInput,
+    ));
+
+    g.bench_function("many_rects/union", |b| b.iter_batched(
+        || load("fixtures/generic_test_cases/many_rects.geojson"),
+        |(p1, p2)| p1.union(&p2),
+        BatchSize::SmallInput,
+    ));
+
+    // medium cases
+    g.sample_size(30);
+
+    g.bench_function("state_source/union", |b| b.iter_batched(
+        || load("fixtures/benchmarks/states_source.geojson"),
+        |(p1, p2)| p1.union(&p2),
+        BatchSize::SmallInput,
+    ));
+
+    g.bench_function("issue96/intersection", |b| b.iter_batched(
         || load("fixtures/generic_test_cases/issue96.geojson"),
         |(p1, p2)| p1.intersection(&p2),
         BatchSize::SmallInput,
     ));
-    c.bench_function("issue96 / union", |b| b.iter_batched(
+
+    g.bench_function("issue96/union", |b| b.iter_batched(
         || load("fixtures/generic_test_cases/issue96.geojson"),
         |(p1, p2)| p1.union(&p2),
         BatchSize::SmallInput,
     ));
 
-    c.bench_function("many_rects / union", |b| b.iter_batched(
-        || load("fixtures/generic_test_cases/many_rects.geojson"),
+    g.bench_function("random_triangles/xor", |b| b.iter_batched(
+        || generate_random_triangles_polygons(),
+        |(p1, p2)| p1.xor(&p2),
+        BatchSize::LargeInput,
+    ));
+
+    g.bench_function("grid/xor", |b| b.iter_batched(
+        || generate_grid_polygons(),
+        |(p1, p2)| p1.xor(&p2),
+        BatchSize::LargeInput,
+    ));
+
+    // large benchmarks
+    g.sample_size(10);
+
+    g.bench_function("asia/union", |b| b.iter_batched(
+        || load("fixtures/benchmarks/asia.geojson"),
         |(p1, p2)| p1.union(&p2),
         BatchSize::SmallInput,
+    ));
+
+    g.bench_function("circles_vs_rects/xor", |b| b.iter_batched(
+        || generate_circles_vs_rects(),
+        |(p1, p2)| p1.xor(&p2),
+        BatchSize::LargeInput,
     ));
 }
 

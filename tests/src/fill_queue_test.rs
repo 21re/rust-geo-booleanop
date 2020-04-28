@@ -4,6 +4,8 @@ use geo_booleanop::boolean::fill_queue::fill_queue;
 use geo_booleanop::boolean::Operation;
 use num_traits::Float;
 
+use super::helper::xy;
+
 #[test]
 fn test_two_polygons() {
     let (s, c) = fixture_shapes("two_shapes.geojson");
@@ -56,13 +58,6 @@ fn test_two_polygons() {
 
 #[test]
 fn test_fill_event_queue() {
-    fn xy<T: Into<f64>>(x: T, y: T) -> Coordinate<f64> {
-        Coordinate {
-            x: x.into(),
-            y: y.into(),
-        }
-    }
-
     let (s, c) = fixture_shapes("two_triangles.geojson");
     let mut sbbox = Rect {
         min: xy(f64::infinity(), f64::infinity()),
