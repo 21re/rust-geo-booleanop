@@ -1,7 +1,8 @@
 use super::helper::fixture_shapes;
-use geo::{Coordinate, Rect};
+use geo::Coordinate;
 use geo_booleanop::boolean::fill_queue::fill_queue;
 use geo_booleanop::boolean::Operation;
+use geo_booleanop::boolean::BoundingBox;
 use num_traits::Float;
 
 use super::helper::xy;
@@ -9,7 +10,7 @@ use super::helper::xy;
 #[test]
 fn test_two_polygons() {
     let (s, c) = fixture_shapes("two_shapes.geojson");
-    let mut sbbox = Rect {
+    let mut sbbox = BoundingBox {
         min: Coordinate {
             x: f64::infinity(),
             y: f64::infinity(),
@@ -59,7 +60,7 @@ fn test_two_polygons() {
 #[test]
 fn test_fill_event_queue() {
     let (s, c) = fixture_shapes("two_triangles.geojson");
-    let mut sbbox = Rect {
+    let mut sbbox = BoundingBox {
         min: xy(f64::infinity(), f64::infinity()),
         max: xy(f64::neg_infinity(), f64::neg_infinity()),
     };
@@ -68,14 +69,14 @@ fn test_fill_event_queue() {
 
     assert_eq!(
         sbbox,
-        Rect {
+        BoundingBox {
             min: xy(20.0, -113.5),
             max: xy(226.5, 74.0)
         },
     );
     assert_eq!(
         cbbox,
-        Rect {
+        BoundingBox {
             min: xy(54.5, -198.0),
             max: xy(239.5, 33.5)
         },

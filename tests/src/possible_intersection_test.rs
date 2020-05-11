@@ -1,11 +1,12 @@
 use super::helper::fixture_shapes;
-use geo::{Coordinate, Rect};
+use geo::Coordinate;
 use geo_booleanop::boolean::compare_segments::compare_segments;
 use geo_booleanop::boolean::fill_queue::fill_queue;
 use geo_booleanop::boolean::possible_intersection::possible_intersection;
 use geo_booleanop::boolean::subdivide_segments::subdivide;
 use geo_booleanop::boolean::sweep_event::SweepEvent;
 use geo_booleanop::boolean::Operation;
+use geo_booleanop::boolean::BoundingBox;
 use geo_booleanop::splay::SplaySet;
 use num_traits::Float;
 use std::cmp::Ordering;
@@ -74,7 +75,7 @@ fn test_possible_intersection() {
 #[test]
 fn test_on_two_polygons() {
     let (s, c) = fixture_shapes("two_shapes.geojson");
-    let mut sbbox = Rect {
+    let mut sbbox = BoundingBox {
         min: Coordinate {
             x: f64::infinity(),
             y: f64::infinity(),

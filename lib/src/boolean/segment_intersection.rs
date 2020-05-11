@@ -1,5 +1,6 @@
 use super::helper::Float;
-use geo_types::{Coordinate, Rect};
+use super::BoundingBox;
+use geo_types::{Coordinate};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LineIntersection<F>
@@ -17,7 +18,7 @@ fn get_intersection_bounding_box<F>(
     a2: Coordinate<F>,
     b1: Coordinate<F>,
     b2: Coordinate<F>,
-) -> Option<Rect<F>>
+) -> Option<BoundingBox<F>>
 where
     F: Float,
 {
@@ -30,7 +31,7 @@ where
     let interval_end_x = a_end_x.min(b_end_x);
     let interval_end_y = a_end_y.min(b_end_y);
     if interval_start_x <= interval_end_x && interval_start_y <= interval_end_y {
-        Some(Rect {
+        Some(BoundingBox {
             min: Coordinate {
                 x: interval_start_x,
                 y: interval_start_y,
@@ -46,7 +47,7 @@ where
 }
 
 #[inline]
-fn constrain_to_bounding_box<F>(p: Coordinate<F>, bb: Rect<F>) -> Coordinate<F>
+fn constrain_to_bounding_box<F>(p: Coordinate<F>, bb: BoundingBox<F>) -> Coordinate<F>
 where
     F: Float,
 {
@@ -198,22 +199,22 @@ mod test {
     use super::super::helper::test::xy;
     use super::*;
 
-    fn rect(min: Coordinate<f64>, max: Coordinate<f64>) -> Rect<f64> {
-        Rect { min, max }
+    fn rect(min: Coordinate<f64>, max: Coordinate<f64>) -> BoundingBox<f64> {
+        BoundingBox { min, max }
     }
 
     #[test]
     fn test_get_intersection_bounding_box() {
         assert_eq!(
             get_intersection_bounding_box(xy(0, 0), xy(2, 2), xy(1, 1), xy(3, 3)),
-            Some(Rect {
+            Some(BoundingBox {
                 min: xy(1, 1),
                 max: xy(2, 2)
             }),
         );
         assert_eq!(
             get_intersection_bounding_box(xy(-1, 0), xy(1, 0), xy(0, -1), xy(0, 1)),
-            Some(Rect {
+            Some(BoundingBox {
                 min: xy(0, 0),
                 max: xy(0, 0)
             }),

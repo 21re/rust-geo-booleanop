@@ -1,16 +1,17 @@
 use super::helper::Float;
-use geo_types::{LineString, Polygon, Rect};
+use geo_types::{LineString, Polygon};
 use std::collections::BinaryHeap;
 use std::rc::{Rc, Weak};
 
 use super::sweep_event::SweepEvent;
 use super::Operation;
+use super::BoundingBox;
 
 pub fn fill_queue<F>(
     subject: &[Polygon<F>],
     clipping: &[Polygon<F>],
-    sbbox: &mut Rect<F>,
-    cbbox: &mut Rect<F>,
+    sbbox: &mut BoundingBox<F>,
+    cbbox: &mut BoundingBox<F>,
     operation: Operation,
 ) -> BinaryHeap<Rc<SweepEvent<F>>>
 where
@@ -53,7 +54,7 @@ fn process_polygon<F>(
     is_subject: bool,
     contour_id: u32,
     event_queue: &mut BinaryHeap<Rc<SweepEvent<F>>>,
-    bbox: &mut Rect<F>,
+    bbox: &mut BoundingBox<F>,
     is_exterior_ring: bool,
 ) where
     F: Float,

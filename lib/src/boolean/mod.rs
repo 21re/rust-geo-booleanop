@@ -1,4 +1,4 @@
-use geo_types::{Coordinate, LineString, MultiPolygon, Polygon, Rect};
+use geo_types::{Coordinate, CoordinateType, LineString, MultiPolygon, Polygon};
 
 pub mod compare_segments;
 pub mod compute_fields;
@@ -89,7 +89,7 @@ fn boolean_operation<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operati
 where
     F: Float,
 {
-    let mut sbbox = Rect {
+    let mut sbbox = BoundingBox {
         min: Coordinate {
             x: F::infinity(),
             y: F::infinity(),
@@ -137,5 +137,29 @@ where
         Operation::Intersection => MultiPolygon(vec![]),
         Operation::Difference => MultiPolygon(Vec::from(subject)),
         Operation::Union | Operation::Xor => MultiPolygon(subject.iter().chain(clipping).cloned().collect()),
+    }
+}
+
+/// A bounded 2D quadrilateral whose area is defined by minimum and maximum `Coordinates`.
+///
+/// A simple implementation copied from geo_types 0.4.0, because this version is a better
+/// fit for the needs of this crate than the newer ones.
+#[derive(PartialEq, Clone, Copy, Debug)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct BoundingBox<T>
+    where
+        T: CoordinateType,
+{
+    pub min: Coordinate<T>,
+    pub max: Coordinate<T>,
+}
+
+impl<T: CoordinateType> BoundingBox<T> {
+    pub fn width(self) -> T {
+        self.max.x - self.min.x
+    }
+
+    pub fn height(self) -> T {
+        self.max.y - self.min.y
     }
 }
