@@ -5,7 +5,7 @@ use std::rc::{Rc, Weak};
 
 use super::sweep_event::SweepEvent;
 use super::Operation;
-use super::BoundingBox;
+use super::helper::BoundingBox;
 
 pub fn fill_queue<F>(
     subject: &[Polygon<F>],

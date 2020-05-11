@@ -1,6 +1,6 @@
 [package]
 name = "geo-booleanop-tests"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["Bodo Junglas <junglas@objectcode.de>"]
 edition = "2018"
 

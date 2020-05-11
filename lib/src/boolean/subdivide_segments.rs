@@ -1,10 +1,9 @@
 use super::compare_segments::compare_segments;
 use super::compute_fields::compute_fields;
-use super::helper::Float;
+use super::helper::{BoundingBox, Float};
 use super::possible_intersection::possible_intersection;
 use super::sweep_event::SweepEvent;
 use super::Operation;
-use super::BoundingBox;
 use crate::splay::SplaySet;
 use std::collections::BinaryHeap;
 use std::rc::Rc;

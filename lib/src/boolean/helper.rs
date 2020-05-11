@@ -1,4 +1,5 @@
 use float_next_after::NextAfter as NextAfterFloat;
+use geo_types::{Coordinate, CoordinateType};
 use num_traits::Float as NumTraitsFloat;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
@@ -47,6 +48,29 @@ pub fn less_if_inversed(condition: bool) -> Ordering {
         Ordering::Greater
     } else {
         Ordering::Less
+    }
+}
+
+/// A bounded 2D quadrilateral whose area is defined by minimum and maximum `Coordinates`.
+///
+/// A simple implementation copied from geo_types 0.4.0, because this version is a better
+/// fit for the needs of this crate than the newer ones.
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub struct BoundingBox<T>
+    where
+        T: CoordinateType,
+{
+    pub min: Coordinate<T>,
+    pub max: Coordinate<T>,
+}
+
+impl<T: CoordinateType> BoundingBox<T> {
+    pub fn width(self) -> T {
+        self.max.x - self.min.x
+    }
+
+    pub fn height(self) -> T {
+        self.max.y - self.min.y
     }
 }
 

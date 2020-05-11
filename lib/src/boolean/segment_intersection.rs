@@ -1,5 +1,5 @@
 use super::helper::Float;
-use super::BoundingBox;
+use super::helper::BoundingBox;
 use geo_types::{Coordinate};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
