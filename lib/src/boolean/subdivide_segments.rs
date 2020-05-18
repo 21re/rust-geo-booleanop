@@ -1,11 +1,10 @@
 use super::compare_segments::compare_segments;
 use super::compute_fields::compute_fields;
-use super::helper::Float;
+use super::helper::{BoundingBox, Float};
 use super::possible_intersection::possible_intersection;
 use super::sweep_event::SweepEvent;
 use super::Operation;
 use crate::splay::SplaySet;
-use geo_types::Rect;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 
@@ -14,8 +13,8 @@ use super::sweep_event::JsonDebug;
 
 pub fn subdivide<F>(
     event_queue: &mut BinaryHeap<Rc<SweepEvent<F>>>,
-    sbbox: &Rect<F>,
-    cbbox: &Rect<F>,
+    sbbox: &BoundingBox<F>,
+    cbbox: &BoundingBox<F>,
     operation: Operation,
 ) -> Vec<Rc<SweepEvent<F>>>
 where

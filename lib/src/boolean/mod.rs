@@ -1,4 +1,4 @@
-use geo_types::{Coordinate, LineString, MultiPolygon, Polygon, Rect};
+use geo_types::{Coordinate, LineString, MultiPolygon, Polygon};
 
 pub mod compare_segments;
 pub mod compute_fields;
@@ -12,7 +12,7 @@ mod signed_area;
 pub mod subdivide_segments;
 pub mod sweep_event;
 
-pub use helper::Float;
+pub use helper::{BoundingBox, Float};
 
 use self::connect_edges::connect_edges;
 use self::fill_queue::fill_queue;
@@ -89,7 +89,7 @@ fn boolean_operation<F>(subject: &[Polygon<F>], clipping: &[Polygon<F>], operati
 where
     F: Float,
 {
-    let mut sbbox = Rect {
+    let mut sbbox = BoundingBox {
         min: Coordinate {
             x: F::infinity(),
             y: F::infinity(),
