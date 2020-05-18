@@ -195,9 +195,7 @@ where
             }
         }
 
-        let (value, left, right) = match *self.root_mut().take().unwrap() {
-            Node { left, right, value, .. } => (value, left, right),
-        };
+        let Node { left, right, value, .. } = *self.root_mut().take().unwrap();
 
         *self.root_mut() = match left {
             None => right,
