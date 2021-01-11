@@ -3,13 +3,13 @@ use geo_types::Coordinate;
 use robust::{orient2d, Coord};
 
 #[inline]
-pub fn coordinate_to_robust<F>(p: Coordinate<F>) -> Coord
+pub fn coordinate_to_robust<F>(p: Coordinate<F>) -> Coord<F>
 where
     F: Float,
 {
     Coord {
-        x: p.x.into(),
-        y: p.y.into(),
+        x: p.x,
+        y: p.y,
     }
 }
 
