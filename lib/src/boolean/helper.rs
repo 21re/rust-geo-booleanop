@@ -1,5 +1,5 @@
 use float_next_after::NextAfter as NextAfterFloat;
-use geo_types::{Coordinate, CoordinateType};
+use geo_types::{Coordinate, CoordNum};
 use num_traits::Float as NumTraitsFloat;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
@@ -58,13 +58,13 @@ pub fn less_if_inversed(condition: bool) -> Ordering {
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct BoundingBox<T>
     where
-        T: CoordinateType,
+        T: CoordNum,
 {
     pub min: Coordinate<T>,
     pub max: Coordinate<T>,
 }
 
-impl<T: CoordinateType> BoundingBox<T> {
+impl<T: CoordNum> BoundingBox<T> {
     pub fn width(self) -> T {
         self.max.x - self.min.x
     }

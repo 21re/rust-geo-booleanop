@@ -10,7 +10,7 @@ readme = "../README.md"
 keywords = ["gis", "geo", "geography", "geospatial"]
 
 [dependencies]
-geo-types = { version = "0.6.0", default-features = false }
+geo-types = { version = "0.7", default-features = false }
 num-traits = "0.2"
 robust = "0.2"
 float_next_after = "0.1"
