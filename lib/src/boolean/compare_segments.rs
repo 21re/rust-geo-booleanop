@@ -97,7 +97,7 @@ where
                 } else {
                     let old_raw = Rc::into_raw(se_old_l.clone());
                     let new_raw = Rc::into_raw(se_new_l.clone());
-                    let res = less_if((old_raw as *const _) > (new_raw as *const _));
+                    let res = less_if((old_raw as *const _ as *const ()) > (new_raw as *const _ as *const ()));
                     unsafe {
                         Rc::from_raw(old_raw);
                         Rc::from_raw(new_raw);
