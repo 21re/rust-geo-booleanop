@@ -92,7 +92,19 @@ where
                 // left and right endpoints. I think in order to properly support self-overlapping
                 // segments we must return Ordering::Equal if and only if segments are the same
                 // by identity (the Rc::ptr_eq above).
-                less_if(se_old_l.contour_id < se_new_l.contour_id)
+                if se_old_l.contour_id != se_new_l.contour_id {
+                    less_if(se_old_l.contour_id < se_new_l.contour_id)
+                } else {
+                    let old_raw = Rc::into_raw(se_old_l.clone());
+                    let new_raw = Rc::into_raw(se_new_l.clone());
+                    let res = less_if((old_raw as *const _) > (new_raw as *const _));
+                    unsafe {
+                        Rc::from_raw(old_raw);
+                        Rc::from_raw(new_raw);
+                    }
+                    res
+
+                }
             } else {
                 // Fallback to purely temporal-based comparison. Since `less_if` already
                 // encodes "earlier-is-less" semantics, no comparison is needed.
