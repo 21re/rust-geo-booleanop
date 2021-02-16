@@ -60,6 +60,7 @@ pub fn ring_is_equal(r1: &LineString<f64>, r2: &LineString<f64>) -> bool {
 
 pub fn poly_is_equal(p1: &Polygon<f64>, p2: &Polygon<f64>) -> bool {
     if !ring_is_equal(p1.exterior(), p2.exterior()) { return false; }
+    if p1.interiors().len() != p2.interiors().len() { return false; }
     let mut matched_in_p2: BTreeSet<usize> = BTreeSet::new();
     for r1 in p1.interiors().iter() {
         let did_match = p2.interiors().iter().enumerate().find(|(j, r2)| {
@@ -76,6 +77,7 @@ pub fn poly_is_equal(p1: &Polygon<f64>, p2: &Polygon<f64>) -> bool {
 
 pub fn mp_is_equal(p1: &MultiPolygon<f64>, p2: &MultiPolygon<f64>) -> bool {
     // We want to look for any permutation of p2 match p1
+    if p1.0.len() != p2.0.len() { return false; }
     let mut matched_in_p2: BTreeSet<usize> = BTreeSet::new();
     for poly1 in p1.0.iter() {
         let did_match = p2.0.iter().enumerate().find(|(j, poly2)| {
