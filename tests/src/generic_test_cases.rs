@@ -4,6 +4,8 @@ use std::thread::Result;
 
 use geo::MultiPolygon;
 
+use crate::helper::mp_is_equal;
+
 use super::compact_geojson::write_compact_geojson;
 use super::helper::{apply_operation, convert_to_feature, extract_expected_result, load_test_case, TestOperation};
 
@@ -61,10 +63,10 @@ fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
                 Result::Err(_) => failures.push(format!("{} / {:?} / {:?} has panicked", filename, op, result_tag)),
                 Result::Ok(result) => {
                     let assertion_result = std::panic::catch_unwind(|| {
-                        assert_eq!(
-                            *result, expected_result.result,
-                            "{} / {:?} / {:?} has result deviation",
-                            filename, op, result_tag,
+                        assert!(
+                            mp_is_equal(result, &expected_result.result),
+                            "{} / {:?} / {:?} has result deviation\nleft = {:?}\nright = {:?}",
+                            filename, op, result_tag, result, expected_result.result,
                         )
                     });
                     if assertion_result.is_err() {

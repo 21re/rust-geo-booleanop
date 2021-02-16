@@ -1,0 +1,43 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [0, 0],
+            [300, 0],
+            [150, 300],
+            [0, 0],
+            [0, 300],
+            [0, 0]
+          ],
+          [
+            [60, 60],
+            [150, 240],
+            [240, 60],
+            [60, 60]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          [
+            [0, 240],
+            [300, 240],
+            [150, 30],
+            [0, 240]
+          ]
+        ],
+        "type": "Polygon"
+      },
+      "properties": {},
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}
