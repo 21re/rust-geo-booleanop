@@ -95,15 +95,10 @@ where
                 if se_old_l.contour_id != se_new_l.contour_id {
                     less_if(se_old_l.contour_id < se_new_l.contour_id)
                 } else {
-                    let old_raw = Rc::into_raw(se_old_l.clone());
-                    let new_raw = Rc::into_raw(se_new_l.clone());
-                    let res = less_if((old_raw as *const _ as *const ()) > (new_raw as *const _ as *const ()));
-                    unsafe {
-                        Rc::from_raw(old_raw);
-                        Rc::from_raw(new_raw);
-                    }
-                    res
-
+                    less_if(
+                        ( Rc::as_ptr(se_old_l) as *const () )
+                            < ( Rc::as_ptr(se_new_l) as *const () )
+                    )
                 }
             } else {
                 // Fallback to purely temporal-based comparison. Since `less_if` already
