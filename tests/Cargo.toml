@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 geo-booleanop = { path = "../lib", features = [] }   # add "debug-booleanop" for debugging
-geo = "0.17"
+geo = "0.19"
 
 # Note: It is crucial to enable arbitrary_precision on serde_json, otherwise
 # JSON parsing isn't exact.
