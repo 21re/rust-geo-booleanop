@@ -162,7 +162,7 @@ fn test_on_two_polygons() {
             }
         }
         if !found {
-            panic!(format!("interval {} not found", interval))
+            panic!("interval {} not found", interval);
         }
     }
 }
