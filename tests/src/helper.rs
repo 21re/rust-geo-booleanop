@@ -135,7 +135,7 @@ pub fn extract_expected_result(feature: &Feature) -> ExpectedResult {
         "xor" => TestOperation::Xor,
         "diff" => TestOperation::DifferenceAB,
         "diff_ba" => TestOperation::DifferenceBA,
-        _ => panic!(format!("Invalid operation: {}", op)),
+        _ => panic!("Invalid operation: {}", op),
     };
 
     let swap_ab_is_broken = properties
