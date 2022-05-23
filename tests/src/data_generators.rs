@@ -110,8 +110,8 @@ pub fn generate_random_triangles(num_polys: usize, seed: u64) -> MultiPolygon<f6
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
 
     let mut rand_coord = || Coordinate {
-        x: rng.gen_range(-1.0f64, 1.0f64),
-        y: rng.gen_range(-1.0f64, 1.0f64),
+        x: rng.gen_range(-1.0f64..1.0f64),
+        y: rng.gen_range(-1.0f64..1.0f64),
     };
 
     MultiPolygon(
