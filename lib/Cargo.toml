@@ -16,7 +16,7 @@ robust = "0.2"
 float_next_after = "0.1"
 
 [dev-dependencies]
-rand = "0.3"
+rand = "0.8"
 
 [features]
 debug-booleanop = []
