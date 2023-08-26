@@ -33,14 +33,7 @@ where
         if exterior {
             contour_id += 1;
         }
-        process_polygon(
-            polygon.exterior(),
-            false,
-            contour_id,
-            &mut event_queue,
-            cbbox,
-            exterior,
-        );
+        process_polygon(polygon.exterior(), false, contour_id, &mut event_queue, cbbox, exterior);
         for interior in polygon.interiors() {
             process_polygon(interior, false, contour_id, &mut event_queue, cbbox, false);
         }
