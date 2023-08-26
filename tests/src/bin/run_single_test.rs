@@ -2,7 +2,7 @@
 //! This binary allows running a test case directly by specifying its path
 //! as argument.
 //!
-use clap::{App, AppSettings, Arg};
+use clap::{Arg, Command};
 use geojson::Feature;
 
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
@@ -39,19 +39,18 @@ pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
 
 fn main() {
     #[rustfmt::skip]
-    let matches = App::new("Test case runner")
-        .setting(AppSettings::ArgRequiredElseHelp)
-        .arg(Arg::with_name("file")
+    let matches = Command::new("Test case runner")
+        .arg(Arg::new("file")
                  .required(true)
                  .help("Input file"))
-        .arg(Arg::with_name("swap-ab")
+        .arg(Arg::new("swap-ab")
                  .long("swap-ab")
                  .help("Swap A/B input polygons"))
         .get_matches();
 
-    let swap_ab = matches.is_present("swap-ab");
+    let swap_ab = matches.get_flag("swap-ab");
 
-    let filename_in = matches.value_of("file").unwrap().to_string();
+    let filename_in = matches.get_one::<String>("file").unwrap();
     let filename_out = filename_in.clone() + ".generated";
     fs::copy(&filename_in, &filename_out).expect("Failed to copy file.");
 

@@ -12,17 +12,17 @@ geo = "0.26"
 
 # Note: It is crucial to enable arbitrary_precision on serde_json, otherwise
 # JSON parsing isn't exact.
-geojson = { version = "0.22", features = ["geo-types"] }
+geojson = { version = "0.24", features = ["geo-types"] }
 serde_json = { version = "1.0.44", features = ["arbitrary_precision"] }
 
-clap = "2.3.3"
+clap = "4.4"
 num-traits = "0.2"
 glob = "0.3"
 pretty_assertions = "1.2"
 rand = "0.8"
 
 [dev-dependencies]
-criterion = "0.3"
+criterion = "0.5"
 
 [[bench]]
 name = "benchmark"

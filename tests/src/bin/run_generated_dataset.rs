@@ -3,8 +3,7 @@
 //! provided by the data generators.
 //!
 
-use clap::{App, AppSettings, Arg};
-
+use clap::{Arg, Command};
 use geo_booleanop_tests::compact_geojson::write_compact_geojson;
 use geo_booleanop_tests::data_generators::{
     generate_circles_vs_rects, generate_grid_polygons, generate_random_triangles_polygons,
@@ -13,15 +12,14 @@ use geo_booleanop_tests::helper::{apply_operation, convert_to_feature, plot_gene
 
 fn main() {
     #[rustfmt::skip]
-    let matches = App::new("Test case runner")
-        .setting(AppSettings::ArgRequiredElseHelp)
-        .arg(Arg::with_name("case")
+    let matches = Command::new("Test case runner")
+        .arg(Arg::new("case")
                  .required(true)
-                 .possible_values(&["grid", "circles_vs_rects", "random_triangles"])
+                 .value_parser(["grid", "circles_vs_rects", "random_triangles"])
                  .help("Input file"))
         .get_matches();
 
-    let case = matches.value_of("case").unwrap().to_string();
+    let case = matches.get_one::<String>("case").unwrap();
     let (a, b) = match case.as_ref() {
         "grid" => generate_grid_polygons(),
         "circles_vs_rects" => generate_circles_vs_rects(),
