@@ -51,7 +51,7 @@ fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
     let mut failures = Vec::new();
 
     for feature in features.iter().skip(2) {
-        let expected_result = extract_expected_result(&feature);
+        let expected_result = extract_expected_result(feature);
         let op = expected_result.op;
 
         let all_results = compute_all_results(&p1, &p2, op, expected_result.swap_ab_is_broken);
@@ -79,7 +79,7 @@ fn run_generic_test_case(filename: &str, regenerate: bool) -> Vec<String> {
 
         if regenerate {
             if let Result::Ok(result) = &all_results.first().expect("Need at least one result").1 {
-                let mut new_feature = convert_to_feature(&result, Some(op));
+                let mut new_feature = convert_to_feature(result, Some(op));
                 new_feature.properties = feature.properties.clone(); // Copy existing properties to keep comments etc.
                 output_features.push(new_feature);
             }
@@ -99,7 +99,7 @@ fn test_generic_test_cases() {
     let test_cases: Vec<_> = glob("./fixtures/generic_test_cases/*.geojson")
         .expect("Failed to read glob pattern")
         .collect();
-    assert!(test_cases.len() > 0, "Expected to find any test cases");
+    assert!(!test_cases.is_empty(), "Expected to find any test cases");
 
     let mut failures = Vec::new();
     for entry in &test_cases {
@@ -108,7 +108,7 @@ fn test_generic_test_cases() {
     }
     println!("\nFinished running {} test cases", test_cases.len());
 
-    if failures.len() > 0 {
+    if !failures.is_empty() {
         println!("\nGeneric test case failures (see error details above):");
         for failure in &failures {
             println!(" - {}", failure);

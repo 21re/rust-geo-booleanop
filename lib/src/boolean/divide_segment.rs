@@ -53,7 +53,7 @@ where
         se_l.contour_id,
         inter,
         false,
-        Rc::downgrade(&se_l),
+        Rc::downgrade(se_l),
         se_l.is_subject,
         true,
     );

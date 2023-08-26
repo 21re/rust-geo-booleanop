@@ -26,7 +26,7 @@ pub fn run_generic_test_case_with_extra_options(filename: &str, swap_ab: bool) {
     };
 
     for feature in features.iter().skip(2) {
-        let op = extract_expected_result(&feature).op;
+        let op = extract_expected_result(feature).op;
         println!("Testing operation: {:?}", op);
 
         let result = apply_operation(&p1, &p2, op);

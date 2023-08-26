@@ -47,10 +47,10 @@ where
         }
         LineIntersection::Point(inter) => {
             if se1.point != inter && other1.point != inter {
-                divide_segment(&se1, inter, queue);
+                divide_segment(se1, inter, queue);
             }
             if se2.point != inter && other2.point != inter {
-                divide_segment(&se2, inter, queue);
+                divide_segment(se2, inter, queue);
             }
             1
         }

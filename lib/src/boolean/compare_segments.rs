@@ -28,7 +28,7 @@ where
         "missing right-event in compare_segments"
     );
 
-    if Rc::ptr_eq(&se1_l, &se2_l) {
+    if Rc::ptr_eq(se1_l, se2_l) {
         return Ordering::Equal;
     }
 
@@ -36,7 +36,7 @@ where
     // SweepEvent w.r.t. the segment of the earlier/newer one. The logic is easier to
     // express by swapping them here according to their temporal order. In case we have
     // to swap, the result function must be inverted accordingly.
-    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(&se2_l) {
+    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(se2_l) {
         (se1_l, se2_l, helper::less_if as fn(bool) -> Ordering)
     } else {
         (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)

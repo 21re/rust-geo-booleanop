@@ -50,10 +50,10 @@ where
                 {
                     println!("{{\"seNextEvent\": {}}}", next.to_json_debug());
                 }
-                if possible_intersection(&event, &next, event_queue) == 2 {
+                if possible_intersection(&event, next, event_queue) == 2 {
                     // Recompute fields for current segment and the one above (in bottom to top order)
                     compute_fields(&event, maybe_prev, operation);
-                    compute_fields(&next, Some(&event), operation);
+                    compute_fields(next, Some(&event), operation);
                 }
             }
 
@@ -62,10 +62,10 @@ where
                 {
                     println!("{{\"sePrevEvent\": {}}}", prev.to_json_debug());
                 }
-                if possible_intersection(&prev, &event, event_queue) == 2 {
-                    let maybe_prev_prev = sweep_line.prev(&prev);
+                if possible_intersection(prev, &event, event_queue) == 2 {
+                    let maybe_prev_prev = sweep_line.prev(prev);
                     // Recompute fields for current segment and the one below (in bottom to top order)
-                    compute_fields(&prev, maybe_prev_prev, operation);
+                    compute_fields(prev, maybe_prev_prev, operation);
                     compute_fields(&event, Some(prev), operation);
                 }
             }
