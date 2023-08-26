@@ -1,19 +1,19 @@
 use super::helper::fixture_shapes;
-use geo::Coordinate;
+use geo::Coord;
 use geo_booleanop::boolean::compare_segments::compare_segments;
 use geo_booleanop::boolean::fill_queue::fill_queue;
 use geo_booleanop::boolean::possible_intersection::possible_intersection;
 use geo_booleanop::boolean::subdivide_segments::subdivide;
 use geo_booleanop::boolean::sweep_event::SweepEvent;
-use geo_booleanop::boolean::Operation;
 use geo_booleanop::boolean::BoundingBox;
+use geo_booleanop::boolean::Operation;
 use geo_booleanop::splay::SplaySet;
 use num_traits::Float;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
 use std::rc::{Rc, Weak};
 
-fn make_simple(a: Coordinate<f64>, b: Coordinate<f64>, is_subject: bool) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
+fn make_simple(a: Coord<f64>, b: Coord<f64>, is_subject: bool) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
     let other = SweepEvent::new_rc(0, b, false, Weak::new(), is_subject, true);
     let event = SweepEvent::new_rc(0, a, true, Rc::downgrade(&other), is_subject, true);
 
@@ -34,53 +34,53 @@ fn test_possible_intersection() {
     let mut e = q.pop().unwrap();
     assert_eq!(
         e.point,
-        Coordinate {
+        Coord {
             x: 100.79403384562251,
             y: 233.41363754101192
         }
     );
-    assert_eq!(e.get_other_event().unwrap().point, Coordinate { x: 56.0, y: 181.0 });
+    assert_eq!(e.get_other_event().unwrap().point, Coord { x: 56.0, y: 181.0 });
 
     e = q.pop().unwrap();
     assert_eq!(
         e.point,
-        Coordinate {
+        Coord {
             x: 100.79403384562251,
             y: 233.41363754101192
         }
     );
-    assert_eq!(e.get_other_event().unwrap().point, Coordinate { x: 16.0, y: 282.0 });
+    assert_eq!(e.get_other_event().unwrap().point, Coord { x: 16.0, y: 282.0 });
 
     e = q.pop().unwrap();
     assert_eq!(
         e.point,
-        Coordinate {
+        Coord {
             x: 100.79403384562251,
             y: 233.41363754101192
         }
     );
-    assert_eq!(e.get_other_event().unwrap().point, Coordinate { x: 153.0, y: 203.5 });
+    assert_eq!(e.get_other_event().unwrap().point, Coord { x: 153.0, y: 203.5 });
 
     e = q.pop().unwrap();
     assert_eq!(
         e.point,
-        Coordinate {
+        Coord {
             x: 100.79403384562251,
             y: 233.41363754101192
         }
     );
-    assert_eq!(e.get_other_event().unwrap().point, Coordinate { x: 153.0, y: 294.5 });
+    assert_eq!(e.get_other_event().unwrap().point, Coord { x: 153.0, y: 294.5 });
 }
 
 #[test]
 fn test_on_two_polygons() {
     let (s, c) = fixture_shapes("two_shapes.geojson");
     let mut sbbox = BoundingBox {
-        min: Coordinate {
+        min: Coord {
             x: f64::infinity(),
             y: f64::infinity(),
         },
-        max: Coordinate {
+        max: Coord {
             x: f64::neg_infinity(),
             y: f64::neg_infinity(),
         },
@@ -88,9 +88,9 @@ fn test_on_two_polygons() {
     let mut cbbox = sbbox;
     let mut q = fill_queue(&[s], &[c], &mut sbbox, &mut cbbox, Operation::Intersection);
 
-    let p0 = Coordinate { x: 16.0, y: 282.0 };
-    let p1 = Coordinate { x: 298.0, y: 359.0 };
-    let p2 = Coordinate { x: 156.0, y: 203.5 };
+    let p0 = Coord { x: 16.0, y: 282.0 };
+    let p1 = Coord { x: 298.0, y: 359.0 };
+    let p2 = Coord { x: 156.0, y: 203.5 };
 
     let te = SweepEvent::new_rc(0, p0, true, Weak::new(), true, true);
     let te2 = SweepEvent::new_rc(0, p1, false, Rc::downgrade(&te), false, true);
@@ -117,21 +117,21 @@ fn test_on_two_polygons() {
 
     assert_eq!(left_segments.len(), 11);
 
-    let e = Coordinate::<f64> { x: 16.0, y: 282.0 };
-    let i = Coordinate::<f64> {
+    let e = Coord::<f64> { x: 16.0, y: 282.0 };
+    let i = Coord::<f64> {
         x: 100.79403384562252,
         y: 233.41363754101192,
     };
-    let g = Coordinate::<f64> { x: 298.0, y: 359.0 };
-    let c = Coordinate::<f64> { x: 153.0, y: 294.5 };
-    let j = Coordinate::<f64> {
+    let g = Coord::<f64> { x: 298.0, y: 359.0 };
+    let c = Coord::<f64> { x: 153.0, y: 294.5 };
+    let j = Coord::<f64> {
         x: 203.36313843035356,
         y: 257.5101243166895,
     };
-    let f = Coordinate::<f64> { x: 153.0, y: 203.5 };
-    let d = Coordinate::<f64> { x: 56.0, y: 181.0 };
-    let a = Coordinate::<f64> { x: 108.5, y: 120.0 };
-    let b = Coordinate::<f64> { x: 241.5, y: 229.5 };
+    let f = Coord::<f64> { x: 153.0, y: 203.5 };
+    let d = Coord::<f64> { x: 56.0, y: 181.0 };
+    let a = Coord::<f64> { x: 108.5, y: 120.0 };
+    let b = Coord::<f64> { x: 241.5, y: 229.5 };
 
     let intervals = &[
         ("EI", e, i, false, true, false),

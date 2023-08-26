@@ -3,9 +3,9 @@ use geo_types::{LineString, Polygon};
 use std::collections::BinaryHeap;
 use std::rc::{Rc, Weak};
 
+use super::helper::BoundingBox;
 use super::sweep_event::SweepEvent;
 use super::Operation;
-use super::helper::BoundingBox;
 
 pub fn fill_queue<F>(
     subject: &[Polygon<F>],
@@ -94,13 +94,13 @@ fn process_polygon<F>(
 #[cfg(test)]
 mod test {
     use super::*;
-    use geo_types::Coordinate;
+    use geo_types::Coord;
     use std::cmp::Ordering;
     use std::collections::BinaryHeap;
     use std::rc::{Rc, Weak};
 
     fn make_simple(x: f64, y: f64, is_subject: bool) -> Rc<SweepEvent<f64>> {
-        SweepEvent::new_rc(0, Coordinate { x, y }, false, Weak::new(), is_subject, true)
+        SweepEvent::new_rc(0, Coord { x, y }, false, Weak::new(), is_subject, true)
     }
 
     fn check_order_in_queue(first: Rc<SweepEvent<f64>>, second: Rc<SweepEvent<f64>>) {

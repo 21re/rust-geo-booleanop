@@ -1,11 +1,11 @@
-use geo::{Coordinate, LineString, MultiPolygon, Polygon};
+use geo::{Coord, LineString, MultiPolygon, Polygon};
 
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
 use super::helper::xy;
 
-fn generate_rect_centered(center: Coordinate<f64>, w: f64, h: f64) -> Polygon<f64> {
+fn generate_rect_centered(center: Coord<f64>, w: f64, h: f64) -> Polygon<f64> {
     let w_half = w / 2.0;
     let h_half = h / 2.0;
     Polygon::new(
@@ -20,7 +20,7 @@ fn generate_rect_centered(center: Coordinate<f64>, w: f64, h: f64) -> Polygon<f6
     )
 }
 
-fn generate_circle_ring(center: Coordinate<f64>, num_points: usize, r: f64) -> LineString<f64> {
+fn generate_circle_ring(center: Coord<f64>, num_points: usize, r: f64) -> LineString<f64> {
     let mut coords = Vec::with_capacity(num_points);
 
     for i in 0..num_points {
@@ -41,11 +41,7 @@ pub fn generate_grid(min: f64, max: f64, rect_size: f64, num_rects: i32) -> Mult
     let mut polygons = Vec::with_capacity((num_rects * num_rects) as usize);
     for x in &positions {
         for y in &positions {
-            polygons.push(generate_rect_centered(
-                Coordinate { x: *x, y: *y },
-                rect_size,
-                rect_size,
-            ));
+            polygons.push(generate_rect_centered(Coord { x: *x, y: *y }, rect_size, rect_size));
         }
     }
 
@@ -53,7 +49,7 @@ pub fn generate_grid(min: f64, max: f64, rect_size: f64, num_rects: i32) -> Mult
 }
 
 pub fn generate_nested_circles(
-    center: Coordinate<f64>,
+    center: Coord<f64>,
     r_min: f64,
     r_max: f64,
     num_polys: usize,
@@ -80,7 +76,7 @@ pub fn generate_nested_circles(
 }
 
 pub fn generate_nested_rects(
-    center: Coordinate<f64>,
+    center: Coord<f64>,
     width_min: f64,
     width_max: f64,
     num_polys: usize,
@@ -109,7 +105,7 @@ pub fn generate_nested_rects(
 pub fn generate_random_triangles(num_polys: usize, seed: u64) -> MultiPolygon<f64> {
     let mut rng: StdRng = SeedableRng::seed_from_u64(seed);
 
-    let mut rand_coord = || Coordinate {
+    let mut rand_coord = || Coord {
         x: rng.gen_range(-1.0f64..1.0f64),
         y: rng.gen_range(-1.0f64..1.0f64),
     };

@@ -1,13 +1,13 @@
 use super::helper::Float;
 use super::sweep_event::SweepEvent;
-use geo_types::Coordinate;
+use geo_types::Coord;
 use std::collections::BinaryHeap;
 use std::rc::Rc;
 
 #[cfg(feature = "debug-booleanop")]
 use super::sweep_event::JsonDebug;
 
-pub fn divide_segment<F>(se_l: &Rc<SweepEvent<F>>, inter: Coordinate<F>, queue: &mut BinaryHeap<Rc<SweepEvent<F>>>)
+pub fn divide_segment<F>(se_l: &Rc<SweepEvent<F>>, inter: Coord<F>, queue: &mut BinaryHeap<Rc<SweepEvent<F>>>)
 where
     F: Float,
 {
@@ -92,7 +92,7 @@ mod test {
     use super::super::segment_intersection::{intersection, LineIntersection};
     use super::super::sweep_event::SweepEvent;
     use super::*;
-    use geo_types::Coordinate;
+    use geo_types::Coord;
     use std::collections::BinaryHeap;
     use std::rc::{Rc, Weak};
 
@@ -105,13 +105,13 @@ mod test {
     ) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
         let other = SweepEvent::new_rc(
             0,
-            Coordinate { x: other_x, y: other_y },
+            Coord { x: other_x, y: other_y },
             false,
             Weak::new(),
             is_subject,
             true,
         );
-        let event = SweepEvent::new_rc(0, Coordinate { x, y }, true, Rc::downgrade(&other), is_subject, true);
+        let event = SweepEvent::new_rc(0, Coord { x, y }, true, Rc::downgrade(&other), is_subject, true);
 
         (event, other)
     }

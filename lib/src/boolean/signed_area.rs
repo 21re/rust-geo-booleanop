@@ -1,28 +1,21 @@
 use super::helper::Float;
-use geo_types::Coordinate;
-use robust::{orient2d, Coord};
+use geo_types::Coord;
+use robust::{orient2d, Coord as RobustCoord};
 
 #[inline]
-pub fn coordinate_to_robust<F>(p: Coordinate<F>) -> Coord<F>
+pub fn coord_to_robust<F>(p: Coord<F>) -> RobustCoord<F>
 where
     F: Float,
 {
-    Coord {
-        x: p.x,
-        y: p.y,
-    }
+    RobustCoord { x: p.x, y: p.y }
 }
 
 #[inline]
-pub fn signed_area<F>(p0: Coordinate<F>, p1: Coordinate<F>, p2: Coordinate<F>) -> f64
+pub fn signed_area<F>(p0: Coord<F>, p1: Coord<F>, p2: Coord<F>) -> f64
 where
     F: Float,
 {
-    orient2d(
-        coordinate_to_robust(p0),
-        coordinate_to_robust(p1),
-        coordinate_to_robust(p2),
-    )
+    orient2d(coord_to_robust(p0), coord_to_robust(p1), coord_to_robust(p2))
 }
 
 #[cfg(test)]

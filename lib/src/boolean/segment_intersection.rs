@@ -1,6 +1,6 @@
-use super::helper::Float;
 use super::helper::BoundingBox;
-use geo_types::{Coordinate};
+use super::helper::Float;
+use geo_types::Coord;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LineIntersection<F>
@@ -8,17 +8,12 @@ where
     F: Float,
 {
     None,
-    Point(Coordinate<F>),
-    Overlap(Coordinate<F>, Coordinate<F>),
+    Point(Coord<F>),
+    Overlap(Coord<F>, Coord<F>),
 }
 
 #[inline]
-fn get_intersection_bounding_box<F>(
-    a1: Coordinate<F>,
-    a2: Coordinate<F>,
-    b1: Coordinate<F>,
-    b2: Coordinate<F>,
-) -> Option<BoundingBox<F>>
+fn get_intersection_bounding_box<F>(a1: Coord<F>, a2: Coord<F>, b1: Coord<F>, b2: Coord<F>) -> Option<BoundingBox<F>>
 where
     F: Float,
 {
@@ -32,11 +27,11 @@ where
     let interval_end_y = a_end_y.min(b_end_y);
     if interval_start_x <= interval_end_x && interval_start_y <= interval_end_y {
         Some(BoundingBox {
-            min: Coordinate {
+            min: Coord {
                 x: interval_start_x,
                 y: interval_start_y,
             },
-            max: Coordinate {
+            max: Coord {
                 x: interval_end_x,
                 y: interval_end_y,
             },
@@ -47,11 +42,11 @@ where
 }
 
 #[inline]
-fn constrain_to_bounding_box<F>(p: Coordinate<F>, bb: BoundingBox<F>) -> Coordinate<F>
+fn constrain_to_bounding_box<F>(p: Coord<F>, bb: BoundingBox<F>) -> Coord<F>
 where
     F: Float,
 {
-    Coordinate {
+    Coord {
         x: if p.x < bb.min.x {
             bb.min.x
         } else if p.x > bb.max.x {
@@ -69,12 +64,7 @@ where
     }
 }
 
-pub fn intersection<F>(
-    a1: Coordinate<F>,
-    a2: Coordinate<F>,
-    b1: Coordinate<F>,
-    b2: Coordinate<F>,
-) -> LineIntersection<F>
+pub fn intersection<F>(a1: Coord<F>, a2: Coord<F>, b1: Coord<F>, b2: Coord<F>) -> LineIntersection<F>
 where
     F: Float,
 {
@@ -93,25 +83,20 @@ where
     }
 }
 
-fn intersection_impl<F>(
-    a1: Coordinate<F>,
-    a2: Coordinate<F>,
-    b1: Coordinate<F>,
-    b2: Coordinate<F>,
-) -> LineIntersection<F>
+fn intersection_impl<F>(a1: Coord<F>, a2: Coord<F>, b1: Coord<F>, b2: Coord<F>) -> LineIntersection<F>
 where
     F: Float,
 {
     // println!("{:?} {:?} {:?} {:?}", a1, a2, b1, b2);
-    let va = Coordinate {
+    let va = Coord {
         x: a2.x - a1.x,
         y: a2.y - a1.y,
     };
-    let vb = Coordinate {
+    let vb = Coord {
         x: b2.x - b1.x,
         y: b2.y - b1.y,
     };
-    let e = Coordinate {
+    let e = Coord {
         x: b1.x - a1.x,
         y: b1.y - a1.y,
     };
@@ -168,18 +153,18 @@ where
     LineIntersection::None
 }
 
-fn mid_point<F>(p: Coordinate<F>, s: F, d: Coordinate<F>) -> Coordinate<F>
+fn mid_point<F>(p: Coord<F>, s: F, d: Coord<F>) -> Coord<F>
 where
     F: Float,
 {
-    Coordinate {
+    Coord {
         x: p.x + s * d.x,
         y: p.y + s * d.y,
     }
 }
 
 #[inline]
-fn cross_product<F>(a: Coordinate<F>, b: Coordinate<F>) -> F
+fn cross_product<F>(a: Coord<F>, b: Coord<F>) -> F
 where
     F: Float,
 {
@@ -187,7 +172,7 @@ where
 }
 
 #[inline]
-fn dot_product<F>(a: Coordinate<F>, b: Coordinate<F>) -> F
+fn dot_product<F>(a: Coord<F>, b: Coord<F>) -> F
 where
     F: Float,
 {
@@ -199,7 +184,7 @@ mod test {
     use super::super::helper::test::xy;
     use super::*;
 
-    fn rect(min: Coordinate<f64>, max: Coordinate<f64>) -> BoundingBox<f64> {
+    fn rect(min: Coord<f64>, max: Coord<f64>) -> BoundingBox<f64> {
         BoundingBox { min, max }
     }
 
