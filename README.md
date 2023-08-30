@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/21re/rust-geo-booleanop.svg?branch=master)](https://travis-ci.org/21re/rust-geo-booleanop)
+[![Build Status](https://github.com/21re/rust-geo-booleanop/actions/workflows/ci.yml/badge.svg)](https://github.com/21re/rust-geo-booleanop/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/geo-booleanop.svg)](https://crates.io/crates/geo-booleanop)
 
 
