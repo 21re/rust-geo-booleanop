@@ -53,13 +53,13 @@ fn benchmarks(c: &mut Criterion) {
     ));
 
     g.bench_function("random_triangles/xor", |b| b.iter_batched(
-        || generate_random_triangles_polygons(),
+        generate_random_triangles_polygons,
         |(p1, p2)| p1.xor(&p2),
         BatchSize::LargeInput,
     ));
 
     g.bench_function("grid/xor", |b| b.iter_batched(
-        || generate_grid_polygons(),
+        generate_grid_polygons,
         |(p1, p2)| p1.xor(&p2),
         BatchSize::LargeInput,
     ));
@@ -74,7 +74,7 @@ fn benchmarks(c: &mut Criterion) {
     ));
 
     g.bench_function("circles_vs_rects/xor", |b| b.iter_batched(
-        || generate_circles_vs_rects(),
+        generate_circles_vs_rects,
         |(p1, p2)| p1.xor(&p2),
         BatchSize::LargeInput,
     ));

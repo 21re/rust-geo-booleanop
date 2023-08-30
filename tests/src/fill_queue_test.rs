@@ -1,8 +1,8 @@
 use super::helper::fixture_shapes;
-use geo::Coordinate;
+use geo::Coord;
 use geo_booleanop::boolean::fill_queue::fill_queue;
-use geo_booleanop::boolean::Operation;
 use geo_booleanop::boolean::BoundingBox;
+use geo_booleanop::boolean::Operation;
 use num_traits::Float;
 
 use super::helper::xy;
@@ -11,11 +11,11 @@ use super::helper::xy;
 fn test_two_polygons() {
     let (s, c) = fixture_shapes("two_shapes.geojson");
     let mut sbbox = BoundingBox {
-        min: Coordinate {
+        min: Coord {
             x: f64::infinity(),
             y: f64::infinity(),
         },
-        max: Coordinate {
+        max: Coord {
             x: f64::neg_infinity(),
             y: f64::neg_infinity(),
         },

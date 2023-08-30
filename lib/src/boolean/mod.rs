@@ -1,4 +1,4 @@
-use geo_types::{Coordinate, LineString, MultiPolygon, Polygon};
+use geo_types::{Coord, LineString, MultiPolygon, Polygon};
 
 pub mod compare_segments;
 pub mod compute_fields;
@@ -90,11 +90,11 @@ where
     F: Float,
 {
     let mut sbbox = BoundingBox {
-        min: Coordinate {
+        min: Coord {
             x: F::infinity(),
             y: F::infinity(),
         },
-        max: Coordinate {
+        max: Coord {
             x: F::neg_infinity(),
             y: F::neg_infinity(),
         },

@@ -197,14 +197,14 @@ mod test {
             match m.next(i) {
                 Some((next, _)) => {
                     assert!(*next > *i);
-                    assert_eq!(m.prev(&next), Some((i, i)));
+                    assert_eq!(m.prev(next), Some((i, i)));
                 }
                 None => assert_eq!(*i, max),
             }
             match m.prev(i) {
                 Some((prev, _)) => {
                     assert!(*prev < *i);
-                    assert_eq!(m.next(&prev), Some((i, i)));
+                    assert_eq!(m.next(prev), Some((i, i)));
                 }
                 None => assert_eq!(*i, min),
             }

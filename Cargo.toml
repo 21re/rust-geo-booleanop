@@ -1,6 +1,3 @@
 [workspace]
-members = [
-    "lib",
-    "tests",
-]
-
+resolver = "2"
+members = ["lib", "tests"]

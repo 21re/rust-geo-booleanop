@@ -1,6 +1,6 @@
 use super::helper::Float;
 use super::sweep_event::{ResultTransition, SweepEvent};
-use geo_types::Coordinate;
+use geo_types::Coord;
 use std::collections::HashSet;
 use std::rc::Rc;
 
@@ -137,8 +137,8 @@ pub struct Contour<F>
 where
     F: Float,
 {
-    /// Raw coordinates of contour
-    pub points: Vec<Coordinate<F>>,
+    /// Raw Coords of contour
+    pub points: Vec<Coord<F>>,
     /// Contour IDs of holes if any.
     pub hole_ids: Vec<i32>,
     /// Contour ID of parent if this contour is a hole.

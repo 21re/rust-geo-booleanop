@@ -1,6 +1,6 @@
 use geo_booleanop::boolean::BooleanOp;
 
-use geo::{Coordinate, MultiPolygon, Polygon};
+use geo::{Coord, MultiPolygon, Polygon};
 
 use geojson::{Feature, GeoJson, Geometry, Value};
 use serde_json::{json, Map};
@@ -16,8 +16,8 @@ use std::process::Command;
 // General geo / booleanop helpers
 // ----------------------------------------------------------------------------
 
-pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coordinate<f64> {
-    Coordinate {
+pub fn xy<X: Into<f64>, Y: Into<f64>>(x: X, y: Y) -> Coord<f64> {
+    Coord {
         x: x.into(),
         y: y.into(),
     }

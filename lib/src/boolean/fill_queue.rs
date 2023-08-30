@@ -3,9 +3,9 @@ use geo_types::{LineString, Polygon};
 use std::collections::BinaryHeap;
 use std::rc::{Rc, Weak};
 
+use super::helper::BoundingBox;
 use super::sweep_event::SweepEvent;
 use super::Operation;
-use super::helper::BoundingBox;
 
 pub fn fill_queue<F>(
     subject: &[Polygon<F>],
@@ -22,7 +22,7 @@ where
 
     for polygon in subject {
         contour_id += 1;
-        process_polygon(&polygon.exterior(), true, contour_id, &mut event_queue, sbbox, true);
+        process_polygon(polygon.exterior(), true, contour_id, &mut event_queue, sbbox, true);
         for interior in polygon.interiors() {
             process_polygon(interior, true, contour_id, &mut event_queue, sbbox, false);
         }
@@ -33,14 +33,7 @@ where
         if exterior {
             contour_id += 1;
         }
-        process_polygon(
-            &polygon.exterior(),
-            false,
-            contour_id,
-            &mut event_queue,
-            cbbox,
-            exterior,
-        );
+        process_polygon(polygon.exterior(), false, contour_id, &mut event_queue, cbbox, exterior);
         for interior in polygon.interiors() {
             process_polygon(interior, false, contour_id, &mut event_queue, cbbox, false);
         }
@@ -94,13 +87,13 @@ fn process_polygon<F>(
 #[cfg(test)]
 mod test {
     use super::*;
-    use geo_types::Coordinate;
+    use geo_types::Coord;
     use std::cmp::Ordering;
     use std::collections::BinaryHeap;
     use std::rc::{Rc, Weak};
 
     fn make_simple(x: f64, y: f64, is_subject: bool) -> Rc<SweepEvent<f64>> {
-        SweepEvent::new_rc(0, Coordinate { x, y }, false, Weak::new(), is_subject, true)
+        SweepEvent::new_rc(0, Coord { x, y }, false, Weak::new(), is_subject, true)
     }
 
     fn check_order_in_queue(first: Rc<SweepEvent<f64>>, second: Rc<SweepEvent<f64>>) {

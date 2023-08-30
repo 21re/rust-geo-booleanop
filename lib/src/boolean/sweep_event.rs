@@ -1,5 +1,5 @@
 use super::helper::Float;
-use geo_types::Coordinate;
+use geo_types::Coord;
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::rc::{Rc, Weak};
@@ -45,7 +45,7 @@ where
 {
     mutable: RefCell<MutablePart<F>>,
     pub contour_id: u32,
-    pub point: Coordinate<F>,
+    pub point: Coord<F>,
     pub is_subject: bool,
     pub is_exterior_ring: bool,
 }
@@ -56,7 +56,7 @@ where
 {
     pub fn new_rc(
         contour_id: u32,
-        point: Coordinate<F>,
+        point: Coord<F>,
         left: bool,
         other_event: Weak<SweepEvent<F>>,
         is_subject: bool,
@@ -160,7 +160,7 @@ where
         self.mutable.borrow_mut().output_contour_id = output_contour_id
     }
 
-    pub fn is_below(&self, p: Coordinate<F>) -> bool {
+    pub fn is_below(&self, p: Coord<F>) -> bool {
         if let Some(ref other_event) = self.get_other_event() {
             if self.is_left() {
                 signed_area(self.point, other_event.point, p) > 0.
@@ -172,7 +172,7 @@ where
         }
     }
 
-    pub fn is_above(&self, p: Coordinate<F>) -> bool {
+    pub fn is_above(&self, p: Coord<F>) -> bool {
         !self.is_below(p)
     }
 
@@ -300,7 +300,7 @@ mod test {
     ) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
         let other = SweepEvent::new_rc(
             contour_id,
-            Coordinate { x: other_x, y: other_y },
+            Coord { x: other_x, y: other_y },
             false,
             Weak::new(),
             is_subject,
@@ -308,7 +308,7 @@ mod test {
         );
         let event = SweepEvent::new_rc(
             contour_id,
-            Coordinate { x, y },
+            Coord { x, y },
             true,
             Rc::downgrade(&other),
             is_subject,

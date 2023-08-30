@@ -41,7 +41,7 @@ where
     let result_transition = if !in_result {
         ResultTransition::None
     } else {
-        determine_result_transition(&event, operation)
+        determine_result_transition(event, operation)
     };
     event.set_result_transition(result_transition);
 

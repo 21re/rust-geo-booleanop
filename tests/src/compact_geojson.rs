@@ -131,7 +131,7 @@ pub fn write_compact_geojson(features: &[Feature], filename: &str) {
     f.write_indented(0, "{\n");
     f.write_indented(0, "  \"features\": [\n");
     for (i, feature) in features.iter().enumerate() {
-        write_feature(&feature, &mut f, i == features.len() - 1);
+        write_feature(feature, &mut f, i == features.len() - 1);
     }
     f.write_indented(0, "  ],\n");
     f.write_indented(0, "  \"type\": \"FeatureCollection\"\n");

@@ -28,7 +28,7 @@ where
         "missing right-event in compare_segments"
     );
 
-    if Rc::ptr_eq(&se1_l, &se2_l) {
+    if Rc::ptr_eq(se1_l, se2_l) {
         return Ordering::Equal;
     }
 
@@ -36,7 +36,7 @@ where
     // SweepEvent w.r.t. the segment of the earlier/newer one. The logic is easier to
     // express by swapping them here according to their temporal order. In case we have
     // to swap, the result function must be inverted accordingly.
-    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(&se2_l) {
+    let (se_old_l, se_new_l, less_if) = if se1_l.is_before(se2_l) {
         (se1_l, se2_l, helper::less_if as fn(bool) -> Ordering)
     } else {
         (se2_l, se1_l, helper::less_if_inversed as fn(bool) -> Ordering)
@@ -112,7 +112,7 @@ mod test {
     use super::super::sweep_event::SweepEvent;
     use super::compare_segments;
     use crate::splay::SplaySet;
-    use geo_types::Coordinate;
+    use geo_types::Coord;
     use std::cmp::Ordering;
     use std::rc::{Rc, Weak};
 
@@ -148,7 +148,7 @@ mod test {
     ) -> (Rc<SweepEvent<f64>>, Rc<SweepEvent<f64>>) {
         let other = SweepEvent::new_rc(
             contour_id,
-            Coordinate { x: other_x, y: other_y },
+            Coord { x: other_x, y: other_y },
             false,
             Weak::new(),
             is_subject,
@@ -156,7 +156,7 @@ mod test {
         );
         let event = SweepEvent::new_rc(
             contour_id,
-            Coordinate { x, y },
+            Coord { x, y },
             true,
             Rc::downgrade(&other),
             is_subject,
@@ -181,8 +181,8 @@ mod test {
         let min_other = tree.min().unwrap().get_other_event().unwrap();
         let max_other = tree.max().unwrap().get_other_event().unwrap();
 
-        assert_eq!(max_other.point, Coordinate { x: 2.0, y: 3.0 });
-        assert_eq!(min_other.point, Coordinate { x: 1.0, y: 1.0 });
+        assert_eq!(max_other.point, Coord { x: 2.0, y: 3.0 });
+        assert_eq!(min_other.point, Coord { x: 1.0, y: 1.0 });
     }
 
     #[test]
@@ -198,8 +198,8 @@ mod test {
         let min_other = tree.min().unwrap().get_other_event().unwrap();
         let max_other = tree.max().unwrap().get_other_event().unwrap();
 
-        assert_eq!(min_other.point, Coordinate { x: 1.0, y: 1.0 });
-        assert_eq!(max_other.point, Coordinate { x: 2.0, y: 3.0 });
+        assert_eq!(min_other.point, Coord { x: 1.0, y: 1.0 });
+        assert_eq!(max_other.point, Coord { x: 2.0, y: 3.0 });
     }
 
     #[test]
