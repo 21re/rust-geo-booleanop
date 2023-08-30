@@ -52,7 +52,7 @@ fn main() {
 
     let filename_in = matches.get_one::<String>("file").unwrap();
     let filename_out = filename_in.clone() + ".generated";
-    fs::copy(&filename_in, &filename_out).expect("Failed to copy file.");
+    fs::copy(filename_in, &filename_out).expect("Failed to copy file.");
 
     run_generic_test_case_with_extra_options(&filename_out, swap_ab);
 
